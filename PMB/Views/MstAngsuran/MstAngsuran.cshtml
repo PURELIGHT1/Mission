@@ -1,0 +1,378 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Data Master Angsuran";
+}
+@model MstAngsuranView
+
+@section Styles{
+    <style>
+        .btntambah{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        #custom-search {
+            float: right;
+        }
+
+        /*option {
+            border-radius: 100px;
+        }*/
+
+        #TabelAngsuran thead th {
+            text-align: center;
+        }
+
+        #TabelAngsuran thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelAngsuran td {
+            white-space:nowrap;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @*Button untuk tambah data master angsuran*@
+        <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah Angsuran</a>
+
+        @*Pencarian berdasarkan kategori tertentu*@
+       @*  <div class="row col-md-4" id="custom-search">
+            <div class="col-md-7">
+                <select id="search-column" class="form-select">
+                    <option selected>Kategori Pencarian</option>
+                    <option value="0">ID Rumus</option>
+                    <option value="1">Tahun Akademik</option>
+                    <option value="2">Nama Jalur</option>
+                    <option value="3">Jumlah Angsuran</option>
+                    <option value="4">Periode</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input class="form-control" id="search-by-column" type="text" placeholder="Ketik di sini..."/>
+            </div>
+        </div> *@
+        
+        @*Tabel data-data Master Angsuran*@
+        <table id="TabelAngsuran" class="table table-responsive-lg table-bordered table-striped display compact">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Tahun Akademik</th>
+                    <th>Nama Jalur</th>
+                    <th>Jumlah Angsuran</th>
+                    <th>Periode</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="table-light">
+            </tbody>
+        </table>
+        <br /><br />
+    </div>
+</div>
+
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Data Master Angsuran</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tahun Akademik</label>
+                    <select class="form-select" id="data_1">
+                        <option value=""> - Pilih Tahun Akademik - </option>
+                        @foreach (var item in Model.AllTahunAkademik)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_1"></span>
+                </div>
+                <div class="form-group">
+                    <label>Nama Jalur</label>
+                    <select class="form-select" id="data_2">
+                        <option selected style="text-align: center;" value="">-- Pilih Nama Jalur --</option>
+                        @foreach (var data in Model.JalurList)
+                        {
+                            <option value="@data.kd_jalur">@data.nama_jalur</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_2"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Angsuran</label>
+                    <input type="number" class="form-control" value="0" id="data_3"/>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_3"></span>
+                </div>
+                <div class="form-group">
+                    <label>Periode</label>
+                    <input type="number" class="form-control" value="0" id="data_4" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_4"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Data Master Angsuran</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tahun Akademik</label>
+                    <select class="form-select" id="dataU_1">
+                        <option value=""> - Pilih Tahun Akademik - </option>
+                        @foreach (var item in Model.AllTahunAkademik)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_dataU_1"></span>
+                </div>
+                <div class="form-group">
+                    <label>Nama Jalur</label>
+                    <select class="form-select" id="dataU_2">
+                        <option selected style="text-align: center;" value="">-- Pilih Nama Jalur --</option>
+                        @foreach (var data in Model.JalurList)
+                        {
+                            <option value="@data.kd_jalur">@data.nama_jalur</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_dataU_2"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Angsuran</label>
+                    <input type="number" class="form-control" value="0" id="dataU_3" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_dataU_3"></span>
+                </div>
+                <div class="form-group">
+                    <label>Periode</label>
+                    <input type="number" class="form-control" value="0" id="dataU_4" />
+                    <input type="hidden" class="form-control"  id="dataU_5" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_dataU_4"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var ta = $("#data_1").val();
+            var error1 = $("#m_data_1");
+
+            var jalur = $("#data_2").val();
+            var error2 = $("#m_data_2");
+
+            var isValid = true;
+
+            if (ta === "") {
+                error1.text("Tahun akademik wajib dipilih!"); isValid = false;
+            } else {
+                error1.text("");
+            }
+
+            if (jalur === "") {
+                error2.text("Jalur wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            return isValid;
+        }
+
+        function ValidateUbah() {
+            var ta = $("#dataU_1").val();
+            var error1 = $("#m_dataU_1");
+
+            var jalur = $("#dataU_2").val();
+            var error2 = $("#m_dataU_2");
+
+            var isValid = true;
+
+            if (ta === "") {
+                error1.text("Tahun akademik wajib dipilih!"); isValid = false;
+            } else {
+                error1.text("");
+            }
+
+            if (jalur === "") {
+                error2.text("Jalur wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            return isValid;
+        }
+        $("#data_1").on("input", ValidateInput);
+        $("#data_2").on("input", ValidateInput);
+
+        $("#dataU_1").on("input", ValidateUbah);
+        $("#dataU_2").on("input", ValidateUbah);
+
+        var table = $('#TabelAngsuran').DataTable({
+            // "data": data, // Menggunakan data yang diterima dari AJAX
+            "columns": [
+                { "data": "No" },
+                { "data": "thnakademik" },
+                { "data": "nama_jalur" },
+                { "data": "jlh_angsuran" },
+                { "data": "periode" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        return '<div class="text-center">' +
+                            ' <a href="/RumusPotongan/RumusPotongan?id_rumus=' + data.id_rumus + '" class="btn btn-sm btn-secondary mr-2 ml-2"><i class="bi bi-percent"></i> Potongan</a>' +
+                            ' <a href="/MstAngsuran/DetailMstAngsuran?id_rumus=' + data.id_rumus + '" class="btn btn-sm btn-info text-white mr-2 ml-2"><i class="bi bi-info-circle-fill"></i> Detail</a>' +
+                            ' <a href="#" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-id="' + data.id_rumus + '" data-ta="' + data.thnakademik + '" data-kd="' + data.kd_jalur + '" data-jlh="' + data.jlh_angsuran + '" data-periode="' + data.periode + '" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                            '<a data-id="' + data.id_rumus + '" data-ta="' + data.thnakademik + '" data-kd="' + data.nama_jalur + '" class="btn btn-sm btn-danger hapus-button mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
+                            '</div>';
+                    }
+                },
+            ],
+            "lengthMenu": [20, 50, 100], // Opsi jumlah entri yang ditampilkan
+            "searching": true
+        });
+        
+        $.ajax({
+            url: '@Url.Action("GetAllAngsuran", "MstAngsuran")',// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].No = i + 1;
+                }
+                console.log(data);
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data referensi.');
+            }
+        });
+
+        $("#modalSimpan").on('click', function () {
+            if (ValidateInput()){
+                var dataToSend = {
+                    ta: $('#data_1').val(),
+                    kd_jalur: $('#data_2').val(),
+                    jumlah: $('#data_3').val(),
+                    periode: $('#data_4').val(),
+                    id_rumus: 0
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveMstAngsuran", "MstAngsuran")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("MstAngsuran", "MstAngsuran")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var dataToSend = {
+                    ta: $('#dataU_1').val(),
+                    kd_jalur: $('#dataU_2').val(),
+                    jumlah: $('#dataU_3').val(),
+                    periode: $('#dataU_4').val(),
+                    id_rumus: $('#dataU_5').val()
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveMstAngsuran", "MstAngsuran")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("MstAngsuran", "MstAngsuran")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelAngsuran').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+            var ta = $(this).data('ta');
+            var kd = $(this).data('kd');
+            var jlh = $(this).data('jlh');
+            var periode = $(this).data('periode');
+            console.log(id); console.log(ta); console.log(kd); console.log(jlh); console.log(periode);
+
+            $('#dataU_1').val(ta);
+            $('#dataU_2').val(kd);
+            $('#dataU_3').val(jlh);
+            $('#dataU_4').val(periode);
+            $('#dataU_5').val(id);
+            ValidateUbah();
+        });
+
+        $('#TabelAngsuran').on('click', '.hapus-button', function () {
+            var id = $(this).data('id');
+            var ta = $(this).data('ta');
+            var kd = $(this).data('kd');
+
+            if (confirm('Anda yakin ingin menghapus Angsuran dari jalur '+kd+' pada Tahun Akademik ' + ta + '?')) {
+                $.ajax({
+                    url: '@Url.Action("HapusMstAngsuran", "MstAngsuran")?id=' + id,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("MstAngsuran", "MstAngsuran")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        ValidateInput();
+        ValidateUbah();
+    });
+</script>

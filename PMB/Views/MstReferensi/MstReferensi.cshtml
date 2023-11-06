@@ -1,0 +1,336 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Data Referensi SMA";
+
+    string actionFungsi = "TambahMstReferensi";
+}
+@model MstReferensiView
+
+@section Styles{
+    <style>
+        #TableReferensi thead th {
+            text-align: center;
+        }
+
+        #TableReferensi thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TableReferensi td {
+            white-space:nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mengatur lebar maksimum untuk tabel */
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
+            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    </style>
+
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header Tambah Referensi-->
+            <div class="card-header">
+                <h3 class="card-title">@Model.title Data Referensi SMA</h3>
+            </div>
+            <!-- /.card-body Tambah Referensi-->
+            <div class="card-body">
+                @if (Model.title == "Ubah")
+                {
+                    actionFungsi = "UbahMstReferensi";
+                }
+                <form asp-action="@actionFungsi" asp-controller="MstReferensi" method="post">
+                    <div class="col-md-12">
+                        <div class="row g-2">
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input class="form-control hidden" asp-for="MstReferensi.ID_SMA" />
+                                    <input class="form-control" id="nama" asp-for="MstReferensi.NAMA_SMA" disabled="@(Model.title == "Ubah" ? "disabled" : null)" />
+                                    <label>Nama SMA/SMK </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="nama_message" asp-validation-for="MstReferensi.NAMA_SMA"></span>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input class="form-control" id="alamat" asp-for="MstReferensi.ALAMAT" />
+                                    <label>Alamat SMA/SMK </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="alamat_message" asp-validation-for="MstReferensi.ALAMAT"></span>
+                            </div>
+                        </div><br />
+
+                    <div class="row g-3">
+                            <div class="col-md" >
+                                <div class="form-floating">
+                                    <select id="propinsi" class="form-select" asp-for="MstReferensi.KD_PROP" onchange="getKota()">
+                                        <option value="">Pilih Propinsi</option>
+                                        @foreach (var item in Model.ProvinsiList)
+                                        {
+                                            <option value="@item.KD_PROP" selected="@(item.KD_PROP == Model.MstReferensi.KD_PROP)">@item.NAMA_PROP</option>
+                                        }
+                                    </select>
+                                    <label>Propinsi </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="propinsi_message"></span>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <select id="kota" class="form-select" asp-for="MstReferensi.ID_KABUPATEN" onchange="getKecamatan()">
+                                        <option value="">Pilih Kota</option>
+                                        @if (Model.title == "Ubah")
+                                        {
+                                            @foreach (var item in Model.KotaList)
+                                            {
+                                                <option value="@item.ID_KABUPATEN" selected="@(item.ID_KABUPATEN == Model.MstReferensi.ID_KABUPATEN)">@item.NAMA_KABUPATEN</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label>Kabupaten/Kota </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="kota_message"></span>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <select id="kecamatan" class="form-select" asp-for="MstReferensi.ID_KECAMATAN">
+                                        <option value="">Pilih Kecamatan</option>
+                                        @if (Model.title == "Ubah")
+                                        {
+                                            @foreach (var item in Model.KecamatanList)
+                                            {
+                                                <option value="@item.id_kecamatan" selected="@(item.id_kecamatan == Model.MstReferensi.ID_KECAMATAN)">@item.nama_kecamatan</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label>Kecamatan </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="kecamatan_message"></span>
+                            </div>
+                    </div> <br />
+
+                    <div class="row g-3" >
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input class="form-control" asp-for="MstReferensi.KODE_POS" maxlength="5"/>
+                                    <label>Kode Pos </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="MstReferensi.KODE_POS"></span>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input class="form-control" asp-for="MstReferensi.TELEPON" />
+                                    <label>Telepon </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="MstReferensi.TELEPON"></span>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-floating">
+                                    <input class="form-control" asp-for="MstReferensi.FAKSIMILI" />
+                                    <label>Faksimili </label>
+                                </div>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="MstReferensi.FAKSIMILI"></span>
+                            </div>
+                    </div><br />
+                        @if (Model.title == "Ubah")
+                        {
+                            <button type="submit" class="btn btn-sm btn-success">Ubah</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <!-- /.card-header List Referensi-->
+            <div class="card-header">
+                <h3 class="card-title">Tabel Data SMA</h3>
+            </div>
+            <!-- /.card-body List Referensi-->
+            <div class="card-body">
+                <div class="col-md-12">
+                    <table id="TableReferensi" class="table table-responsive-lg table-bordered table-striped display compact">
+                        <thead>
+                            <tr>
+                                <th class="text-center">ID SMA</th>
+                                <th class="text-center">NAMA SMA</th>
+                                <th class="text-center">ALAMAT</th>
+                                <th class="text-center">EDIT</th>
+                                <th class="text-center">HAPUS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-light">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script type="text/javascript">
+
+        function getKota() {
+            var propinsiId = document.getElementById("propinsi").value;
+            var errorMessage = document.getElementById("propinsi_message");
+            if (propinsiId !== "") {
+                errorMessage.textContent = "";
+                kota.classList.remove("hidden");
+                fetch(`/MstReferensi/GetKotaByProvinsiId?provinsiId=${propinsiId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var kotaSelect = document.getElementById("kota");
+                        kotaSelect.innerHTML = "";
+                        kotaSelect.innerHTML = '<option value="">Pilih Kota</option>';
+                        data.forEach(item => {
+                            var option = document.createElement("option");
+                            option.value = item.iD_KABUPATEN;
+                            option.text = item.namA_KABUPATEN;
+                            kotaSelect.appendChild(option);
+                        });
+                    });
+            } else {
+                errorMessage.textContent = "Propinsi harus diisi";
+            }
+        }
+
+        function getKecamatan() {
+            var kotaId = document.getElementById("kota").value;
+
+            if (kotaId !== "") {
+                kecamatan.classList.remove("hidden");
+                fetch(`/MstReferensi/GetKecamatanByKotaId?kotaId=${kotaId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        var kecamatanSelect = document.getElementById("kecamatan");
+                        kecamatanSelect.innerHTML = "";
+                        kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        data.forEach(item => {
+                            var option = document.createElement("option");
+                            option.value = item.id_kecamatan;
+                            option.text = item.nama_kecamatan;
+                            kecamatanSelect.appendChild(option);
+                        });
+                    });
+            }
+        }
+
+
+        $(document).ready(function () {
+            // validasi
+            $('#Form').submit(function (e) {
+                e.preventDefault();
+
+                // Ambil nilai input
+                var propinsi = $('#propinsi').val();
+                var kota = $('#kota').val();
+                var kecamatan = $('#kecamatan').val();
+                console.log(propinsi);
+                // Lakukan validasi di sini, misalnya, apakah inputData kosong
+                if (propinsi.trim() === '') {
+                    $('#propinsi_message').text('Propinsi tidak boleh kosong.');
+                    return;
+                }
+                if (propinsi > 99 && propinsi < 135) {
+                    if (kota.trim() === '') {
+                        $('#kota_message').text('Kota tidak boleh kosong.');
+                        return;
+                    }
+                    if (kecamatan.trim() === '') {
+                        $('#kecamatan_message').text('Kecamatan tidak boleh kosong.');
+                        return;
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var items = 'all';
+            $.ajax({
+                url: '@Url.Action("GetReferensiList", "MstReferensi")',// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // var table = $('#TableReferensi tbody');
+                    // table.empty(); Kosongkan tabel sebelum menambahkan data
+                    initializeDataTables(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data referensi.');
+                }
+            });
+
+            $('#TableReferensi').on('click', '.delete-button', function () {
+                var itemId = $(this).data('id'); 
+                var itemName = $(this).data('name');
+                // Lakukan sesuatu dengan itemId, misalnya, konfirmasi penghapusan
+                if (confirm('Anda yakin ingin menghapus ' + itemName + '?')) {
+                    var form = document.createElement("form");
+                    form.method = "POST";
+                    form.action = "@Url.Action("DeleteMstReferensi", "MstReferensi")"; // Ganti dengan URL yang sesuai
+
+                    // Tambahkan input untuk id
+                    var input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "id_sma";
+                    input.value = itemId;
+                    form.appendChild(input);
+
+                    // Sisipkan form ke dalam body dokumen dan kirimkan permintaan
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+
+            $('#TableReferensi').on('click', '.edit-button', function () {
+                var itemId = $(this).data('id');
+                window.location.href = "@Url.Action("MstReferensi", "MstReferensi")?id=" + itemId;
+                console.log(id);
+            });
+        });
+        function initializeDataTables(data) {
+            $('#TableReferensi').DataTable({
+                "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    { "data": "ID_SMA" },
+                    { "data": "NAMA_SMA" },
+                    { "data": "ALAMAT" },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<a data-id="' + data.ID_SMA + '" class="btn btn-sm btn-warning edit-button" > <i class="bi bi-pencil-fill"> </i> Ubah</a >';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<a data-id="' + data.ID_SMA + '" data-name="' + data.NAMA_SMA + '" class="btn btn-sm btn-danger delete-button" > <i class="bi bi-trash"> </i> Hapus</a>';
+                        }
+                    },
+                ]
+            });
+        }
+
+    </script>
+}

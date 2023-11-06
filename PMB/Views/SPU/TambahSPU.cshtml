@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Tambah Data SPU Mahasiswa";
+}
+@model SPUMhsView
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-header">
+                <h3 class="card-title">Tambah Data SPU</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-6">
+                    <form asp-action="TambahSPU" asp-controller="SPU" method="post">
+                        <div class="form-group">
+                            <label>Nama Calon Mahasiswa</label>
+                            <br />
+                            <select class="form-select" asp-for="SPUCalonMhs.kd_calon" id="kd_calon" onchange="getData()">
+                                <option selected style="text-align: center;" value="">-- Pilih Nama Calon --</option>
+                                @foreach (var item in Model.PendaftarList)
+                                {
+                                    <option value="@item.Kd_Calon">@item.Nm_Calon</option>
+                                }
+                            </select>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="SPUCalonMhs.kd_calon"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>SPU</label>
+                            <input class="form-control" asp-for="SPUCalonMhs.spu" id="nominal"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input class="form-control" asp-for="SPUCalonMhs.username" />
+                        </div>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="SPUCalonMhs.is_matrikulasi">
+                                <label class="form-check-label" asp-for="SPUCalonMhs.is_matrikulasi">
+                                    Matrikulasi
+                                </label>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="submit" class="btn btn-sm btn-success">Simpan</button>
+                    </form>
+                    <a href="SPUMahasiswa" class="btn btn-sm btn-warning" style="margin-left: 80px; margin-top: -60px">Batal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        function getData() {
+            var kd_calon = $("#kd_calon").val();
+            $.ajax({
+                type: "GET",
+                url: "/SPU/CariSPU",
+                cache: false,
+                dataType: 'json',
+                data: {
+                    "kd_calon": kd_calon
+                },
+                success: function (response) {
+                    console.log(response);
+                    if (response != null) {
+                        $("#nominal").val(response.spu);
+                    }
+                    else {
+                        $("#nominal").val(0);
+                    }
+                },
+                error: function (xhr) {
+                    alert("Telah terjadi kesalahan dengan kode : " + xhr.status + ", silakan menghubungi admin terkait.");
+                }
+            });
+        }
+    </script>
+}

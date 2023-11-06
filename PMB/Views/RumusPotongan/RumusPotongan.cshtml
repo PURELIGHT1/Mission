@@ -1,0 +1,473 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Rumus Potongan";
+}
+
+@section Styles{
+    <style>
+        #TabelPotongan thead th {
+            text-align: center;
+        }
+
+        #TabelPotongan thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelPotongan td {
+            white-space: nowrap;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah Rumus Potongan</a><br /><br />
+        <input type="hidden" value="@ViewBag.id_rumus" id="id_rumus" />
+        <div class="table-container">
+            <table id="TabelPotongan" class="table table-responsive-lg table-bordered table-striped display compact">
+                <thead>
+                    <tr>
+                        <th style="width: 10px">No</th>
+                        @* <th>Jalur</th> *@
+                        <th>Prodi</th>
+                        <th>Jenis Tagihan</th>
+                        <th>Nominal</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Rumus Potongan</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <select class="form-select text-center" id="prodi"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="jenisTagihan"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jenisTagihan"></span>
+                </div>
+                <div class="form-group">
+                    <label>Nominal</label>
+                    <input type="number" class="form-control" id="nominal" value="1000000" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_nominal" step="500000"></span>
+                </div>
+                <div class="form-row">
+                    <label>Keterangan</label>
+                    <textarea id="keterangan" class="form-control"></textarea>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_keterangan"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Rumus Potongan</h4>
+                <input type="hidden" id="id_potongan" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <select class="form-select text-center" id="prodi_u"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="jenisTagihan_u"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jenisTagihan_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Nominal</label>
+                    <input type="number" class="form-control" id="nominal_u" value="1000000" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_nominal_u" step="500000"></span>
+                </div>
+                <div class="form-row">
+                    <label>Keterangan</label>
+                    <textarea id="keterangan_u" class="form-control"></textarea>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_keterangan_u"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatRupiah(value) {
+        return 'Rp. ' + value.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    }
+    $(document).ready(function () {
+        var id_rumus = $('#id_rumus').val();
+        function ValidateInput() {
+            var prodi = $("#prodi").val();
+            var error2 = $("#m_prodi");
+
+            var tagihan = $("#jenisTagihan").val();
+            var error3 = $("#m_jenisTagihan");
+
+            var nominal = $("#nominal").val();
+            var error4 = $("#m_nominal");
+
+            var isValid = true;
+
+            if (prodi === "") {
+                error2.text("Prodi wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (tagihan === "") {
+                error3.text("Jenis Tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+
+            if (nominal < 1) {
+                error4.text("Nominal potongan tidak boleh kurang dari 0"); isValid = false;
+            } else {
+                error4.text("");
+            }
+            return isValid;
+        }
+
+        function ValidateUbah() {
+            var prodi = $("#prodi_u").val();
+            var error2 = $("#m_prodi_u");
+
+            var tagihan = $("#jenisTagihan_u").val();
+            var error3 = $("#m_jenisTagihan_u");
+
+            var nominal = $("#nominal_u").val();
+            var error4 = $("#m_nominal_u");
+
+            var isValid = true;
+
+            if (prodi === "") {
+                error2.text("Prodi wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (tagihan === "") {
+                error3.text("Jenis Tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+
+            if (nominal < 1) {
+                error4.text("Nominal potongan tidak boleh kurang dari 0"); isValid = false;
+            } else {
+                error4.text("");
+            }
+            return isValid;
+        }
+
+        $("#prodi").on("change", ValidateInput);
+        $("#jenisTagihan").on("change", ValidateInput);
+        $("#nominal").on("input", ValidateInput);
+
+        $("#prodi_u").on("change", ValidateUbah);
+        $("#jenisTagihan_u").on("change", ValidateUbah);
+        $("#nominal_u").on("input", ValidateUbah);
+
+        var table = $('#TabelPotongan').DataTable({
+            "columns": [
+                { "data": "No" },
+                { "data": "nm_prodi" },
+                { "data": "nama_tagihan" },
+                { "data": "nominal" },
+                { "data": "keterangan" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            return '<div class="text-center">' +
+                                '<a data-id="' + data.id_dtl_potongan + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                '<a data-id="' + data.id_dtl_potongan + '" data-jalur="' + data.nama_jalur + '" class="btn btn-sm btn-danger hapus-button mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
+                                '</div>';
+                        }
+                        return data;
+
+                    }
+                },
+            ],
+            "columnDefs": [{
+                "targets": [3],
+                "render": function (data, type, row) {
+                    if (type === 'display') {
+                        if (data == null) {
+                            return '0';
+                        } else {
+                            return formatRupiah(data);
+                        }
+                    }
+                    return data;
+                }
+            }],
+            "lengthMenu": [20, 50, 100],
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetAllPotonganByRumus", "RumusPotongan")?id_rumus=' + id_rumus,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].No = i + 1;
+                }
+                console.log(data);
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetProdiList", "CalonMhs")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#prodi");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Prodi --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_PRODI);
+                    option.text(item.JENJANG + " - " + item.NM_PRODI);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetProdiList", "CalonMhs")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#prodi_u");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Prodi --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_PRODI);
+                    option.text(item.JENJANG + " - " + item.NM_PRODI);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("ListTagihan", "RumusPotongan")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#jenisTagihan_u");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Jenis Tagihan --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.id_tagihan);
+                    option.text(item.nama_tagihan);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+         $.ajax({
+            url: '@Url.Action("ListTagihan", "RumusPotongan")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#jenisTagihan");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Jenis Tagihan --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.id_tagihan);
+                    option.text(item.nama_tagihan);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $("#modalSimpan").on('click', function () {
+
+            if (ValidateInput()) {
+                var dataToSend = {
+                    id_dtl_potongan: 0,
+                    id_rumus: id_rumus,
+                    id_prodi: $('#prodi').val(),
+                    kd_jalur: $('#jalur').val(),
+                    id_tagihan: parseInt($('#jenisTagihan').val()),
+                    nominal: parseInt($('#nominal').val()),
+                    keterangan: $('#keterangan').val()
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveDataRumus", "RumusPotongan")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("RumusPotongan", "RumusPotongan")?id_rumus=' + response.id_rumus;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var dataToSend = {
+                    id_dtl_potongan: $('#id_potongan').val(),
+                    id_rumus: id_rumus,
+                    id_prodi: $('#prodi_u').val(),
+                    kd_jalur: $('#jalur_u').val(),
+                    id_tagihan: parseInt($('#jenisTagihan_u').val()),
+                    nominal: parseInt($('#nominal_u').val()),
+                    keterangan: $('#keterangan_u').val()
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveDataRumus", "RumusPotongan")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("RumusPotongan", "RumusPotongan")?id_rumus=' + response.id_rumus;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelPotongan').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+
+            $.ajax({
+                url: '@Url.Action("GetDetailRmsPotongan", "RumusPotongan")?id=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response);
+                    $('#id_potongan').val(response.id_dtl_potongan);
+                    $('#jalur_u').val(response.kd_jalur);
+                    $('#prodi_u').val(response.id_prodi);
+                    $('#jenisTagihan_u').val(response.id_tagihan);
+                    $('#nominal_u').val(response.nominal);
+                    $('#keterangan_u').val(response.keterangan);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+        });
+
+        $('#TabelPotongan').on('click', '.hapus-button', function () {
+            var id = $(this).data('id');
+            var jalur = $(this).data('jalur');
+            console.log(id_rumus);
+            if (confirm('Anda yakin ingin menghapus salah satu rumus potongan pada jalur ' + jalur + '?')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteDataRumus", "RumusPotongan")?id=' + id + '&id_rumus=' + $('#id_rumus').val(),
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("RumusPotongan", "RumusPotongan")?id_rumus=' + response.id_rumus;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+        ValidateInput();
+        ValidateUbah();
+    });
+</script>

@@ -1,0 +1,242 @@
+﻿@{
+    ViewData["Title"] = "Data Calon Mahasiswa Baru";
+}
+@model PendaftarView
+
+@section Styles{
+    <style>
+        #custom-search {
+            float: right;
+        }
+
+        #TabelCalonMhs thead th {
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        #TabelCalonMhs td {
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mengatur lebar maksimum untuk tabel */
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
+            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .excel-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .excel-right-content {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: none; 
+            border-radius: 0 5px 5px 0;
+        }
+
+        ./* excel-button {
+            margin-left: auto;
+            padding: 10px 20px;
+            background-color: green;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        } */
+    </style>
+}
+
+    <div class="row">
+        <div class="col-md-12">
+            @*<a href="/CalonMhs/GenerateAngsuran" class="btn btn-sm btn-success btntambah" id="btn-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Generate Angsuran</a>*@
+
+            <div class="customRow">
+                <div style="display: flex;">
+                    <select id="customFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                        <option value="S1">Sarjana</option>
+                        <option value="S2">Pasca Sarjana</option>
+                    </select>
+
+                    <select id="customFilter2" class="form-select" style="width: 200px;">
+                        @foreach (var item in Model.AllTahunAkademik)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="item-right">
+                    <button class="btn btn-success" id="ExportExcelCalon"><i class="bi bi-file-excel"></i> Export Calon Mahasiswa</button>
+
+                        @* <a href="TambahPrestasiCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Tambah Prestasi</a> *@
+                </div>
+            </div>
+
+        @*Tabel data-data Calon Mahasiswa*@
+            <table id="TabelCalonMhs" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                <thead style="background-color: #284387; color: white;">
+                    <tr>
+                        <th>Kode Calon</th>
+                        <th>Nama Calon</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Tempat Lahir</th>
+                        <th>Tanggal Lahir</th>
+                        <th>Agama</th>
+                        <th>Program Studi</th>
+                        <th>Tahun Akademik</th>
+                        <th>Jenjang</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+        </table>
+        <br /><br />
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#TabelCalonMhs').DataTable({
+            // "data": data, // Menggunakan data yang diterima dari AJAX
+            "columns": [
+                { "data": "kd_Calon" },
+                { "data": "nm_Calon" },
+                {
+                    "data": "jns_Kel",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = row.jns_Kel;
+                            if (text == "P") {
+                                return '<td class="text-center"><span class="badge" style = "background-color: pink; color:black;" > <i class="bi bi-gender-female" > </i></span></td>';
+                            }
+                            else {
+                                return '<td class="text-center"><span class="badge" style = "background-color: lightblue; color:black;" > <i class="bi bi-gender-male" > </i></span></td>';
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+                    }
+                },
+                { "data": "tmp_Lahir" },
+                { "data": "tgl_Lahir" },
+                { "data": "agama" },
+                { "data": "nm_Prodi" },
+                { "data": "thnakademik" },
+                {
+                    "data": "jenjang"
+                },
+                {
+                    "data": "keterangan",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = row.keterangan;
+                            if (text == "Tidak diterima") {
+                                return '<td><span class="badge bg-danger">' + text + '</span></td >';
+                            }
+                            else if (text == "Diterima") {
+                                return '<td><span class="badge bg-success">' + text + '</span></td >';
+                            }
+                            else if (text == "Dalam proses") {
+                                return '<td><span class="badge bg-warning">' + text + '</span></td >';
+                            }
+                        }
+                        else {
+                            // Untuk tipe lain (seperti 'filter' atau 'sort'), cukup kembalikan data asli
+                            return data;
+                        }
+                    }
+                },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        return '<div class="text-center mr-2 ml-2">' +
+                            '<a href="/CalonMhs/DetailAngsuranCalonMhs?Kd_Calon=' + data.kd_Calon + '" class="btn btn-sm btn-info text-white" > <i class="bi bi-info-circle-fill" > </i> Detail SKPUK</a >' +
+                            '<a href="/CalonMhs/DetailCalonMhs?Kd_Calon=' + data.kd_Calon + '" class="btn btn-sm btn-warning text-black" > <i class="bi bi-info-circle-fill" > </i> Detail Calon</a >' +
+                            '</div>';
+                    }
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets": [8], // Indeks kolom yang ingin Anda sembunyikan
+                    "visible": false, // Menyembunyikan kolom
+                }
+            ],
+            "lengthMenu": [50, 100, 150], // Opsi jumlah entri yang ditampilkan
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetAllCalonMhs", "CalonMhs")',// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                table.rows.add(data).draw();
+                table.column(7).search('2020/2021').draw();
+                table.column(8).search('S1').draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data referensi.');
+            }
+        });
+
+        $('#customFilter').on('change', function () {
+            var filterValue = $(this).val();
+            if (filterValue === '') {
+                table.columns().search('').draw();
+            } else {
+                table.column(8).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+            }
+        });
+
+        $('#customFilter2').on('change', function () {
+            var filterValue = $(this).val();
+            if (filterValue === '') {
+                table.columns().search('').draw();
+            } else {
+                table.column(7).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+            }
+        });
+
+        $('#ExportExcelCalon').on('click', function () {
+            var ta = "2020/2021";
+            var jenjang = "S1";
+            var taFilter = $("#customFilter2").val()
+            var jenjangFilter = $("#customFilter").val();
+            if (jenjangFilter !== "") {
+                jenjang = jenjangFilter;
+            }
+            if (taFilter !== "") {
+                ta = taFilter;
+            }
+            
+            window.location.href = "@Url.Action("ExportExcelCalon", "CalonMhs")?ta=" + ta + "&jenjang=" + jenjang;
+        });
+    });
+   
+</script>

@@ -1,0 +1,340 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Data Kabupaten";
+}
+
+@section Styles{
+    <style>
+        #TabelKabupaten thead th {
+            text-align: center;
+        }
+
+        #TabelKabupaten thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelKabupaten td {
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
+            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            margin-left: 15px;
+            margin-right: 5px;
+        }
+    </style>
+
+}
+
+@model Provinsi
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Data Kabupaten Pada Propinsi @Model.NAMA_PROP</h3>
+                <input type="hidden" id="kd_prop" value="@Model.KD_PROP"/>
+            </div>
+            <div class="card-body">
+                <div class="customRow">
+                    <div style="display: flex;">
+                        <select id="customFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                            <option value="">Semua</option>
+                            <option value="true" selected>Aktif</option>
+                            <option value="false">Tidak Aktif</option>
+                        </select>
+                    </div>
+
+                    <div class="item-right">
+                        <a href="#" class="btn btn-sm btn-success" style="margin-right: 15px;" data-toggle="modal" data-target="#modal-default"><i class="bi bi-plus"></i> Tambah Kabupaten</a>
+                    </div>
+                </div>
+
+                <div class="p-3 mb-3">
+                    <table id="TabelKabupaten" class="table table-responsive-lg table-bordered table-striped display compact">
+                        <thead>
+                            <tr>
+                                <th>Nama Kabupaten</th>
+                                <th style="width: 20px;">Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Kabupaten</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Kabupaten</label>
+                    <input class="form-control" id="kab" placeholder="Masukkan Nama Kabupaten" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_kab"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Kabupaten</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Kabupaten</label>
+                    <input class="form-control" type="hidden" id="id_kab" />
+                    <input class="form-control" id="kabUbah" placeholder="Masukkan Nama Kabupaten" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_kabUbah"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Ubah</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var nama = $("#kab").val();
+            var errorDiv = $("#m_kab");
+
+            if (nama === "") {
+                errorDiv.text("Nama Kabupaten tidak boleh kosong");
+                return false;
+            } else {
+                errorDiv.text("");
+                return true;
+            }
+        }
+        function ValidateUbah() {
+            var nama = $("#kabUbah").val();
+            var errorDiv = $("#m_kabUbah");
+
+            if (nama === "") {
+                errorDiv.text("Nama Kabupaten tidak boleh kosong");
+                return false;
+            } else {
+                errorDiv.text("");
+                return true;
+            }
+        }
+
+        var tabelKabupaten = $('#TabelKabupaten').DataTable({
+            "columns": [
+                { "data": "NAMA_KABUPATEN" },
+                {
+                    "data": "ISCURRENT",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = data;
+                            console.log(data);
+                            if (text) {
+                                return '<td style="text-align: center;"><span class="badge badge-sm badge-success"><i class="bi bi-check2-circle nonaktif-button" data-id="' + row.ID_KABUPATEN + '" data-nama="' + row.NAMA_KABUPATEN + '"  style="font-size: 2em;"></i></span></td>';
+                            }
+                            else {
+                                return '<td style="text-align: center;"><span class="badge badge-sm badge-danger"><i class="bi bi-slash-circle aktif-button" data-id="' + row.ID_KABUPATEN + '" data-nama="' + row.NAMA_KABUPATEN + '"  style="font-size: 2em;"></i></span></td>';
+                            }
+                        }
+                        return data;
+                    }
+                },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            if (row.ISCURRENT) {
+                                return '<div class="text-center">' +
+                                    '<a data-id="' + data.ID_KABUPATEN + '" data-nama="' + data.NAMA_KABUPATEN + '" class="btn btn-sm btn-warning edit-button mr-2" data-toggle="modal" data-target="#modal-ubah"> <i class="bi bi-pencil-fill"> </i> Ubah</a >' +
+                                    '</div>';
+                            } else {
+                                return '';
+                            }
+                        }
+                        return data;
+                    }
+                }
+            ],
+            "searching": true
+        });
+
+        var kd_prop = $('#kd_prop').val();
+
+        $.ajax({
+            url: '@Url.Action("GetKabupaten", "Wilayah")?id=' + kd_prop,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                tabelKabupaten.rows.add(data).draw();
+                tabelKabupaten.columns(1).search('true').draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $('#customFilter').on('change', function () {
+            var filterValue = $(this).val();
+            if (filterValue === '') {
+                tabelKabupaten.columns().search('').draw();
+            } else {
+                tabelKabupaten.column(1).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+            }
+        });
+
+        $("#kab").on("input", ValidateInput);
+        $("#kabiUbah").on("input", ValidateUbah);
+
+        $("#modalSimpan").on('click', function () {
+            var dataToSend = {
+                KD_PROP: $('#kd_prop').val(),
+                ID_KABUPATEN: 0,
+                NAMA_KABUPATEN: $("#kab").val(),
+                status: 1
+            }
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("SaveKabupaten", "Wilayah")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Kabupaten", "Wilayah")?id=' + response.kd_prop;
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        $("#modalUbah").on('click', function () {
+            var dataToSend = {
+                KD_PROP: $('#kd_prop').val(),
+                ID_KABUPATEN: $('#id_kab').val(),
+                NAMA_KABUPATEN: $("#kabUbah").val(),
+                status: 1
+            }
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("SaveKabupaten", "Wilayah")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Kabupaten", "Wilayah")?id=' + response.kd_prop;
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        $('#TabelKabupaten').on('click', '.edit-button', function () {
+            var id_kab = $(this).data('id');
+            var nama = $(this).data('nama');
+
+            $('#id_kab').val(id_kab);
+            $('#kabUbah').val(nama);
+            ValidateUbah();
+        });
+
+        $('#TabelKabupaten').on('click', '.nonaktif-button', function () {
+            var id_kab = $(this).data('id');
+            var nama = $(this).data('nama');
+
+            if (confirm('Anda yakin ingin menonaktifkan kabupaten ' + nama + ' ini?')) {
+                $.ajax({
+                    url: '@Url.Action("NonAktifKabupaten", "Wilayah")?id=' + id_kab,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Kabupaten", "Wilayah")?id=' + kd_prop;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelKabupaten').on('click', '.aktif-button', function () {
+            var id_kab = $(this).data('id');
+            var nama = $(this).data('nama');
+
+            if (confirm('Anda yakin ingin mengaktifkan kabupaten ' + nama + ' ini?')) {
+                $.ajax({
+                    url: '@Url.Action("AktifKabupaten", "Wilayah")?id=' + id_kab,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Kabupaten", "Wilayah")?id=' + kd_prop;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        ValidateInput();
+        ValidateUbah();
+    });
+</script>

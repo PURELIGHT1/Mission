@@ -1,0 +1,362 @@
+﻿@{
+    Layout = null;
+}
+@model CetakSKPUKView
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Surat Ketetapan Pembayaran Uang Kuliah @Model.DataMhs.nm_calon</title>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="/Assets/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <!-- Ionicons -->
+    <link rel="stylesheet"
+          href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet"
+          href="/Assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/Assets/dist/css/adminlte.min.css" />
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        #namaMhs table, #namaMhs th, #namaMhs td {
+            border-style: hidden;
+        }
+
+        #tblJenisBayar {
+            margin-bottom: 40px;
+        }
+
+        #tblTotalBayar {
+            margin-bottom: 10px;
+        }
+
+        #tblJenisBayar thead, #tblTotalBayar thead, #tblAngsuran thead {
+            text-align: center;
+        }
+
+        #tblJenisBayar td, #tblTotalBayar td, #tblAngsuran td {
+            padding: 5px;
+        }
+
+        #isiJenisBayar {
+            border-bottom: hidden;
+        }
+
+        #isiJmlJenisBayar {
+            text-align: right;
+            border-bottom: hidden;
+        }
+
+        #isiJenisPotongan {
+            border-bottom: hidden;
+        }
+
+        #isiTotalBayar {
+            text-align: right;
+            border-bottom: hidden;
+        }
+
+        #ketSebelum {
+            text-align: left;
+        }
+
+        #jmlSebelum {
+            text-align: right;
+        }
+
+        #potSPU {
+            text-align: left;
+        }
+
+        #jmlPotongan {
+            text-align: right;
+        }
+
+        #ketSetelah {
+            text-align: left;
+        }
+
+        #jmlSetelah {
+            text-align: right;
+        }
+
+        #tblAngsuran {
+            font-size:10px;
+        }
+
+        #noAngsuran {
+            text-align: center;
+        }
+
+        #jmlAngsuran {
+            text-align: right;
+        }
+
+        #jmlBayar {
+            text-align: justify;
+            float: left;
+            width: 108%;
+        }
+
+        #ketBerkeberatan {
+            text-align: justify;
+            float: left;
+            width: 108%;
+        }
+
+        #keterangan {
+            text-align: justify-center;
+            float: left;
+            width: 108%;
+        }
+
+    </style>
+</head>
+
+<body class="classbody">
+    <div class="divbody">
+        <h4 style="text-align: center;">
+            SURAT KETETAPAN PEMBAYARAN UANG KULIAH (SKPUK)
+            <br />
+            TAHUN AKADEMIK @Model.DataMhs.thnakademik
+            <br />
+            PMB PROGRAM @Model.DataMhs.nama_jalur
+            <hr style="width: 850px; height: 1px; background-color: black;" />
+        </h4>
+
+        <table id="namaMhs" style="text-align: left; font-size: 16pt;">
+            <tr>
+                <th>Nama</th>
+                <td>
+                <th>: @Model.DataMhs.nm_calon</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Nomor Pendaftaran</th>
+                <td>
+                <th>: @Model.DataMhs.kd_calon</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Fakultas</th>
+                <td>
+                <th>: @Model.DataMhs.nm_fakultas</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Program Studi</th>
+                <td>
+                <th>: @Model.DataMhs.nm_prodi</th>
+                </td>
+            </tr>
+        </table>
+        <br />
+
+        @{
+            string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
+            string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+        }
+
+        <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah</strong> (<strong>@* @Model.DataMhs.terbilangJmlStlhPotongan *@</strong>), dengan perincian sebagai berikut:</p>
+        <br />
+
+        <table id="tblJenisBayar" width="49%" style="float: left;">
+            <thead>
+                <tr>
+                    <th>Jenis Pembayaran</th>
+                    <th>Jumlah</th>
+                    </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.JenisPembayaran)
+                {
+                    string jenisPembayaran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.ket_angsuran);
+                    string jumlah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jumlah);
+
+                    int indexPersen = jenisPembayaran.IndexOf('%');
+                    string jenis = jenisPembayaran.Substring(indexPersen + 1).Trim();
+
+                    <tr>
+                        <td id="isiJenisBayar">@jenis</td>
+                        <td id="isiJmlJenisBayar"><span style="float:left">Rp.</span>@jumlah</td>
+                    </tr> 
+                }
+                <tr></tr>
+                @{
+
+                    string jml_sebelum = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_sebelum_potongan);
+                    <tr>
+                        <td id="ketSebelum">Jumlah sebelum potongan</td>
+                        <td id="jmlSebelum"><span style="float:left">Rp.</span>@jml_sebelum</td>
+                    </tr>
+                }
+                
+            </tbody>
+        </table>
+
+        <table id="tblTotalBayar" width="49%" style="float: right;">
+            <thead>
+                <tr>
+                    <th>Potongan</th>
+                    <th>Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+              @*   <tr>
+                    <td id="isiJenisPotongan">Unggulan (Potongan SPU)</td>
+                    @if (Model.DataMhs.potUnggulan != 0)
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potUnggulan</td>
+                    }
+                    else{
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
+                    }
+                </tr>
+                <tr>
+                    <td id="isiJenisPotongan">Keluarga (Potongan SPU)</td>
+                    @if (Model.DataMhs.potKeluarga != 0)
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKeluarga</td>
+                    }
+                    else
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
+                    }
+                </tr>
+                <tr>
+                    <td id="isiJenisPotongan">Prestasi (Potongan SPU)</td>
+                    @if (Model.DataMhs.potPrestasi != 0)
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potPrestasi</td>
+                    }
+                    else
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
+                    }
+                </tr>
+                <tr>
+                    <td id="isiJenisPotongan">Keringanan SPU</td>
+                    @if (Model.DataMhs.potKeringananSPU != 0)
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKeringananSPU</td>
+                    }
+                    else
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
+                    }
+                </tr>
+                <tr>
+                    <td id="isiJenisPotongan">Konsesi (Potongan SPP)</td>
+                    @if (Model.DataMhs.potKonsesi != 0)
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKonsesi</td>
+                    }
+                    else
+                    {
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
+                    }
+                </tr>
+                <tr></tr>
+                <tr>
+                    <td id="potSPU">Jumlah potongan</td>
+                    <td id="jmlPotongan"><span style="float:left">Rp.</span>@jml_potongan</td>
+                </tr>
+                <tr>
+                    <td id="ketSetelah">Jumlah setelah potongan</td>
+                    <td id="jmlSetelah"><span style="float:left">Rp.</span>@jml_setelah</td>
+                </tr> *@
+            </tbody>
+        </table>
+
+        <p id="ketBerkeberatan">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya sesuai tanggal angsuran 1 atau apabila berkeberatan dapat diangsur dengan jadwal pembayaran sebagai berikut:</p>
+        <br />
+
+        <table id="tblAngsuran" style="width: 100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th>Angsuran</th>
+                    <th>Batas Waktu Pembayaran</th>
+                    <th>Keterangan Angsuran</th>
+                    <th>Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var itemAngsuran in Model.ListAngsuranMhs)
+                {
+                    string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
+
+                    <tr>
+                       @*  @if (item.AngsuranKe == "Uang Jaminan")
+                        {
+                            <td style="text-align:center;"><span class="badge bg-danger text-center">@item.AngsuranKe</span></td>
+                        }
+                        else
+                        { *@
+                        <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
+                        @* } *@
+                        <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
+                        <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
+                        <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
+                    </tr>
+                }
+                @{
+                    string jml_angsuran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
+
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Jumlah</td>
+                        <td id="jmlAngsuran"><span style="float:left">Rp.</span>@jml_angsuran</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <br /> <br /> <br />
+        <p style="text-align: justify; width: 100%;">Mohon perhatian, membayar angsuran belum berarti Saudara/i sudah tercatat sebagai mahasiswa baru. Selanjutnya Saudara/i <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @* @Model.DataMhs.keterangan *@</strong></p>
+
+        @* @if (Model.DataMhs.banyak_angsuran != 0)
+        {
+        }
+        else {
+            <br /> <br /> <br />
+            <p id="keterangan" style="">Mohon perhatian, selanjutnya Saudara/i <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @Model.DataMhs.keterangan</strong></p>
+        } *@
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"
+            integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK"
+            crossorigin="anonymous"></script>
+    
+    <!-- jQuery UI 1.11.4 -->
+    <script src="/Assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="/Assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="/Assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+    <!-- Summernote -->
+    <script src="/Assets/plugins/summernote/summernote-bs4.min.js"></script>
+    <!-- overlayScrollbars -->
+    <script src="/Assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/Assets/dist/js/adminlte.js"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+    <script src="/Assets/dist/js/pages/dashboard.js"></script>
+    <script src="/js/site.js"></script>
+</body>
+</html>

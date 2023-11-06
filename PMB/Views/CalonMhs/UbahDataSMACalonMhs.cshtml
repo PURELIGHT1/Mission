@@ -1,0 +1,224 @@
+﻿@{
+    ViewData["Title"] = "Edit Data SMA";
+}
+
+@model StorePendaftar2
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Form Edit</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+
+                <form onsubmit="submitForm(event)">
+                    <div class="row">
+                        <div class="col-12 col-sm-12">
+                            <input type="hidden" class="form-control" id="kdCalon" asp-for="Kd_Calon">
+                            <input type="hidden" class="form-control" id="sma" asp-for="Id_Sma">
+                            <div class="form-group">
+                                <label for="propinsi">Propinsi</label>
+                                <select id="data_1" class="form-control select2" required>
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_1"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="kota">Kabupaten</label>
+                                <select id="data_2" class="form-control select2" required>
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_2"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="sma">SMA/SMK</label>
+                                <select id="data_3" class="form-control select2" required>
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_3"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="jurusan">Jurusan SMA/SMK</label>
+                                <input type="text" class="form-control" id="data_4" placeholder="Masukkan Jurusan SMA Calon">
+                            </div>
+                            <div class="text-left">
+                                <a href="/CalonMhs/DetailCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-short"></i> Kembali</a>
+                                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-save"></i> Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </form> 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        var kdCalon = $('#kdCalon').val();
+        var sma = $('#sma').val();
+        var text = "";
+        var kabId = 0;
+        var smaId = 0;
+
+        GetProp();
+
+        $.ajax({
+            url: '@Url.Action("GetDataSMA", "CalonMhs")?Kd_Calon=' + kdCalon,// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+
+                if (data.KD_PROP !== null || data.KD_PROP !== "") {
+                    text = data.KD_PROP;
+                }
+                $('#data_1').val(text);
+
+                if (data.ID_KABUPATEN !== null) {
+                    kabId = data.ID_KABUPATEN;
+                }
+
+                GetKab(text, kabId);
+                text = "";
+
+                if (data.ID_SMA !== null) {
+                    smaId = data.ID_SMA;
+                }
+                console.log(smaId);
+                GetSma(kabId, smaId);
+
+                $('#data_4').val(data.JUR_SMA_SMK);
+
+            },
+            error: function () {
+                console.error('Gagal mengambil data referensi.');
+            }
+        });
+
+        $('#data_1').on('change', function () {
+            var selectedValue = $(this).val();
+            console.log(selectedValue);
+            GetKab(selectedValue, 0);
+        });
+
+        $('#data_2').on('change', function () {
+            var selectedValue = $(this).val();
+            console.log(selectedValue);
+            GetSma(selectedValue, 0);
+        });
+    });
+
+    function GetProp() {
+        $.ajax({
+            url: '@Url.Action("GetProvinsiList", "CalonMhs")',// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var select = $('#data_1');
+                data.forEach(item => {
+                    var option = $('<option>').val(item.kD_PROP).text(item.namA_PROP);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+    }
+
+    function GetKab(prop, kab) {
+        $.ajax({
+            url: '@Url.Action("GetKotaByProvinsiId", "MstReferensi")?provinsiId=' + prop,// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $('#data_2');
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text(' - Pilih Kabupatan/Kota - ');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.iD_KABUPATEN);
+                    option.text(item.namA_KABUPATEN);
+
+                    // Menentukan opsi yang sudah terpilih (selected)
+                    if (item.iD_KABUPATEN === kab) {
+                        option.attr('selected', 'selected');
+                    }
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+    }
+
+    function GetSma(kab, sma) {
+        $.ajax({
+            url: '@Url.Action("GetSMAByKotaId", "MstReferensi")?kotaId=' + kab,// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $('#data_3');
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text(' - Pilih SMA - ');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_SMA);
+                    option.text(item.NAMA_SMA);
+                    // Menentukan opsi yang sudah terpilih (selected)
+                    if (item.ID_SMA === sma) {
+                        option.attr('selected', 'selected');
+                    }
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+    }
+
+    function submitForm(event) {
+        event.preventDefault();
+
+        var dataToSend = {
+            Kd_calon: $('#kdCalon').val(),
+            Id_sma: $('#data_3').val(),
+            Jur_sma_smk: $('#data_4').val()
+        }
+
+        console.log(dataToSend);
+        $.ajax({
+            url: '@Url.Action("saveDataSMA", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function (response) {
+                console.log(response);
+                if (response.success) {
+                    window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                }
+            },
+            error: function (error) {
+                console.error('Terjadi kesalahan:', error);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Surat Diterima";
+}
+@model SuratDiterimaView
+
+<div class="row">
+    <div class="col-md-11">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-header">
+                <h3 class="card-title">Tambah Data Surat Diterima</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-6">
+                    <form asp-action="TambahJadwalRegis" asp-controller="SuratDiterima" method="post">
+                        <div class="form-group">
+                            <label>Nomor Surat</label>
+                            <br />
+                            <div>
+                                <input type="text" class="form-control text-center" asp-for="KetDiterima.No_Surat"/>
+                            </div>
+                            <span style="color:darkgray">Contoh Format : 002/Eks-KAA-UAJY/2022</span> <br />
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.No_Surat"></span>
+                        </div>
+                        <div class="form-group" style="margin-top: 5px">
+                            <label>Jalur</label>
+                            <br />
+                            <select class="form-select text-center" asp-for="KetDiterima.Kd_Jalur">
+                                <option selected value="">-- Pilih Nama Jalur --</option>
+                                @foreach (var item in Model.JalurList)
+                                {
+                                    <option value="@item.kd_jalur">@item.nama_jalur</option>
+                                }
+                            </select>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.Kd_Jalur"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Periode Jalur</label>
+                            <br />
+                            <div>
+                                <input type="number" class="form-control text-center" asp-for="KetDiterima.Periode"/>
+                            </div>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.Periode"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Mulai Perkuliahan</label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Perkuliahan" />
+                            <span style="color:darkgray">Contoh Format : 22 Agustus 2022</span> <br />
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.Perkuliahan"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Periode Registrasi</label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Periode_Regis" />
+                            <span style="color:darkgray">Contoh Format : 30 Mei - 2 Juni 2022</span> <br />
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.Periode_Regis"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Registrasi</label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Tgl_Regis" value="-" />
+                            <span style="color:darkgray">Contoh Format : 4 - 5 Agustus 2022</span> <br />
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="KetDiterima.Tgl_Regis"></span>
+                        </div>
+
+                        <br />
+                        <button type="submit" class="btn btn-sm btn-success">Simpan</button>
+                    </form>
+                    <a href="~/SuratDiterima/SuratDiterima" class="btn btn-sm btn-warning" style="margin-left: 80px; margin-top: -60px">Batal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

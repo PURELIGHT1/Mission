@@ -1,0 +1,726 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Tarif Prodi";
+}
+
+@section Styles{
+    <style>
+        .btntambah {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        } 
+
+        #custom-search {
+            float: right;
+        }
+
+        #TabelTarif thead th {
+            text-align: center;
+        }
+
+        #TabelTarif thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        .freeze-column {
+            width: fit-content; /* Adjust to fit your needs */
+            max-width: 100%;
+            overflow-x: auto;
+            border: 1px solid #777777;
+        }
+
+        .freeze-column table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            width: 100%; /* Optional: To remove spacing between cells */
+        }
+
+        .freeze-column th,
+        .freeze-column td {
+            border-right: 1px solid #bbbbbb;
+            border-bottom: 1px solid #bbbbbb;
+            padding: inherit;
+            word-wrap: break-word;
+            text-align: center;
+        }
+
+        .freeze-column th:nth-child(2),
+        .freeze-column td:nth-child(2),
+        .freeze-column th:nth-child(3),
+        .freeze-column td:nth-child(3) {
+            position: sticky;
+            font-weight: normal;
+            z-index: 2;
+        }
+
+        .freeze-column th:nth-child(2),
+        .freeze-column td:nth-child(2) {
+            left: 0; /* Width of the first column */
+            width: 150px;
+            min-width: 150px;
+        }
+
+        .freeze-column td:nth-child(3) {
+            left: 170px;
+            width: 100px;
+            min-width: 100px;
+        }
+
+        .freeze-column td:nth-child(2),
+        .freeze-column td:nth-child(3) {
+            background: #f5ac1d;
+        }
+
+        #TableTambahTarif thead {
+            display: block;
+            background-color: #284387;
+            color: white;
+        }
+
+       #TableTambahTarif thead th {
+            display: block;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        #TableTambahTarif tbody {
+            display: block;
+        }
+
+        #TableTambahTarif tbody td {
+            display: block;
+            margin-bottom: 10px; 
+        }
+
+        .horizontal-vertical-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .horizontal-vertical-table tbody {
+            display: block;
+        }
+
+
+        .horizontal-vertical-table tbody tr {
+            display: flex;
+            white-space: nowrap; /* Mencegah pemutihan teks */
+        }
+
+        .horizontal-vertical-table tbody td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            width: 300px;
+        }
+
+        .tarif-tagihan {
+            background: gray;
+            color: white;
+        }
+
+    </style>
+}
+@model TarifView
+<div class="row">
+    <div class="col-md-12">
+        <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah Tarif</a><br />
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <label>Pilih kolom yang ingin ditampilkan:</label>
+                <select id="columnSelect" class="select2 freeze-column" multiple="multiple" data-placeholder="Kolom Akan Terlihat saat dipilih" style="width: 100%;">
+                    <option value="all">ALL</option>
+                    <option value="3">SPP Tetap</option>
+                    <option value="4">SPP Variabel</option>
+                    <option value="5">Jaket</option>
+                    <option value="6">Buku</option>
+                    <option value="7">Courseware</option>
+                    <option value="8">Matrikulasi</option>
+                    <option value="9">Biaya Herregistrasi</option>
+                    <option value="10">SPP Variabel Inter</option>
+                    <option value="11">Kemahasiswaan</option>
+                    <option value="12">Uang Kuliah Tetap</option>
+                    <option value="13">SPU Bersubsidi</option>
+                    <option value="14">SPU Normal</option>
+                    <option value="15">SPU Registrasi 3</option>
+                    <option value="16">SPU Registrasi 4</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-container">
+            <table id="TabelTarif" class="freeze-column">
+                <thead>
+                    <tr>
+                        <th style="width: 10px">No</th>
+                        <th>Prodi</th>
+                        <th>Tahun Masuk</th>
+                        <th>SPP T</th>
+                        <th>SPP V</th>
+                        <th>Jaket</th>
+                        <th>Buku</th>
+                        <th>Courseware</th>
+                        <th>Matrikulasi</th>
+                        <th>Herregistrasi</th>
+                        <th>SPP V Inter</th>
+                        <th>Kemahasiswaan</th>
+                        <th>Uang KT</th>
+                        <th>SPU Subsidi</th>
+                        <th>SPU N</th>
+                        <th>SPU R 3</th>
+                        <th>SPU R 4</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+            </table>
+        </div>
+       
+        <br /><br />
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Tagihan Tarif</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <select class="form-select text-center" id="prodi" onchange="ChangeTarif()"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
+                </div>
+                <div class="form-group">
+                    <label>Tahun Masuk</label>
+                    <select id="thn" class="form-select">
+                        @foreach (var item in Model.ListTahun)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_thn"></span>
+                </div>
+                <div class="form-group">
+                    <label>Tarif Tagihan</label>
+                    <table class="horizontal-vertical-table" id="tarifTagihan">
+                       
+                    </table>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Tagihan Tarif</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <input type="hidden" id="dataProdi" />
+                    <input type="hidden" id="dataTahun" />
+                    <input id="namaProdi" disabled class="form-control" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
+                </div>
+                <div class="form-group">
+                    <label>Tahun Masuk</label>
+                    <select id="thnUbah" class="form-select" disabled>
+                        @foreach (var item in Model.ListTahun)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_thn"></span>
+                </div>
+                <div class="form-group">
+                    <label>Tarif Tagihan</label>
+                    <table class="horizontal-vertical-table" id="tarifTagihanUbah">
+                    </table>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.5/jquery.inputmask.min.js"></script>
+    
+}
+<script>
+    function formatRupiah(value) {
+        return 'Rp. ' + value.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+    }
+
+    function ChangeTarif() {
+        var prodi = $("#prodi").val();
+        $.ajax({
+            url: '@Url.Action("GetAllRefTagihan", "Tarif")?id_prodi=' + prodi,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                SetDataTagihan(data, "tarifTagihan");
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+    }
+
+    var idTagihan = [];
+    function SetDataTagihan(data, id_tarif) {
+        var tarif = $('#' + id_tarif);
+        tarif.empty();
+        idTagihan.splice(0, idTagihan.length);
+        var biaya = 0;
+        console.log(data);
+        $.each(data, function (index, item) {
+            var row = $("<tr>");
+
+            var dataTampil = $("<td>");
+            dataTampil.attr("class", "tarif-tagihan");
+            dataTampil.text(item.nama_tagihan);
+            var dataInput = $('<input type="text">');
+            dataInput.attr("class", "form-control masked-money text-center");
+
+            idTagihan.push(item.id_tagihan);
+            if (id_tarif === "tarifTagihanUbah"){
+                dataInput.attr('id', 'dataU_' + item.id_tagihan);
+            } else {
+                dataInput.attr('id', 'data_' + item.id_tagihan);
+                dataInput.val(biaya);
+            }
+
+            row.append(dataTampil);
+            row.append($("<td>").html(dataInput));
+
+            tarif.append(row);
+        });
+
+        var row = $("<tr>");
+
+        var dataTampil = $("<td>");
+        dataTampil.attr("class", "tarif-tagihan");
+        dataTampil.text("SKS");
+        var dataInputSKS = $('<input type="text" class="form-control text-center">');
+
+        if (id_tarif === "tarifTagihanUbah") {
+            dataInputSKS.attr('id', 'dataSKS_U');
+        } else {
+            dataInputSKS.attr('id', 'dataSKS');
+            dataInputSKS.val(1);
+        }
+
+        row.append(dataTampil);
+        row.append($("<td>").html(dataInputSKS));
+        tarif.append(row);
+    }
+
+    function SetBiayaTagihan(data, tarif) {
+        console.log(data); console.log(tarif); console.log(tarif["SPP Tetap"]);
+
+        $.each(data, function (index, item) {
+
+            $("#dataSKS_U").val(tarif["SKS"]);
+
+            if (item.nama_tagihan === "SPP Tetap") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPP Tetap"]);
+            }
+
+            if (item.nama_tagihan === "SPP Variabel") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel"]);
+            }
+
+            if (item.nama_tagihan === "Jaket") {
+                $('#dataU_' + item.id_tagihan).val(tarif.Jaket);
+            }
+
+            if (item.nama_tagihan === "Buku") {
+                $('#dataU_' + item.id_tagihan).val(tarif.Buku);
+            }
+
+            if (item.nama_tagihan === "Courseware") {
+                $('#dataU_' + item.id_tagihan).val(tarif.Courseware);
+            }
+
+            if (item.nama_tagihan === "Matrikulasi") {
+                $('#dataU_' + item.id_tagihan).val(tarif.Matrikulasi);
+            }
+
+            if (item.nama_tagihan === "Biaya Herregistrasi") {
+                $('#dataU_' + item.id_tagihan).val(tarif["Biaya Herregistrasi"]);
+            }
+
+            if (item.nama_tagihan === "SPP Variabel Inter") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel Inter"]);
+            }
+
+            if (item.nama_tagihan === "Kemahasiswaan") {
+                $('#dataU_' + item.id_tagihan).val(tarif.Kemahasiswaan);
+            }
+
+            if (item.nama_tagihan === "Uang Kuliah Tetap") {
+                $('#dataU_' + item.id_tagihan).val(tarif["Uang Kuliah Tetap"]);
+            }
+
+            if (item.nama_tagihan === "SPU Bersubsidi") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPU Bersubsidi"]);
+            }
+
+            if (item.nama_tagihan === "SPU Normal") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPU Normal"]);
+            }
+
+            if (item.nama_tagihan === "SPU Registrasi 3") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 3"]);
+            }
+
+            if (item.nama_tagihan === "SPU Registrasi 4") {
+                $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 4"]);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+
+        $('#data_5').on('input', function () {
+            var removeChar = this.value.replace(/[^0-9\.]/g, '');
+            var removeDot = removeChar.replace(/\./g, '');
+            this.value = removeDot;
+            console.log(this.value);
+
+            var formattedNumber = this.value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            console.log(formattedNumber);
+        });
+
+        function ValidateInput() {
+            var prodi = $("#prodi").val();
+            var error1 = $("#m_prodi");
+
+            var thn = $("#thn").val();
+            var error2 = $("#m_thn");
+
+            var isValid = true;
+
+            if (prodi === "") {
+                error1.text("Prodi wajib dipilih!"); isValid = false;
+            } else {
+                error1.text("");
+            }
+
+            if (thn < 1 || thn === "") {
+                error2.text("Tahun tidak boleh kurang dari 0"); isValid = false;
+            } else {
+                error2.text("");
+            }
+            return isValid;
+        }
+
+        $("#prodi").on("input", ValidateInput);
+        $("#thn").on("input", ValidateInput);
+
+        $.ajax({
+            url: '@Url.Action("GetProdiList", "CalonMhs")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var select = $("#prodi");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Prodi --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_PRODI);
+                    option.text(item.JENJANG + " - " + item.NM_PRODI);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        var table = $('#TabelTarif').DataTable({
+            "columns": [
+                { "data": "No" },
+                { 
+                    "data": "nm_prodi",
+                    "render": function(data, type, row) {
+                        return row.jenjang + ' - ' + row.nm_prodi;
+                    }
+                },
+                { "data": "thmasuk" },
+                { "data": "SPP Tetap" },
+                { "data": "SPP Variabel" },
+                { "data": "Jaket" },
+                { "data": "Buku" },
+                { "data": "Courseware" },
+                { "data": "Matrikulasi" },
+                { "data": "Biaya Herregistrasi" },
+                { "data": "SPP Variabel Inter" },
+                { "data": "Kemahasiswaan" },
+                { "data": "Uang Kuliah Tetap" },
+                { "data": "SPU Bersubsidi" },
+                { "data": "SPU Normal" },
+                { "data": "SPU Registrasi 3" },
+                { "data": "SPU Registrasi 4" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            if (row.iscurrent) {
+                                return '<div class="text-center">' +
+                                    ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                    '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '" data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
+                                    '</div>';
+                            } else {
+                                return '<div class="text-center">' +
+                                    ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                    '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '"data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
+                                    '</div>';
+                            }
+                        }
+                        return data;
+                       
+                    }
+                },
+            ],
+            "columnDefs": [{
+                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                "render": function (data, type, row) {
+                    if (type === 'display') {
+                        if (data == null) {
+                            return '0';
+                        } else {
+                            return formatRupiah(data);
+                        }
+                    }
+                    return data;
+                }
+            },
+            {
+                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                "visible": false
+            }],
+            "lengthMenu": [20, 50, 100],
+            "searching": true
+        });
+
+        $('#columnSelect').on('change', function () {
+            var selectedColumns = $(this).val();
+            table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).visible(false);
+            if (selectedColumns && selectedColumns.indexOf("all") !== -1) {
+                table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).visible(true);
+            }else{
+                table.columns(selectedColumns).visible(true);
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetAllTarifTagihan", "Tarif")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].No = i + 1;
+                }
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data');
+            }
+        });
+
+
+        $("#modalSimpan").on('click', function () {
+            var biayaTagihan = [];
+            var tagihan = [];
+
+            for (var i = 0; i < idTagihan.length; i++) {
+                var value = parseInt($('#data_' + idTagihan[i]).val());
+
+                if (!isNaN(value)) {
+                    biayaTagihan.push(value);
+                    tagihan.push(idTagihan[i].toString());
+                }
+            }
+            if (ValidateInput()){
+
+                var dataToSend = {
+                    prodi: $('#prodi').val(),
+                    tahun: parseInt($('#thn').val()),
+                    semester: "1",
+                    biaya: biayaTagihan,
+                    tagihan: tagihan,
+                    pengali: parseInt($('#dataSKS').val())
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveTarifTagihan", "Tarif")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Tarif", "Tarif")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+
+        $('#TabelTarif').on('click', '.nonaktif-button', function () {
+            var id_prodi = $(this).data('id');
+            var prodi = $(this).data('prodi');
+            var tahun = $(this).data('tahun');
+
+            if (confirm('Anda yakin ingin menonaktifkan tarif prodi ' + prodi + ' pada tahun ' + tahun + '?')) {
+                $.ajax({
+                    url: '@Url.Action("NonAktifTarifTagihan", "Tarif")?prodi=' + id_prodi + '&tahun=' + tahun,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Tarif", "Tarif")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+
+        $('#TabelTarif').on('click', '.aktif-button', function () {
+            var id_prodi = $(this).data('id');
+            var prodi = $(this).data('prodi');
+            var tahun = $(this).data('tahun');
+
+            if (confirm('Anda yakin ingin mengaktifkan tarif prodi ' + prodi + ' pada tahun ' + tahun + '?')) {
+                $.ajax({
+                    url: '@Url.Action("AktifTarifTagihan", "Tarif")?prodi=' + id_prodi + '&tahun=' + tahun,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Tarif", "Tarif")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelTarif').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+            var tahun = $(this).data('tahun');
+
+            $.ajax({
+                url: '@Url.Action("GetDetailRefTagihan", "Tarif")?id_prodi=' + id + '&tahun=' + tahun,
+                method: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    $("#dataProdi").val(response.tarif.id_prodi);
+                    $("#dataTahun").val(response.tarif.thmasuk);
+                    $("#namaProdi").val(response.tarif.nm_prodi);
+                    $("#thnUbah").val(response.tarif.thmasuk);
+
+                    SetDataTagihan(response.tagihan, "tarifTagihanUbah");
+                    SetBiayaTagihan(response.tagihan, response.tarif);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+        });
+
+        $("#modalUbah").on('click', function () {
+
+            var biayaTagihan = [];
+            var tagihan = [];
+
+            for (var i = 0; i < idTagihan.length; i++) {
+                var value = parseInt($('#dataU_' + idTagihan[i]).val());
+
+                if (!isNaN(value)) {
+                    biayaTagihan.push(value);
+                    tagihan.push(idTagihan[i].toString());
+                }
+            }
+
+            var dataToSend = {
+                prodi: $('#dataProdi').val(),
+                tahun: parseInt($('#dataTahun').val()),
+                semester: "1",
+                biaya: biayaTagihan,
+                tagihan: tagihan,
+                pengali: parseInt($('#dataSKS_U').val())
+            };
+
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("UbahTarifTagihan", "Tarif")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Tarif", "Tarif")';
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        ValidateInput();
+    });
+</script>

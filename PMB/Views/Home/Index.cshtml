@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+    var username = User.Claims
+                    .Where(c => c.Type == "username")
+                        .Select(c => c.Value).SingleOrDefault();
+}
+
+@section Styles{
+    <style>
+        .btntambah{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h3 style="text-align:center; margin-bottom: 20px">Selamat datang, @User.Identity.Name!</h3><br />
+            <div id="carouselExampleControls" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-inner rounded-5 shadow-4-strong">
+                    <div class="carousel-item active">
+                        <img src="/Assets/dist/img/UAJY-ORI.png" class="d-block w-100" alt="UAJY">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/Assets/dist/img/Kampus2.png" class="d-block w-100" alt="Kampus 2">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/Assets/dist/img/Kampus3.png" class="d-block w-100" alt="Kampus 3">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/Assets/dist/img/CoWorkSpace.jpg" class="d-block w-100" alt="Coworking Space">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+            <br />
+    </div>
+</div>
+

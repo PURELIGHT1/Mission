@@ -1,0 +1,1456 @@
+﻿@{
+    var jenjang = "";
+    if (Model.jenjang == "S1")
+    {
+        jenjang = "Sarjana";
+    }
+    else if (Model.jenjang == "S2")
+    {
+        jenjang = "Pasca Sarjana";
+    }
+    ViewData["Title"] = "Detail Calon Mahasiswa " + jenjang;
+}
+@model StorePendaftar2
+
+@section Styles{
+    <style>
+        #TabelPrestasi thead th {
+            text-align: center;
+        }
+
+        #TabelPrestasi thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelPrestasi td {
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mengatur lebar maksimum untuk tabel */
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
+            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gambar-styled {
+            max-width: 1000px;
+            height: auto;
+        }
+
+        .pdf-styled {
+            width: 100%;
+            height: 600px;
+        }
+
+        .containerFilter {
+            display: flex;
+            justify-content: space-between; 
+        }
+    </style>
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Data Calon Mahasiswa @jenjang Kode Calon : @Model.Kd_Calon, Nama Calon : @Model.Nm_Calon</h3>
+                <input type="hidden" id="kdCalon" asp-for="Kd_Calon" />
+                <input type="hidden" id="namaCalon" asp-for="Nm_Calon" />
+                <input type="hidden" id="namaJalur" asp-for="nama_jalur" />
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs" id="myTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab1-tab" href="#tab1" aria-selected="true">Data Pribadi</a>
+                        </li>
+                        @if(jenjang == "Sarjana")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab2-tab" href="#tab2" aria-selected="false">Data SMA</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab3-tab" href="#tab3" aria-selected="false">Data Program Studi</a>
+                        </li>
+                        @if(jenjang == "Sarjana")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab4-tab" href="#tab4" aria-selected="false">Nilai</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab5-tab" href="#tab5" ari-selected="false">Prestasi</a>
+                            </li>                      
+                        }
+                        @if(jenjang == "Pasca Sarjana")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab7-tab" href="#tab7" aria-selected="false">Riwayat</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab8-tab" href="#tab8" ari-selected="false">Jawaban</a>
+                            </li>                      
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab6-tab" href="#tab6" aria-selected="false">Dokumen</a>
+                        </li>
+                         @if(jenjang == "Pasca Sarjana")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab9-tab" href="#tab9" aria-selected="false">Infomasi</a>
+                            </li>  
+                        }
+                    </ul>
+
+
+                    <div class="tab-content" id="myTabsContent" style="margin-top: 12px;">
+                        <!-- Data Diri -->
+                        <div class="tab-pane fade show active" id="tab1" aria-labelledby="tab1-tab">
+                            <!-- Konten Tab 1 -->
+                            <div class="text-right">
+                                <a href="UbahDataDiriCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Data Diri</a>
+                            </div>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        @if(jenjang == "Sarjana")
+                                        {
+                                            <span>Kode Calon</span><br>
+                                            <span>NISN</span><br>
+                                            <span>Jalur Masuk</span><br />
+                                            <span>Email</span><br>
+                                            <span>Periode</span><br>
+                                            <span>Nama Calon</span><br>
+                                            <span>NIK</span><br>
+                                            <span>Nomor KK</span><br>
+                                            <span>Tempat Lahir</span><br>
+                                            <span>Tanggal Lahir</span><br>
+                                            <span>Jenis Kelamin</span><br>
+                                            <span>Agama</span><br>
+                                            <span>Kewarganegaraan, Negara</span><br>
+                                            <span>HP</span><br>
+                                            <span>Nama Ibu</span><br>
+                                            <span>Alamat KTP</span><br>
+                                            <span>KPS</span><br>
+                                            <span>Ukuran Jas</span><br />
+                                            <span>Kebutuhan Khusus</span>
+                                        }
+                                        else if(jenjang == "Pasca Sarjana")
+                                        {
+                                            <span>Kode Calon S2</span><br>
+                                            <span>Email</span><br>
+                                            <span>Nama Calon</span><br>
+                                            <span>NIK</span><br>
+                                            <span>Nomor KK</span><br>
+                                            <span>Tempat Lahir</span><br>
+                                            <span>Tanggal Lahir</span><br>
+                                            <span>Jenis Kelamin</span><br>
+                                            <span>Agama</span><br>
+                                            <span>Kewarganegaraan, Negara</span><br>
+                                            <span>HP</span><br>
+                                            <span>Nama Ibu</span><br>
+                                            <span>Alamat KTP</span><br><br /><br /><br />
+                                            <span>Alamat Surat</span><br />
+                                            <span>Kebutuhan Khusus</span>                           
+                                        }
+                                    </div>
+                                    <!-- /.col -->
+                                     <div class="col-sm-4">
+                                        @if (jenjang == "Sarjana")
+                                        {
+                                            <span id="data_1"></span><br>
+                                            <span id="data_2"></span><br>
+                                            <span id="data_3"></span><br>
+                                            <span id="data_4"></span><br>
+                                            <span id="data_5"></span><br>
+                                            <span id="data_6"></span><br>
+                                            <span id="data_7"></span><br>
+                                            <span id="data_8"></span><br>
+                                            <span id="data_9"></span><br>
+                                            <span id="data_10"></span><br>
+                                            <span id="data_11"></span><br>
+                                            <span id="data_12"></span><br>
+                                            <span id="data_13"></span><br>
+                                            <span id="data_14"></span><br>
+                                            <span id="data_15"></span><br>
+                                            <span id="data_16"></span><br>
+                                            <span id="data_17"></span><br>
+                                            <span id="data_18"></span><br>
+                                            <span id="data_19"></span>
+                                        }
+                                        else if (jenjang == "Pasca Sarjana")
+                                        {
+                                            <span id="dataS2_1"></span><br>
+                                            <span id="dataS2_2"></span><br>
+                                            <span id="dataS2_3"></span><br>
+                                            <span id="dataS2_4"></span><br>
+                                            <span id="dataS2_5"></span><br>
+                                            <span id="dataS2_6"></span><br>
+                                            <span id="dataS2_7"></span><br>
+                                            <span id="dataS2_8"></span><br>
+                                            <span id="dataS2_9"></span><br>
+                                            <span id="dataS2_10"></span><br>
+                                            <span id="dataS2_11"></span><br>
+                                            <span id="dataS2_12"></span><br>
+                                            <span id="dataS2_13"></span><br>
+                                            <span id="dataS2_13_a">Propinsi</span><br>
+                                            <span id="dataS2_13_b">Kabupaten</span><br>
+                                            <span id="dataS2_13_c">Kode Pos</span><br>
+                                            <span id="dataS2_14"></span><br>
+                                            @*<span id="dataS2_14_b">Kabupaten</span><br>
+                                            <span id="dataS2_14_c">Kode Pos</span><br> *@
+                                            <span id="dataS2_15"></span>
+                                        }
+                                      </div>
+
+                                    <!-- /.col -->
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Data SMA -->
+                        <div class="tab-pane fade show" id="tab2" aria-labelledby="tab2-tab">
+                            <!-- Konten Tab 1 -->
+                            <div class="text-right">
+                                <a href="UbahDataSMACalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Data SMA</a>
+                            </div>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <span>Nama SMA</span><br>
+                                        <span>Jurusan SMA</span><br>
+                                        <span>Propinsi</span><br>
+                                        <span>Kabupaten</span>
+                                    </div>
+                                   
+                                    <!-- /.col -->
+                                    <div class="col-sm-4">
+                                       <span id="data2_1"></span><br>
+                                       <span id="data2_2"></span><br>
+                                       <span id="data2_3"></span><br>
+                                       <span id="data2_4"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                        <!-- Program Studi -->
+                        <div class="tab-pane fade" id="tab3" aria-labelledby="tab3-tab">
+                            <!-- Konten Tab 2 -->
+                            <div class="text-right">
+                                <a href="UbahProgramStudiCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Program Studi</a>
+                            </div>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                    @if (jenjang == "Sarjana")
+                                    {
+                                        <span>Pilihan Pertama</span><br>
+                                        <span>Pilihan Kedua</span><br>
+                                        <span>Pilihan Ketiga</span>
+                                    }
+                                    else if (jenjang == "Pasca Sarjana")
+                                    {
+                                        <span>Pilihan Prodi</span><br>
+                                        <span>Pilihan Konsentrasi</span>
+                                    }
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-sm-4">
+                                        @if (jenjang == "Sarjana")
+                                        {
+                                            <span id="data3_1"></span><br>
+                                            <span id="data3_2"></span><br>
+                                            <span id="data3_3"></span>
+                                        }
+                                        else if (jenjang == "Pasca Sarjana")
+                                        {
+                                            <span id="data3S2_1"></span><br>
+                                            <span id="data3S2_2"></span>
+                                        }
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                         <!-- Nilai -->
+                        <div class="tab-pane fade" id="tab4" aria-labelledby="tab4-tab">
+                            <div class="p-3 mb-3">
+                                <div class="row">
+                                <!-- title row -->
+                                    @if(Model.id_template_nilai == 1){
+                                        <table id="TableReadRapot" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No.</th>
+                                                    <th>Kelas</th>
+                                                    <th>Semester</th>
+                                                    <th>KKM Matematika</th>
+                                                    <th>Matematika (Pengetahuan)</th>
+                                                    <th>KKM B.Inggris</th>
+                                                    <th>B.Inggris (Pengetahuan)</th>
+                                                    <th>KKM B.Indonesia</th>
+                                                    <th>B.Indonesia (Pengetahuan)</th>
+                                                    <th>Rangking</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    }
+
+                                    @if(Model.id_template_nilai == 3){
+                                        <table id="TableReadSMT5" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No.</th>
+                                                    <th>Kelas</th>
+                                                    <th>Semester</th>
+                                                    <th>Matematika</th>
+                                                    <th>B.Inggris</th>
+                                                    <th>B.Indonesia</th>
+                                                    <th>Rangking</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    }
+
+                                    @if(Model.id_template_nilai == 4){
+                                        <table id="TableReadUTBK" class="table table-bordered table-striped display compact text-center">
+                                            <thead>
+                                                <tr>
+                                                    <th>No.</th>
+                                                    <th>Kemampuan Penalaran Umum</th>
+                                                    <th>Kemampuan Memahami Bacaan dan Menulis</th>
+                                                    <th>Pengetahuan dan Pemahaman Umum</th>
+                                                    <th>Pengetahuan Kuantitatif</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div><br />
+                                <div class="row">
+                                    @if(Model.id_template_nilai == 4){
+                                        <input type="hidden" id="banyakUTBK"/>
+                                        <table id="TableUpdateUTBK" class="table table-bordered table-striped display compact text-center">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40px">No.</th>
+                                                    <th>Jenis Nilai UTBK</th>
+                                                    <th>Deskripsi</th>
+                                                    <th>Nilai</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                        <div class="text-left">
+                                            <button type="submit" class="btn btn-sm btn-success" id="submitNilaiUTBK"><i class="bi bi-save"></i> Simpan</button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div> 
+                         </div>
+
+                        <!-- Prestasi -->
+                        <div class="tab-pane fade" id="tab5" aria-labelledby="tab5-tab">
+                            <!-- Konten Tab 2 -->
+                            <div class="text-right">
+                                <a href="TambahPrestasiCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Tambah Prestasi</a>
+                            </div>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <table id="TabelPrestasi" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px">Hapus</th>
+                                            <th>Kategori</th>
+                                            <th>Nama Kegiatan</th>
+                                            <th style="width: 40px">Tingkat</th>
+                                            <th>Prestasi</th>
+                                            <th style="width: 40px">Tahun</th>
+                                            <th>Keterangan</th>
+                                            <th style="width: 50px">Kelompok</th>
+                                            <th style="width: 40px">Ubah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                        <!-- Dokumen -->
+                        <div class="tab-pane fade" id="tab6" aria-labelledby="tab6-tab">
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-5 col-sm-3">
+                                        <input type="text" id="idCalonOnline" asp-for="Id_Calon_Online"/>
+                                        <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                                    
+                                        </div>
+                                    </div>
+                                    <div class="col-7 col-sm-9">
+                                        <div class="tab-content" id="vert-tabs-tabContent">
+                                            <div class="tab-pane text-left fade" id="vert-tabs-1" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=1" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="ijasah" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-2" role="tabpanel">
+                                                <div class="col-md-12">
+                                                    <div class="row mb-2 containerFilter">
+                                                        <div class="col-sm-6 item item-left" style="width: 200px">
+                                                            <select id="customDokumen" class="form-control">
+                                                                <option value="-"> - Pilih Gambar/Pdf - </option>
+                                                                <option value="Gambar">Gambar</option>
+                                                                <option value="Pdf">Pdf</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-6 item text-right">
+                                                            <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=2" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                        </div>
+                                                    </div>
+                                                </div><br />
+                                                <img id="toefl" src="" class="gambar-styled"> <!--DONE-->
+                                                <object data="" type="application/pdf" id="toefl_dokumen" class="pdf-styled hidden">
+                                                Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object>
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-3" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=3" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="foto_rapot" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-4" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=4" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="keterangan_rangking" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-5" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=5" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="keterangan_prestasi" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-6" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=6" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="foto_slip_ortu" class="pdf-styled">
+                                                Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-7" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=7" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="rekomendasi" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object>
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-8" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=8" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="tidak_mampu" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object>
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-9" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=9" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="foto_kk" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-10" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=10" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+
+                                                <img id="foto_nilai_nus_1" src="" class="gambar-styled"> <!--DONE-->
+                                                @* <object data="" type="application/pdf" id="foto_nilai_nus_1" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE--> *@
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-11" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=11" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="foto_utbk" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object> <!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-12" role="tabpanel">
+                                                <img id="gambar" src="">
+                                            </div>
+                                            <!-- S2 aja -->
+                                            <div class="tab-pane text-left fade" id="vert-tabs-13" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=13" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="transkip_nilai" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object><!--DONE-->
+                                            </div>
+                                           @*  <div class="tab-pane text-left fade" id="vert-tabs-14" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=14" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <img id="gambar" src="">
+                                            </div> *@
+                                            <div class="tab-pane text-left fade" id="vert-tabs-15" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=15" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <img id="foto_diri" src="" class="gambar-styled"> <!--DONE-->
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-16" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=16" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <img id="ktp" src="" class="gambar-styled"> <!--DONE--> 
+                                            </div>
+
+                                            <!-- S2 aja -->
+                                            <div class="tab-pane text-left fade" id="vert-tabs-17" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=17" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <img id="gambar" src="">
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-18" role="tabpanel">
+                                                <div class="text-right">
+                                                    <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=18" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                </div><br />
+                                                <object data="" type="application/pdf" id="kip" class="pdf-styled">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object>
+                                            </div>
+                                            <div class="tab-pane text-left fade" id="vert-tabs-19" role="tabpanel">
+                                                <div class="row mb-2 containerFilter">
+                                                    <div class="col-sm-6 item item-left" style="width: 200px">
+                                                        <select id="customDokumen2" class="form-control">
+                                                            <option value="-"> - Pilih Gambar/Pdf - </option>
+                                                            <option value="Gambar">Gambar</option>
+                                                            <option value="Pdf">Pdf</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-6 item text-right">
+                                                        <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=19" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
+                                                    </div>
+                                                </div><br />
+                                                <img id="toefl_2" src="" class="gambar-styled"> <!--DONE-->
+                                                <object data="" type="application/pdf" id="toefl_dokumen_2" class="pdf-styled hidden">
+                                                    Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
+                                                </object>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><br/><br/>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card card-outline card-info">
+                                            <div class="card-header">
+                                                <div class="col-md-12">
+                                                    <div class="row mb-2 containerFilter">
+                                                        <div class="col-sm-11 item item-left">
+                                                            <span>
+                                                                Catatan Berupa Dokumen yang Tidak Lengkap
+                                                            </span>
+                                                        </div>
+                                                        <div class="col-sm-1 item item-right">
+                                                            <button class="btn btn-sm btn-success" id="btnTemplate"><i class="bi bi-clipboard"></i> Template</button>
+                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- /.card-header -->
+                                            <div class="card-body">
+                                                <textarea class="textarea" id="content" name="content"></textarea>
+                                                <button class="btn btn-sm btn-success" type="submit" style="margin-left: 5px;" id="btnSubmitBerkas"><i class="bi bi-send"></i> Kirim</button>
+                                            </div>
+                                            <div class="card-footer">
+                                                <i>Tulisan akan dikirim ke email calon</i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.col-->
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                        <!-- Riwayat -->
+                        <div class="tab-pane fade" id="tab7" aria-labelledby="tab7-tab">
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-5 col-sm-3">
+                                        <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                                          <a class="nav-link active" id="vert-tabs-1-tab" data-toggle="pill" href="#vert-tabs2-1" role="tab" aria-controls="vert-tabs-1" aria-selected="true">Pendidikan</a>
+                                          <a class="nav-link" id="vert-tabs-2-tab" data-toggle="pill" href="#vert-tabs2-2" role="tab" aria-controls="vert-tabs-2" aria-selected="false">Kursus</a>
+                                          <a class="nav-link" id="vert-tabs-3-tab" data-toggle="pill" href="#vert-tabs2-3" role="tab" aria-controls="vert-tabs-3" aria-selected="false">Pengalaman Tes</a>
+                                          <a class="nav-link" id="vert-tabs-4-tab" data-toggle="pill" href="#vert-tabs2-4" role="tab" aria-controls="vert-tabs-4" aria-selected="false">Penguasaaan Program</a>
+                                          <a class="nav-link" id="vert-tabs-5-tab" data-toggle="pill" href="#vert-tabs2-5" role="tab" aria-controls="vert-tabs-5" aria-selected="false">Pekerjaan</a>
+                                        </div>
+                                     </div>
+                                     <div class="col-7 col-sm-9">
+                                        <div class="tab-content" id="vert-tabs-tabContent">
+                                          <div class="tab-pane text-left fade show active" id="vert-tabs2-1" role="tabpanel" aria-labelledby="vert-tabs-1-tab">
+                                             <table id="TabelPendidikan" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                                <thead>
+                                                    <tr>
+                                                            @* <th style="width: 40px">Hapus</th> *@
+                                                            <th>Tingkat</th>
+                                                            <th>Lembaga Pendidikan</th>
+                                                            <th>Program Studi</th>
+                                                            <th>Tahun Lulus</th>
+                                                            @* <th style="width: 40px">Ubah</th> *@
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                          <div class="tab-pane fade" id="vert-tabs2-2" role="tabpanel" aria-labelledby="vert-tabs-2-tab">
+                                             <table id="TabelKursus" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                                <thead>
+                                                   <tr>
+                                                            @* <th style="width: 40px">Hapus</th> *@
+                                                     <th>Kursus</th>
+                                                     <th>Durasi</th>
+                                                     <th>Tahun</th>
+                                                     <th>Tempat</th>
+                                                            @* <th style="width: 40px">Ubah</th> *@
+                                                   </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                          <div class="tab-pane fade" id="vert-tabs2-3" role="tabpanel" aria-labelledby="vert-tabs-3-tab">
+                                             <table id="TabelKursus" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                                <thead>
+                                                   <tr>
+                                                            @* <th style="width: 40px">Hapus</th> *@
+                                                        <th>Jenis Test</th>
+                                                        <th>Score</th>
+                                                        <th>Keterangan</th>
+                                                            @* <th style="width: 40px">Ubah</th> *@
+                                                   </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                          <div class="tab-pane fade" id="vert-tabs2-4" role="tabpanel" aria-labelledby="vert-tabs-3-tab">
+                                             <table id="TabelProgram" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                                <thead>
+                                                    <tr>
+                                                            @* <th style="width: 40px">Hapus</th> *@
+                                                      <th>Program Komputer</th>
+                                                            @* <th style="width: 40px">Ubah</th> *@
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                          <div class="tab-pane fade" id="vert-tabs2-5" role="tabpanel" aria-labelledby="vert-tabs-5-tab">
+                                             <table id="TabelPekerjaan" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                                <thead>
+                                                    <tr>
+                                                            @* <th style="width: 40px">Hapus</th> *@
+                                                        <th>Instansi</th>
+                                                        <th>Masa Kerja</th>
+                                                        <th>Jabatan</th>
+                                                            @* <th style="width: 40px">Ubah</th> *@
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                             </table>
+                                          </div>
+                                        </div>
+                                      </div>
+                                </div><br />
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                        <!-- Jawaban -->
+                        <div class="tab-pane fade" id="tab8" aria-labelledby="tab8-tab">
+                            <!-- Konten Tab 2 -->
+                            @* <div class="text-right">
+                                <a href="TambahPrestasiCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Tambah Prestasi</a>
+                            </div *@>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <table id="TabelJawaban" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                    <thead>
+                                        <tr>
+                                            @* <th style="width: 40px">Hapus</th> *@
+                                            <th>Pertanyaan</th>
+                                            <th>Jawaban</th>
+                                            @* <th style="width: 40px">Ubah</th> *@
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
+                         <!-- Infomarsi -->
+                        <div class="tab-pane fade" id="tab9" aria-labelledby="tab9-tab">
+                            <!-- Konten Tab 1 -->
+                            @* <div class="text-right">
+                                <a href="UbahDataSMACalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Data SMA</a>
+                            </div> *@
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <span>Tujuan Kuliah di UAJY</span><br>
+                                        <span>Jurusan SMA</span><br>
+                                        <span>Propinsi</span><br>
+                                        <span>Kabupaten</span>
+                                    </div>
+                                   
+                                    <!-- /.col -->
+                                    <div class="col-sm-4">
+                                       <span id="data2_1"></span><br>
+                                       <span id="data2_2"></span><br>
+                                       <span id="data2_3"></span><br>
+                                       <span id="data2_4"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        $(document).ready(function () {
+            $('#myTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+
+            var id = $('#kdCalon').val();
+            var calonOnline = $('#idCalonOnline').val(); 
+            var namaCalon = $('#namaCalon').val(); 
+            var jalurCalon = $('#namaJalur').val();
+
+            var text = "-";
+            // Data Diri
+            $.ajax({
+                url: '@Url.Action("GetDataDiri", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.KD_CALON === null) {
+                        data.KD_CALON = text;
+                    }
+                    $('#data_1').text(data.KD_CALON);
+                    $('#dataS2_1').text(data.KD_CALON);
+
+                    if (data.nisn === null) {
+                        data.nisn = text;
+                    }
+                    $('#data_2').text(data.nisn);
+
+
+                    if (data.nama_jalur === null) {
+                        data.nama_jalur = text;
+                    }
+                    $('#data_3').text(data.nama_jalur);                         
+
+                    if (data.EMAIL === null) {
+                        data.EMAIL = text;
+                    }
+                    $('#data_4').text(data.EMAIL);
+                    $('#dataS2_2').text(data.EMAIL);
+
+                    if (data.periode === null) {
+                        data.periode = text;
+                    }
+                    $('#data_5').text(data.periode);
+
+                    if (data.NM_CALON === null) {
+                        data.NM_CALON = text;
+                    }
+                    $('#data_6').text(data.NM_CALON);
+                    $('#dataS2_3').text(data.NM_CALON);
+
+                     if (data.NIK === null) {
+                        data.NIK = text;
+                    }
+                    $('#data_7').text(data.NIK);
+                    $('#dataS2_4').text(data.NIK);
+
+                    if (data.NO_KK === null) {
+                        data.NO_KK = text;
+                    }
+                    $('#data_8').text(data.NO_KK);
+
+                    $('#dataS2_5').text(data.NO_KK);
+
+                    if (data.TMP_LAHIR === null) {
+                        data.TMP_LAHIR = text;
+                    }
+                    $('#data_9').text(data.TMP_LAHIR);
+                    $('#dataS2_6').text(data.TMP_LAHIR);
+
+                    if (data.TGL_LAHIR === null) {
+                        data.TGL_LAHIR = text;
+                    }
+                    $('#data_10').text(data.TGL_LAHIR);
+                    $('#dataS2_7').text(data.TGL_LAHIR);
+
+                    if (data.JNS_KEL === null) {
+                        data.JNS_KEL = text;
+                    }
+                    $('#data_11').text(data.JNS_KEL);
+                    $('#dataS2_8').text(data.JNS_KEL);
+
+                    if (data.AGAMA === null) {
+                        data.AGAMA = text;
+                    }
+                    $('#data_12').text(data.AGAMA);
+                    $('#dataS2_9').text(data.AGAMA);
+
+                    if (data.KWRGANEGARAAN === null) {
+                        data.KWRGANEGARAAN = text;
+                    }
+                    if (data.NEGARA === null || data.NEGARA === '') {
+                        data.NEGARA = "Indonesia";
+                    }
+                    $('#data_13').text(data.KWRGANEGARAAN + ", " + data.NEGARA);
+                    $('#dataS2_10').text(data.KWRGANEGARAAN+", "+ data.NEGARA);
+
+                    if (data.HP_PENDAFTAR === null) {
+                        data.HP_PENDAFTAR = text;
+                    }
+                    $('#data_14').text(data.HP_PENDAFTAR);
+                    $('#dataS2_11').text(data.HP_PENDAFTAR);
+
+                    if (data.NAMA_IBU === null) {
+                        data.NAMA_IBU = text;
+                    }
+                    $('#data_15').text(data.NAMA_IBU);
+                    $('#dataS2_12').text(data.NAMA_IBU);
+
+                    if (data.alamat === null) {
+                        data.alamat = text;
+                    }
+                    $('#data_16').text(data.alamat);
+                    $('#dataS2_13').text(data.alamat);
+
+                    if (data.kd_prop_asal !== null) {
+                        GetPropinsiName(data.kd_prop_asal, "#dataS2_13_a");
+                    }
+
+                    if (data.kota_asal !== null) {
+                        GetKabupatenName(data.kota_asal, "#dataS2_13_b");
+                    }
+
+                    $('#dataS2_13_c').text("Kode Pos: "+data.kode_pos);
+
+                    if (data.IS_KPS !== "1") {
+                        data.NO_KPS = text;
+                    }
+                    $('#data_17').text(data.NO_KPS);
+
+                    if (data.ukuran === null) {
+                        data.ukuran = text;
+                    }
+                    $('#data_18').text(data.ukuran);
+
+                    if (data.KEBUTUHAN_KHUSUS_MHS === null || data.KEBUTUHAN_KHUSUS_MHS === "") {
+                        data.KEBUTUHAN_KHUSUS_MHS = text;
+                    }
+                    $('#data_19').text(data.KEBUTUHAN_KHUSUS_MHS);
+                    $('#dataS2_15').text(data.KEBUTUHAN_KHUSUS_MHS);
+                    
+                    $('#dataS2_14').text(data.alamat_surat);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+
+            // Propinsi dan Kabupaten
+            function GetPropinsiName(id, idData) {
+                $.ajax({
+                    url: '@Url.Action("GetDetailProvinsi", "CalonMhs")?id=' + id,// Ganti dengan URL controller Anda
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                    console.log(data);
+                        $(idData).text("Propinsi: "+data.namA_PROP);
+                    },
+                    error: function () {
+                        console.error('Gagal mengambil data.');
+                    }
+                });
+            }
+
+            function GetKabupatenName(id, idData) {
+                $.ajax({
+                url: '@Url.Action("GetDetailKabupaten", "CalonMhs")?id=' + id,// Ganti dengan URL controller Anda
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                        $(idData).text("Kabupaten / Kota: " + data.namA_KABUPATEN);
+                    },
+                    error: function () {
+                        console.error('Gagal mengambil data.');
+                    }
+                });
+            }
+
+
+            // Data SMA
+            $.ajax({
+                url: '@Url.Action("GetDataSMA", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.NAMA_SMA === null) {
+                        data.NAMA_SMA = text;
+                    }
+                    $('#data2_1').text(data.NAMA_SMA);
+
+                    if (data.JUR_SMA_SMK === null) {
+                        data.JUR_SMA_SMK = text;
+                    }
+                    $('#data2_2').text(data.JUR_SMA_SMK);
+
+                    if (data.NAMA_PROP === null) {
+                        data.NAMA_PROP = text;
+                    }
+                    $('#data2_3').text(data.NAMA_PROP);
+
+                    if (data.NAMA_KABUPATEN === null) {
+                        data.NAMA_KABUPATEN = text;
+                    }
+                    $('#data2_4').text(data.NAMA_KABUPATEN);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetDataProdi", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    if (data.PILIHAN_1 === null) {
+                        data.NAMA_PIL_1 = text;
+                    }
+                    $('#data3_1').text(data.NAMA_PIL_1);
+
+                    if (data.PILIHAN_2 === null) {
+                        data.NAMA_PIL_2 = text;
+                    }
+                    $('#data3_2').text(data.NAMA_PIL_2);
+
+                    if (data.PILIHAN_3 === null) {
+                        data.NAMA_PIL_3 = text;
+                    }
+                    $('#data3_3').text(data.NAMA_PIL_3);
+
+                    $('#data3S2_1').text(data.NAMA_PIL_1);
+                     if (data.KONSENTRASI_STUDI === null) {
+                    data.KONSENTRASI_STUDI = text;
+                    }
+                    $('#data3S2_2').text(data.KONSENTRASI_STUDI);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+            var tablePrestasi = $('#TabelPrestasi').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                        return '<a data-id="' + data.id + '" data-name="' + data.jns_keg + '" data-calon="' + data.kd_calon + '" class="btn btn-sm btn-danger delete-button" > <i class="bi bi-trash"> </i> Hapus</a>';
+                        }
+                    },
+                    { "data": "deskripsi" },
+                    { "data": "jns_keg" },
+                    { "data": "tingkat" },
+                    { "data": "prestasi" },
+                    { "data": "tahun" },
+                    { "data": "ket_prestasi" },
+                    { "data": "kelompok" },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<a data-id="' + data.id + '" class="btn btn-sm btn-warning edit-button" > <i class="bi bi-pencil-fill"> </i> Ubah</a >';
+                        }
+                    },
+                ],
+                "lengthMenu": [50, 100, 150], // Opsi jumlah entri yang ditampilkan
+                "searching": true
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetPrestasiCalonMhs", "CalonMhs")?Kd_Calon='+id,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    tablePrestasi.rows.add(data).draw();
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            var tableReadUTBK = $('#TableReadUTBK').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    { 
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row.No;
+                        }
+                    },
+                    { "data": "KPU" },
+                    { "data": "KMBM" },
+                    { "data": "PPU" },
+                    { "data": "PK" },
+                ],
+                "lengthMenu": [4],
+                "searching": false
+            });
+
+            var tableReadSMT5 = $('#TableReadSMT5').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    { 
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row.No;
+                        }
+                    },
+                    { "data": "Kelas" },
+                    { "data": "semester" },
+                    { "data": "matematika" },
+                    { "data": "bhs_inggris" },
+                    { "data": "bahasa" },
+                    { "data": "rangking" },
+                ],
+                "lengthMenu": [4],
+                "searching": false
+            });
+            
+            $.ajax({
+                url: '@Url.Action("GetUTBKCalonMhs", "CalonMhs")?Kd_Calon='+id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                     for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                    }
+                    console.log(data);
+                    tableReadUTBK.rows.add(data).draw();
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetSMT5CalonMhs", "CalonMhs")?Kd_Calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                    }
+                    console.log(data);
+                    tableReadSMT5.rows.add(data).draw();
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetUpdateUTBKCalonMhs", "CalonMhs")?Kd_Calon='+id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                        $('#banyakUTBK').val(i+1);
+                    }
+                    console.log(data);
+                    updateNilaiUTBK(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+
+            $('#TabelPrestasi').on('click', '.delete-button', function () {
+                var itemId = $(this).data('id');
+                var itemName = $(this).data('name');
+                var itemCalon = $(this).data('calon');
+                // Lakukan sesuatu dengan itemId, misalnya, konfirmasi penghapusan
+                if (confirm('Anda yakin ingin menghapus ' + itemName + '?')) {
+
+                    var dataToSend = {
+                        id: itemId,
+                        kd_Calon: itemCalon,
+                    }
+
+                    console.log(JSON.stringify(dataToSend));
+                    $.ajax({
+                        url: '@Url.Action("DeletePrestasiCalonMhs", "CalonMhs")?id=' + itemId + '&Kd_Calon=' + itemCalon, // Ganti dengan URL sesuai dengan controller dan action Anda
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: null,
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success) {
+                                window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                            }
+                        },
+                        error: function (error) {
+                            console.error('Terjadi kesalahan:', error);
+                        }
+                    });
+                }
+            });
+
+            $('#TabelPrestasi').on('click', '.edit-button', function () {
+                var itemId = $(this).data('id'); 
+                var id = $('#kdCalon').val();
+                window.location.href = "@Url.Action("UbahPrestasiCalonMhs", "CalonMhs")?id=" + itemId + "&Kd_Calon=" + id;
+            });
+
+            $('#customDokumen2').on('change', function () {
+                var filterValue = $(this).val();
+                console.log(filterValue);
+                if (filterValue === '-' || filterValue === 'Gambar') {
+                    $('#toefl_2').removeClass("hidden");
+                    $('#toefl_dokumen_2').addClass("hidden");
+                } else {
+                    $('#toefl_dokumen_2').removeClass("hidden");
+                    $('#toefl_2').addClass("hidden");
+                }
+            });
+            $('#customDokumen').on('change', function () {
+            var filterValue = $(this).val();
+            console.log(filterValue);
+            if (filterValue === "-" || filterValue === "Gambar") {
+                $('#toefl').removeClass("hidden");
+                $('#toefl_dokumen').addClass("hidden");
+            } else {
+                $('#toefl_dokumen').removeClass("hidden");
+                $('#toefl').addClass("hidden");
+            }
+        });
+
+            $.ajax({
+                url: '@Url.Action("GetDokumenList", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    var tabs = $("#vert-tabs-tab");
+                    $.each(data, function (index, item) {
+
+                        var ref = item.id_ref_jenis_dokumen;
+                        var dokumen = item.jenis_dokumen;
+                        var link = $('<a>', {
+                            'class': 'nav-link',
+                            'id': 'vert-tabs-' + ref + '-tab',
+                            'data-toggle': 'pill',
+                            'href': '#vert-tabs-' + ref,
+                            'role': 'tab',
+                            'aria-controls': 'vert-tabs-' + ref,
+                            'aria-selected': 'false',
+                            'style': 'text-transform: uppercase;',
+                            'text': dokumen
+                        });
+
+                    tabs.append(link);
+                    });
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetDataDokumen", "CalonMhs")?id_calon_online=' + calonOnline,// Ganti dengan URL controller Anda
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+
+                    $("#ijasah").attr("data", "data:application/pdf;base64," + data.foto_ijasah);
+                    $("#toefl").attr("src", "data:image/jpeg;base64," + data.foto_toefl); $("#toefl_dokumen").attr("data", "data:application/pdf;base64," + data.foto_toefl);
+                    $("#foto_rapot").attr("data", "data:application/pdf;base64," + data.foto_nilai);
+                    $("#keterangan_rangking").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan);
+                    $("#keterangan_prestasi").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_prestasi);
+                    $("#foto_slip_ortu").attr("data", "data:application/pdf;base64," + data.foto_slip_gaji_ortu);
+                    $("#rekomendasi").attr("data", "data:application/pdf;base64," + data.foto_surat_rekomendasi);
+                    $("#tidak_mampu").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_tidak_mampu);
+                    $("#foto_kk").attr("data", "data:application/pdf;base64," + data.foto_kartu_keluarga);
+                    // 10 - Dokumen ijazah / UAS
+                    $("#foto_utbk").attr("data", "data:application/pdf;base64," + data.foto_utbk);
+                    // 12 - tulisan singkat
+                    // 13 - Transkip Nilai (dibawah untuk s2)
+                    $("#transkip_nilai").attr("data", "data:application/pdf;base64," + data.foto_nilai);
+                    // 14 - Akte Kelahiran
+                    $("#foto_diri").attr("src", "data:image/jpeg;base64," + data.foto);// $("#foto_diri").attr("data", "data:application/pdf;base64," + data.foto);
+                    $("#ktp").attr("src", "data:image/jpeg;base64," + data.foto_identitas);// $("#ktp").attr("data", "data:application/pdf;base64," + data.foto_identitas);
+                    // 17 - Dokumen penunjang lain : sertifikat, piagam
+                    $("#kip").attr("data", "data:application/pdf;base64," + data.foto_kip);
+                    $("#toefl_2").attr("src", "data:image/jpeg;base64," + data.foto_toefl); $("#toefl_dokumen_2").attr("data", "data:application/pdf;base64," + data.foto_toefl);
+
+                    // ("#foto_nilai_nus_1").attr("data", "data:application/pdf;base64," + data.foto_nilai_nus_1);
+                    $("#foto_nilai_nus_1").attr("src", "data:image/jpeg;base64," + data.foto_nilai_nus_1);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+
+            $('#content').summernote();
+                console.log(id);
+
+            $('#btnTemplate').click(function () {
+                var dataTemplate = '<p><span style="font-family: Arial; ">Kepada<br>Yth. Calon Mahasiswa '+namaCalon+'</span></p><p><span style="font-family: Arial; "><br></span><span style="font-family: Arial; background-color: var(--bs-card-bg); color: var(--bs-card-color); '+
+                    'font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">Dengan hormat,<br></span><span style="font-family: Arial; background-color: var(--bs-card-bg); text-align: var(--bs-body-text-align); '+
+                    'color: var(--bs-card-color); font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight);">Diberitahukan kepada calon mahasiswa ' + namaCalon + ' yang mengikuti program jalur masuk ' + jalurCalon + ' bahwa pihak yang bersangkutan memiliki kekurangan beberapa dokumen diantaranya;</span></p>' +
+                    '<ol><li><span style="background-color: var(--bs-card-bg); text-align: var(--bs-body-text-align);"><font face="Arial">SURAT A (Buram)</font></span></li></ol>' +
+                    '<p><font face="Arial">Mohon untuk segera melengkapi berkas dengan upload ke </font><a href="https://pmb.uajy.ac.id/." target="_blank">https://pmb.uajy.ac.id/.</a><font face="Arial"><br></font><span style="font-family: Arial; background-color: var(--bs-card-bg); '+
+                    'color: var(--bs-card-color); font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">Demikian surat pemberitahuan ini kami sampaikan.<br></span><span style="font-family: Arial; background-color: var(--bs-card-bg); '+
+                    'color: var(--bs-card-color); font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">Atas perhatian dan kerjasamanya kami ucapkan terimakasih.</span></p><p><span style="font-family: Arial; background-color: var(--bs-card-bg); '+
+                    'color: var(--bs-card-color); font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);"><br></span><span style="background-color: var(--bs-card-bg); color: var(--bs-card-color); font-family: Arial; font-size: var(--bs-body-font-size); '+
+                    'font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">Salam,</span></p><p><span style="background-color: var(--bs-card-bg); color: var(--bs-card-color); font-family: Arial; font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); '+
+                    'text-align: var(--bs-body-text-align);"><br></span><span style="background-color: var(--bs-card-bg); color: var(--bs-card-color); font-family: Arial; font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">' +
+                    'Kantor Admisi dan Akademik (KAA)<br></span><span style="background-color: var(--bs-card-bg); color: var(--bs-card-color); font-family: Arial; font-size: var(--bs-body-font-size); font-weight: var(--bs-body-font-weight); text-align: var(--bs-body-text-align);">Universitas Atma Jaya Yogyakarta</span></p>';
+                
+                $('#content').summernote('code', dataTemplate);
+            });
+
+            $('#btnSubmitBerkas').click(function () {
+                var content = $('#content').summernote('code');
+                var dataBerkasToSend = {
+                kd_calon: $('#kdCalon').val(),
+                    content: content
+                }
+                console.log(dataBerkasToSend);
+                $.ajax({
+                    url: '@Url.Action("SubmitNoteDokumen", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataBerkasToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
+
+            $('#submitNilaiUTBK').click(function () {
+                var temp = $('#banyakUTBK').val();
+                var dataToUpdate = [];
+
+                $('#TableUpdateUTBK tbody tr').each(function () {
+                    var row = $(this);
+                    var baris = row.index();
+                    var id = row.find('input[type="number"]').attr('id').replace("utbk_", "");
+                    var nilai = parseFloat(row.find('input[type="number"]').val());
+
+                    dataToUpdate.push({ Kd_calon: $('#kdCalon').val(), id_nilai_utbk: parseInt(id), id_ref_nilai_utbk: baris+1, nilai: nilai });
+                });
+                console.log(dataToUpdate);
+
+                $.ajax({
+                    url: '@Url.Action("UbahNilaiUTBK", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToUpdate),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
+            
+        });
+
+        function updateNilaiUTBK(data) {
+            var table = $('#TableUpdateUTBK'); // Ambil tabel di luar loop
+            $.each(data, function (index, item) {
+                var row = $("<tr>");
+
+                row.append($("<td>").text(item.No));
+                row.append($("<td>").text(item.jenis_nilai_utbk));
+                row.append($("<td>").text(item.deskripsi));
+
+                // Buat input elements
+                var dataUbah = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.nilai));
+
+                dataUbah.attr("id", "utbk_" + item.id_nilai_utbk);
+
+                // Tambahkan elemen-elemen ke dalam baris
+                row.append($("<td>").html(dataUbah));
+
+                // Tambahkan baris ke dalam tabel
+                table.append(row);
+            });
+        }
+
+
+        $(document).ready(function () {
+            $("#submitButton").click(function () {
+                var dataNilai = {
+                    kelas10: [],
+                    kelas11: []
+                };
+                for (var i = 1; i <= 2; i++) {
+                    dataNilai.kelas10.push({
+                        calonMhs: $("#kdCalon").val(),
+                        kelas: 1,
+                        semester: i,
+                        prestasi: parseInt($("#prestasi10_" + i).val()),
+                        kk_mm: parseFloat($("#kk_mm10_" + i).val()),
+                        mm: parseFloat($("#mm10_" + i).val()),
+                        kkm_bing: parseFloat($("#kkm_bing10_" + i).val()),
+                        bing: parseFloat($("#bing10_" + i).val()),
+                        kkm_id: parseFloat($("#kkm_id10_" + i).val()),
+                        id: parseFloat($("#id10_" + i).val()),
+                        rank: $("#rank10_" + i).val(),
+                    });
+
+                    dataNilai.kelas11.push({
+                        calonMhs: $("#kdCalon").val(),
+                        kelas: 2,
+                        semester: i,
+                        prestasi: parseInt($("#prestasi11_" + i).val()),
+                        kk_mm: parseFloat($("#kk_mm11_" + i).val()),
+                        mm: parseFloat($("#mm11_" + i).val()),
+                        kkm_bing: parseFloat($("#kkm_bing11_" + i).val()),
+                        bing: parseFloat($("#bing11_" + i).val()),
+                        kkm_id: parseFloat($("#kkm_id11_" + i).val()),
+                        id: parseFloat($("#id11_" + i).val()),
+                        rank: $("#rank11_" + i).val(),
+                    });
+                }
+
+                // Mengirim data ke controller menggunakan AJAX
+                $.ajax({
+                    url: '/CalonMhs/UbahNilaiCalonMhs', // Ganti dengan URL controller Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataNilai),
+                    success: function (result) {
+                        if (result.success){
+                            window.location.href = "CalonMhs/CalonMhs";
+
+                        }
+                    },
+                    error: function (error) {
+                        console.error(error);
+                    }
+                });
+            });
+        });
+    </script>
+

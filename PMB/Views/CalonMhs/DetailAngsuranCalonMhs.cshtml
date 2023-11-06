@@ -1,0 +1,156 @@
+﻿@using PMB.DAO;
+
+@{
+    ViewData["Title"] = "Data Angsuran Calon Mahasiswa";
+
+    var dao = new CalonMhsDAO();
+}
+@model PendaftarView
+
+@section Styles{
+    <style>
+        #TabelAngsuranMhs thead th {
+            white-space: nowrap;
+        }
+
+        #TabelAngsuranMhs tbody td {
+            white-space: nowrap;
+        }
+
+        .btn-back {
+            color: white;
+            background-color: indianred;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 5px #999;
+        }
+        
+        .btn-back:hover {
+            background-color: #9f5754;
+        }
+        
+        .btn-back:active {
+            background-color: #FF9966;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+
+        .btndel{
+            float: right;
+        }
+    </style>
+}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <!-- /.card-header-->
+                <div class="card-header">
+                    <h3 class="card-title">Detail Data Angsuran Calon Mahasiswa @Model.Pendaftar.Nm_Calon</h3>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-body">
+                    <div class="col-md-12">
+                        <a href="/CalonMhs/GenerateAngsuran?Kd_Calon=@Model.Pendaftar.Kd_Calon&&Nm_Calon=@Model.Pendaftar.Nm_Calon&&Masuk=@Model.Pendaftar.Masuk&&Periode=@Model.Pendaftar.Periode&&Kd_Jalur=@Model.Pendaftar.Kd_Jalur&&Thnakademik=@Model.Pendaftar.Thnakademik"
+                            class="btn btn-sm btn-success btntambah" id="btn-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Generate Angsuran @Model.Pendaftar.Nm_Calon </a>
+                        <form style="display:inline" asp-action="DeleteAngsuran" asp-controller="CalonMhs" method="post">
+                            <input type="hidden" name="Kd_Calon" value="@Model.Pendaftar.Kd_Calon" />
+                            <input type="hidden" name="Nm_Calon" value="@Model.Pendaftar.Nm_Calon" />
+                            <button class="btn btn-sm btn-danger btndel" onclick="return confirm('Apakah yakin ingin menghapus data angsuran mahasiswa @Model.Pendaftar.Kd_Calon?');"><i class="bi bi-trash"></i> Hapus Semua Angsuran</button>
+                        </form>
+                        <br /><br />
+                        <table id="TabelAngsuranMhs" class="table table-bordered table-striped display text-center" style="width: 100%;">
+                            <thead style="background-color: #284387; color: white;">
+                                <tr>
+                                    <th>Angsuran Ke</th>
+                                    <th>Nominal Angsuran</th>
+                                    <th>Batas Awal</th>
+                                    <th>Batas Akhir</th>
+                                    <th>Keterangan</th>
+                                    <th>Potongan</th>
+                                    <th>Harus Dibayarkan</th>
+                                    <th>Status</th>
+                                    <th>Jaminan</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-light">
+                                @foreach (var item in Model.AngsuranCalonMhs)
+                                {
+                                    <tr>
+                                        <td>@item.AngsuranKe</td>
+
+                                        @if (item.Jumlah != null){
+                                            string Jumlah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.Jumlah);
+                                            <td>@Jumlah</td>
+                                        }else{
+                                            <td>-</td>
+                                        }
+
+                                        <td>@item.Tgl_Buka</td>
+                                        <td>@item.Batas_Waktu</td>
+
+                                        @if (item.Ket_Angsuran == null)
+                                        {
+                                            <td>-</td>
+                                        }
+                                        else{
+                                            <td>@item.Ket_Angsuran</td>
+                                        }
+
+                                        @if (item.Potongan != null){
+                                            string Potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.Potongan);
+                                            <td>@Potongan</td>
+                                        }else{
+                                            <td>-</td>
+                                        }
+
+                                        @if (item.Jml_Uang != null)
+                                        {
+                                            string Jml_Uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.Jml_Uang);
+                                            <td>@Jml_Uang</td>
+                                        }else{
+                                            <td>-</td>
+                                        }
+
+                                        @if (item.Status == "Belum Lunas")
+                                        {
+                                            <td><span class="badge bg-danger">@item.Status</span></td>
+                                        }
+                                        else if (item.Status == "Lunas")
+                                        {
+                                            <td><span class="badge bg-success">@item.Status</span></td>
+                                        }
+
+                                        @if (item.Is_Jaminan == "Tidak")
+                                        {
+                                            <td><span class="badge bg-danger">@item.Is_Jaminan</span></td>
+                                        }
+                                        else if (item.Is_Jaminan == "Ya")
+                                        {
+                                            <td><span class="badge bg-success">@item.Is_Jaminan</span></td>
+                                        }
+                                    </tr>
+                                }
+                        </tbody>
+                    </table>
+
+                    <a href="/CalonMhs/CalonMhs" class="btn btn-sm btn-back">Kembali</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#TabelAngsuranMhs').DataTable({
+            //fixedHeader: {
+            //    header: true,
+            //},
+            //scrollX: true,
+            ordering: false,
+            dom: '<"top">rt<"bottom"ip><"clear">'
+        });
+    });
+</script>

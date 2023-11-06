@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Rumus Angsuran";
+}
+@model RmsAngsuranView
+
+<div class="row">
+    <div class="col-md-11">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-header">
+                <h3 class="card-title">Tambah Data Rumus Angsuran</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-6">
+                    <form asp-action="TambahRumus" asp-controller="RumusAngsuran" method="post">
+                        <div class="form-group">
+                            <label>ID Rumus Angsuran</label>
+                            <br />
+                            <div>
+                                <input class="form-control text-center" asp-for="RmsAngsuran.id_rumus" id="id_rumus"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Angsuran Ke</label>
+                            <br />
+                            <select class="form-select text-center" asp-for="RmsAngsuran.angsuran_ke" id="angsuranke" onchange="getData()">
+                                <option selected value="">-- Pilih Angsuran Ke Berapa --</option>
+                                    @for (var i = 1; i <= Model.jlh_angsuran; i++ )
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                            </select>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="RmsAngsuran.angsuran_ke"></span>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label>Persentase</label>
+                                <input class="form-control" asp-for="RmsAngsuran.prosentase"/>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="RmsAngsuran.prosentase"></span>
+                            </div>
+                            <div class="col-md-1" style="margin-top: 40px;">
+                                <i class="bi bi-percent"></i>
+                            </div>
+                            <div class="col-md-9">
+                                <label>Jenis Tagihan</label>
+                                <br />
+                                <select class="form-select text-center" asp-for="RmsAngsuran.id_tagihan">
+                                    <option selected value="">-- Pilih Jenis Tagihan --</option>
+                                    @foreach (var item in Model.TagihanList)
+                                    {
+                                        <option value="@item.id_tagihan">@item.nama_tagihan</option>
+                                    }
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px; margin-left:205px" asp-validation-for="RmsAngsuran.id_tagihan"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Batas Awal</label>
+                            <input type="date" class="form-control text-center" asp-for="RmsAngsuran.tgl_buka" id="tgl_buka"/>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="RmsAngsuran.tgl_buka"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Batas Akhir</label>
+                            <input type="date" class="form-control text-center" asp-for="RmsAngsuran.tgl_tutup" id="tgl_tutup"/>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="RmsAngsuran.tgl_tutup"></span>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="RmsAngsuran.is_jaminan" id="is_jaminan">
+                                <label class="form-check-label" asp-for="RmsAngsuran.is_jaminan">
+                                    Jaminan
+                                </label>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="submit" class="btn btn-sm btn-success">Simpan</button>
+                    </form>
+                    <a href="~/MstAngsuran/DetailMstAngsuran?id_rumus=@Model.RmsAngsuran.id_rumus" class="btn btn-sm btn-warning" style="margin-left: 80px; margin-top: -60px">Batal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        function getData(){
+            var id_rumus = $("#id_rumus").val();
+            var angsuran_ke = $("#angsuranke").val();
+            $.ajax({
+                type: "GET",
+                url: "/RumusAngsuran/CariJaminanTgl",
+                cache: false,
+                dataType: 'json',
+                data: {
+                    "id_rumus" : id_rumus, "angsuran_ke" : angsuran_ke
+                },
+                success: function (response) {
+                    console.log(response);
+                    if(response != null){
+                        $("#tgl_buka").val(response.tgl_buka);
+                        $("#tgl_tutup").val(response.tgl_tutup);
+                        if(response.is_jaminan == "True"){
+                            $("#is_jaminan").prop("checked", true);
+                        }
+                        else{
+                            $("#is_jaminan").prop("checked", false);
+                        }
+                    }
+                    else{
+                        $("#tgl_buka").val("");
+                        $("#tgl_tutup").val("");
+                        $("#is_jaminan").prop("checked", false);
+                    }
+                },
+                error: function (xhr) {
+                    alert("Telah terjadi kesalahan dengan kode : " + xhr.status + ", silakan menghubungi admin terkait.");
+                }
+            });
+        }
+    </script>
+}

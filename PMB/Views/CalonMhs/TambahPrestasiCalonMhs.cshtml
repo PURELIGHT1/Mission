@@ -1,0 +1,132 @@
+﻿@{
+    ViewData["Title"] = "Tambah Data Prestasi";
+}
+
+@model PendaftarView
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Form Tambah</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+
+                <form onsubmit="submitForm(event)">
+                    <div class="row">
+                        <div class="col-12 col-sm-12">
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" id="kdCalon" asp-for="StorePendaftar.Kd_Calon" />
+                                <input type="hidden" class="form-control" id="prestasi_id" asp-for="prestasi_id" />
+                                <label>Nama Kegiatan</label>
+                                <input class="form-control" id="data_1" />
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_1"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Peringkat</label>
+                                <input class="form-control" id="data_2" />
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_2"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select class="form-select" id="data_3">
+                                    <option value=""> - Pilih Kategori - </option>
+                                    @foreach (var item in Model.ListKategori)
+                                    {
+                                        <option value="@item.id_ref_prestasi">@item.deskripsi</option>
+                                    }
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_3"></span>
+                            </div>
+                             <div class="form-group">
+                                <label>Kepesertaan</label>
+                                <select class="form-select" id="data_4">
+                                    <option value=""> - Pilih Kepesertaan - </option>
+                                    <option value="Perorangan">Perorangan</option>
+                                    <option value="Kelompok">Kelompok</option>
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="data_4"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Tingkat</label>
+                                <select class="form-select" id="data_5">
+                                    <option value=""> - Pilih Tingkat - </option>
+                                    <option value="Lokal">Lokal</option>
+                                    <option value="Nasional">Nasional</option>
+                                    <option value="Internasional">Internasional</option>
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_5"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Tahun</label>
+                                <input type="number" class="form-control" id="data_6" />
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_6"></span>
+                            </div>
+                            <div class="form-row">
+                                <label>Keterangan Prestasi</label>
+                                <textarea id="data_7" class="form-control"></textarea>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data_7"></span>
+                            </div><br />
+                            <div class="text-center">
+                                <a href="/CalonMhs/DetailCalonMhs?Kd_Calon=@Model.StorePendaftar.Kd_Calon" style="margin-right: 5px;" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-short"></i> Kembali</a>
+                                <button type="submit" class="btn btn-sm btn-success" style="margin-left: 5px;"><i class="bi bi-save"></i> Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var kdCalon = $('#kdCalon').val();
+        var prestasi_id = $('#prestasi_id').val();
+        console.log(kdCalon); console.log(prestasi_id);
+    });
+
+    function ValidasiForm() {
+        var nama = $('#data_1').val();
+    }
+
+    function submitForm(event) {
+        event.preventDefault();
+        var prestasi_id = $('#prestasi_id').val();
+        var kd_calon = $('#kdCalon').val();
+
+        var dataToSend = {
+            id_prestasi: 0,
+            kd_calon: kd_calon,
+            jns_keg: $('#data_1').val(),
+            kelompok: $('#data_4').val(),
+            tingkat: $('#data_5').val(),
+            prestasi: $('#data_2').val(),
+            tahun: $('#data_6').val(),
+            ket_prestasi: $('#data_7').val(),
+            id_ref_prestasi: parseInt($('#data_3').val()),
+            deskripsi: "",
+            id: parseInt(prestasi_id)
+        }
+
+        console.log(dataToSend);
+        $.ajax({
+            url: '@Url.Action("saveDataPrestasi", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function (response) {
+                console.log(response);
+                if (response.success) {
+                    window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                }
+            },
+            error: function (error) {
+                console.error('Terjadi kesalahan:', error);
+            }
+        });
+    }
+</script>

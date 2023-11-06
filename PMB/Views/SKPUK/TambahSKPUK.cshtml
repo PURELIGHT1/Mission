@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Tambah SKPUK";
+}
+@model SKPUKView
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-header">
+                <h3 class="card-title">Tambah Data SKPUK</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-6">
+                    <form asp-action="TambahSKPUK" asp-controller="SKPUK" method="post">
+                        <div class="form-group">
+                            <label>Tahun Akademik</label>
+                            <input class="form-control" asp-for="SKPUK.thnakademik"/>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="SKPUK.thnakademik"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Program Studi</label>
+                            <br />
+                            <select class="form-select text-center" asp-for="SKPUK.id_prodi">
+                                <option selected style="text-align: center;" value="">-- Pilih Nama Program Studi --</option>
+                                @foreach (var item in Model.ProdiList)
+                                {
+                                    <option value="@item.id_prodi">@item.nama_prodi</option>
+                                }
+                            </select>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="SKPUK.id_prodi"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Tagihan</label>
+                            <br />
+                            <select class="form-select text-center" asp-for="SKPUK.id_tagihan">
+                                <option selected style="text-align: center;" value="">-- Pilih Jenis Tagihan --</option>
+                                @foreach (var item in Model.TagihanList)
+                                {
+                                    <option value="@item.id_tagihan">@item.nama_tagihan</option>
+                                }
+                            </select>
+                            <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" asp-validation-for="SKPUK.id_tagihan"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Nominal</label>
+                            <input class="form-control" asp-for="SKPUK.nominal" value="0" />
+                        </div>
+                        <br />
+                        <button type="submit" class="btn btn-sm btn-success" id="btnSubmit">Simpan</button>
+                    </form>
+                    <a href="SKPUK" class="btn btn-sm btn-warning" style="margin-left: 80px; margin-top: -60px">Batal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,109 @@
+﻿@{
+    ViewData["Title"] = "Ubah Dokumen";
+}
+@model UploadDokumen
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Form Ubah Dokumen</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <form asp-action="SubmitDokumen" asp-controller="CalonMhs" enctype="multipart/form-data" method="POST">
+                    <div class="form-group">
+                        <label for="exampleInputFile">File</label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="hidden" asp-for="id_ref_jenis_dokumen" />
+                                <input type="hidden" asp-for="kd_calon" />
+                                <input type="hidden" asp-for="id_calon_online" />
+                                    @if(Model.id_ref_jenis_dokumen == 15 || Model.id_ref_jenis_dokumen == 16)
+                                    {
+
+                                        <input type="file" class="custom-file-input" name="imageFile" accept=".jpg, .png, .jpeg, .heic" required onchange="checkFileSizeImage(this)">
+                                    }
+                                    else
+                                    {
+                                        <input type="file" class="custom-file-input" name="pdfFile" accept=".pdf" required onchange="checkFileSizePdf(this)">
+                                    }
+                                <label class="custom-file-label" for="inputFiles">Choose file</label>
+
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">Upload</button>
+                            </div>
+
+                        </div>
+                        <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="fileTypeError"></span>
+                        <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="fileSizeError"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        bsCustomFileInput.init();
+    });
+
+    function checkFileSizeImage(input) {
+        var maxSizeInBytes = 512000;
+
+        var file = input.files[0];
+        var allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        console.log(file);
+        if (file) {
+            if (!allowedTypes.includes(file.type)) {
+                document.getElementById("fileSizeError").innerText = "Tipe berkas tidak valid. Hanya berkas jpg, jpeg, dan png yang diperbolehkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("fileSizeError").innerText = "";
+            }
+
+            if (file.size > maxSizeInBytes) {
+                document.getElementById("fileSizeError").innerText = "Ukuran berkas terlalu besar. Maksimum 500Kb diizinkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("fileSizeError").innerText = "";
+            }
+        }
+    }
+
+    function checkFileSizePdf(input) {
+        var maxSizeInBytes = 512000;
+        var file = input.files[0];
+        var allowedTypes = ['application/pdf'];
+
+        if (file) {
+            if (!allowedTypes.includes(file.type)) {
+                document.getElementById("fileSizeError").innerText = "Tipe berkas tidak valid. Hanya berkas PDF yang diperbolehkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("fileSizeError").innerText = "";
+            }
+
+            if (file.size > maxSizeInBytes) {
+                document.getElementById("fileSizeError").innerText = "Ukuran berkas terlalu besar. Maksimum 500Kb diizinkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("fileSizeError").innerText = "";
+            }
+        }
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="/Assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+}

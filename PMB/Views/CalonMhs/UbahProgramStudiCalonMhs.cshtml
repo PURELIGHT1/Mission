@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Edit Data Program Studi";
+}
+
+@model StorePendaftar2
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Form Edit</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+
+                <form onsubmit="submitForm(event)">
+                    <div class="row">
+                        <div class="col-12 col-sm-12">
+                            <input type="hidden" class="form-control" id="kdCalon" asp-for="Kd_Calon">
+                            <div class="form-group">
+                                <label for="pil_1">Pilihan 1</label>
+                                <select id="pil_1" class="form-select">
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_pil_1"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="pil_2">Pilihan 2</label>
+                                <select id="pil_2" class="form-select">
+                                </select>
+                                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_pil_2"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="pil_3">Pilihan 3</label>
+                                <select id="pil_3" class="form-select">
+                                </select>
+                            </div>
+                            <div class="text-left">
+                                <a href="/CalonMhs/DetailCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-short"></i> Kembali</a>
+                                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-save"></i> Simpan</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var kdCalon = $('#kdCalon').val();
+        var text = "";
+
+        $.ajax({
+            url: '@Url.Action("GetDataProdi", "CalonMhs")?Kd_Calon=' + kdCalon,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+
+                if (data.PILIHAN_1 !== null || data.PILIHAN_1 !== "") {
+                    text = data.PILIHAN_1;
+                }
+
+                GetProdi('pil_1', text);
+                text = "";
+
+                if (data.PILIHAN_2 !== null || data.PILIHAN_2 !== "") {
+                    text = data.PILIHAN_2;
+                }
+                GetProdi('pil_2', text);
+                text = "";
+
+                if (data.PILIHAN_3 !== null || data.PILIHAN_3 !== "") {
+                    text = data.PILIHAN_3;
+                }
+                GetProdi('pil_3', text);
+                text = "";
+
+            },
+            error: function () {
+                console.error('Gagal mengambil data referensi.');
+            }
+        });
+    });
+
+    function GetProdi(pil, id) {
+        $.ajax({
+            url: '@Url.Action("GetProdiList", "CalonMhs")',// Ganti dengan URL controller Anda
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#" + pil);
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text(' - Pilih Program Studi - ');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_PRODI);
+                    option.text(item.JENJANG + " - " + item.NM_PRODI);
+                    // Menentukan opsi yang sudah terpilih (selected)
+                    if (item.ID_PRODI === id) {
+                        option.attr('selected', 'selected');
+                    }
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+    }
+
+    function submitForm(event) {
+        event.preventDefault();
+
+        var pil1 = $('#pil_1').val();
+        var pil2 = $('#pil_2').val();
+        var pil3 = $('#pil_3').val();
+        console.log(pil1); console.log(pil2); console.log(pil3);
+        
+        var validationMessage1 = $("#m_pil_1");
+        var validationMessage2 = $("#m_pil_2");
+
+        if (pil1 !== "" && pil2 !== "") {
+            if (pil1 === pil2 || pil1 === pil3 || pil2 === pil3) {
+                alert("Harap memilih prodi yang berbeda diantara ketiganya!");
+                return;
+            }
+        } else {
+            if (pil1 === "") {
+                validationMessage1.text("Pilihan 1 tidak boleh kosong.");
+                return;
+            } else {
+                validationMessage1.text("");
+            }
+
+            if (pil2 === "") {
+                validationMessage2.text("Pilihan 2 tidak boleh kosong.");
+                return;
+            } else {
+                validationMessage2.text("");
+            }
+        }
+
+            var dataToSend = {
+                Kd_calon: $('#kdCalon').val(),
+                pil_1: $('#pil_1').val(),
+                pil_2: $('#pil_2').val(),
+                pil_3: $('#pil_3').val()
+            }
+
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("saveDataProdi", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        
+    }
+
+</script>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+}

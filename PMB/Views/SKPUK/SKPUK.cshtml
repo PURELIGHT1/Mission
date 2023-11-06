@@ -1,0 +1,114 @@
+﻿@using System.Globalization
+@{
+    ViewData["Title"] = "Pengelolaan SKPUK";
+}
+@model SKPUKView
+
+@section Styles{
+    <style type="text/css">
+        .btntambah{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        #custom-search {
+            float: right;
+        }
+
+        th, td {
+            white-space:nowrap;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        @*Button untuk tambah data SKPUK*@
+        <a href="/SKPUK/TambahSKPUK" class="btn btn-sm btn-success btntambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah SKPUK</a>
+        
+        @*Pencarian berdasarkan kategori tertentu*@
+        <div class="row col-md-4" id="custom-search">
+            <div class="col-md-7">
+                <select id="search-column" class="form-select">
+                    <option selected>Kategori Pencarian</option>
+                    <option value="1">Prodi</option>
+                    <option value="2">Tahun Akademik</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input class="form-control" id="search-by-column" type="text" placeholder="Ketik di sini..."/>
+            </div>
+        </div>
+
+            @*Tabel data-data SKPUK*@
+            <table id="TabelSKPUK" class="table table-bordered table-striped display text-center" style="width:100%">
+                <thead style="background-color: #284387; color: white; white-space: nowrap;">
+                    <tr>
+                        <th>No</th>
+                        <th>Prodi</th>
+                        <th>Tahun Akademik</th>
+                        <th>Jenis Tagihan</th>
+                        <th>Nominal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                @foreach (var item in Model.SKPUKList)
+                {
+                    @*Convert data dari int menjadi string ke format rupiah (100000 -> 100.000)*@
+                    string nominal = String.Format(CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.nominal);
+
+                    <tr>
+                        <td>@item.id_skpu</td>
+                        <td style="text-align:left">@item.nama_prodi</td>
+                        <td>@item.thnakademik</td>
+                        <td>@item.nama_tagihan</td>
+                        <td>@nominal</td>
+                        <td>
+                            <div class="text-center">
+                                <a href="/SKPUK/UbahSKPUK?id_skpu=@item.id_skpu" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Ubah</a>
+                                <form style="display:inline" asp-action="DeleteSKPUK" asp-controller="SKPUK" method="post">
+                                    <input type="hidden" name="id_prodi" value="@item.id_prodi" />
+                                    <input type="hidden" name="thnakademik" value="@item.thnakademik" />
+                                    <input type="hidden" name="id_tagihan" value="@item.id_tagihan" />
+                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Apakah yakin ingin menghapus data SKPUK Prodi @item.nama_prodi pada tahun akademik @item.thnakademik dengan tagihan @item.nama_tagihan?');"><i class="bi bi-trash"></i> Hapus</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Pagination with custom search -> DataTables
+    $(document).ready(function () {
+        function searchByColumn(table) {
+            var defaultSearch;
+
+            $(document).on('change', '#search-column', function () {
+                defaultSearch = this.value;
+            });
+
+            $(document).on('change', '#search-by-column', function () {
+                table.search('').columns().search('').draw();
+                table.column(defaultSearch).search(this.value).draw();
+            });
+        }
+
+        var table = $('#TabelSKPUK').DataTable({
+            ordering: false,
+            //scrollX: true,
+            dom: '<"top">rt<"bottom"ip><"clear">'
+        });
+        searchByColumn(table);
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>

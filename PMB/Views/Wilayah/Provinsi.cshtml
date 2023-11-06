@@ -1,0 +1,343 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Data Provinsi";
+}
+
+@section Styles{
+    <style>
+        #TabelPropinsi thead th {
+            text-align: center;
+        }
+
+        #TabelPropinsi thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelPropinsi td {
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
+            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            margin-left: 15px;
+            margin-right: 5px;
+        }
+    </style>
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Data Provinsi</h3>
+            </div>
+            <div class="card-body">
+                <div class="customRow">
+                    <div style="display: flex;">
+                        <select id="customFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                            <option value="">Semua</option>
+                            <option value="true" selected>Aktif</option>
+                            <option value="false">Tidak Aktif</option>
+                        </select>
+                    </div>
+
+                    <div class="item-right">
+                        <a href="#" class="btn btn-sm btn-success" style="margin-right: 15px;" data-toggle="modal" data-target="#modal-default"><i class="bi bi-plus"></i> Tambah Provinsi</a>
+                    </div>
+                </div>
+
+                <div class="p-3 mb-3">
+                    <table id="TabelPropinsi" class="table table-responsive-lg table-bordered table-striped display compact">
+                        <thead>
+                            <tr>
+                                <th>Nama Provinsi</th>
+                                <th style="width: 20px;">Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Propinsi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Propinsi</label>
+                    <input class="form-control" id="propinsi" placeholder="Masukkan Nama Propinsi"/>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_propinsi"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Propinsi</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama Propinsi</label>
+                    <input type="hidden" id="kd_prop" />
+                    <input class="form-control" id="propinsiUbah" placeholder="Masukkan Nama Propinsi" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_propinsiUbah"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Ubah</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var nama = $("#propinsi").val();
+            var errorDiv = $("#m_propinsi");
+
+            if (nama === "") {
+                errorDiv.text("Nama Propinsi tidak boleh kosong");
+                return false;
+            } else {
+                errorDiv.text("");
+                return true;
+            }
+        }
+        function ValidateUbah() {
+            var nama = $("#propinsiUbah").val();
+            var errorDiv = $("#m_propinsiUbah");
+
+            if (nama === "") {
+                errorDiv.text("Nama Propinsi tidak boleh kosong");
+                return false;
+            } else {
+                errorDiv.text("");
+                return true;
+            }
+        }
+
+        var tabelPropinsi = $('#TabelPropinsi').DataTable({
+            "columns": [
+                { "data": "NAMA_PROP" },
+                {
+                    "data": "ISCURRENT",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = data;
+                            console.log(data);
+                            if (text) {
+                                return '<td style="text-align: center;"><span class="badge badge-sm badge-success"><i class="bi bi-check2-circle nonaktif-button" data-id="' + row.KD_PROP + '" data-nama="' + row.NAMA_PROP + '"  style="font-size: 2em;"></i></span></td>';
+                            }
+                            else {
+                                return '<td style="text-align: center;"><span class="badge badge-sm badge-danger"><i class="bi bi-slash-circle aktif-button" data-id="' + row.KD_PROP + '" data-nama="' + row.NAMA_PROP + '"  style="font-size: 2em;"></i></span></td>';
+                            }
+                        }
+                        return data;
+                    }
+                },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            if (row.ISCURRENT) {
+                                return '<div class="text-center">' +
+                                    '<a data-id="' + data.KD_PROP + '" class="btn btn-sm btn-info text-white detail-button mr-2 kab-button"> <i class="bi bi-info-circle-fill"></i> Detail Kabupaten</a >' +
+                                    '<a data-id="' + data.KD_PROP + '" data-nama="' + data.NAMA_PROP + '" class="btn btn-sm btn-warning edit-button mr-2" data-toggle="modal" data-target="#modal-ubah"> <i class="bi bi-pencil-fill"> </i> Ubah</a >' +
+                                    '</div>';
+                            } else {
+                                return '';
+                            }
+                        }
+                        return data;
+                    }
+                }
+            ],
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetPropinsi", "Wilayah")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                tabelPropinsi.rows.add(data).draw();
+                tabelPropinsi.columns(1).search('true').draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $('#customFilter').on('change', function () {
+            var filterValue = $(this).val();
+            if (filterValue === '') {
+                tabelPropinsi.columns().search('').draw();
+            } else {
+                tabelPropinsi.column(1).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+            }
+        });
+
+        $("#propinsi").on("input", ValidateInput);
+        $("#propinsiUbah").on("input", ValidateUbah);
+
+        $("#modalSimpan").on('click', function () {
+            var dataToSend = {
+                kd_prop: null,
+                nama_prop: $('#propinsi').val(),
+                status: 1
+            }
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("SavePropinsi", "Wilayah")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Provinsi", "Wilayah")';
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+        
+        $("#modalUbah").on('click', function () {
+            var dataToSend = {
+                kd_prop: $('#kd_prop').val(),
+                nama_prop: $('#propinsiUbah').val(),
+                status: 1
+            }
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("SavePropinsi", "Wilayah")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Provinsi", "Wilayah")';
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+        
+        $('#TabelPropinsi').on('click', '.edit-button', function () {
+            var kd_prop = $(this).data('id');
+            var nama_prop = $(this).data('nama');
+            var errorDiv = $("#m_propinsiUbah");
+            
+            $('#kd_prop').val(kd_prop);
+            $('#propinsiUbah').val(nama_prop);
+            errorDiv.text("");
+        });
+
+        $('#TabelPropinsi').on('click', '.kab-button', function () {
+            var kd_prop = $(this).data('id');
+
+            window.location.href = '@Url.Action("Kabupaten", "Wilayah")id?=' + kd_prop;
+        });
+        
+
+        $('#TabelPropinsi').on('click', '.nonaktif-button', function () {
+            var kd_prop = $(this).data('id');
+            var nama_prop = $(this).data('nama');
+
+            if (confirm('Anda yakin ingin menonaktifkan propinsi ' + nama_prop + ' ini?')) {
+                $.ajax({
+                    url: '@Url.Action("NonAktifPropinsi", "Wilayah")?id=' + kd_prop,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Provinsi", "Wilayah")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelPropinsi').on('click', '.aktif-button', function () {
+            var kd_prop = $(this).data('id');
+            var nama_prop = $(this).data('nama');
+
+            if (confirm('Anda yakin ingin mengaktifkan propinsi ' + nama_prop + ' ini?')) {
+                $.ajax({
+                    url: '@Url.Action("AktifPropinsi", "Wilayah")?id=' + kd_prop,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Provinsi", "Wilayah")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        ValidateInput();
+        ValidateUbah();
+    });
+</script>

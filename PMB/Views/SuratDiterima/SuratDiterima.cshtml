@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Surat Diterima";
+}
+@model SuratDiterimaView
+
+@section Styles{
+    <style>
+        .btntambah {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        #TabelRegis thead th {
+            white-space: nowrap;
+        }
+
+        #TabelRegis td {
+            white-space: nowrap;
+        }
+    </style>
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="/SuratDiterima/TambahJadwalRegis" class="btn btn-sm btn-success btntambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah Jadwal Registrasi</a> 
+        <table id="TabelRegis" class="table table-lg table-bordered table-striped display compact text-center" style="width: 100%;">
+            <thead style="background-color: #284387; color: white;">
+                <tr style="text-align: center;">
+                    <th>No Surat</th>
+                    <th>Jalur</th>
+                    <th>Periode Jalur</th>
+                    <th>Periode Perkuliahan</th>
+                    <th>Periode Registrasi</th>
+                    <th>Tanggal Registrasi</th>
+                    <th>Tanggal Inisiasi</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="table-light text-center">
+               @foreach (var item in Model.KetDiterimaList)
+               {
+                      <tr>
+                          <td>@item.No_Surat</td>
+                          <td>@item.Nama_Jalur</td>
+                          <td>@item.Periode</td>
+                          <td>@item.Perkuliahan</td>
+                          <td>@item.Periode_Regis</td>
+                          @if (item.Tgl_Regis == null){
+                              <td>-</td>
+                          }
+                          else {
+                              <td>@item.Tgl_Regis</td>
+                          }
+
+                          @if (item.Tgl_Inisiasi == null)
+                          {
+                              <td>-</td>
+                          }
+                          else
+                          {
+                            <td>@item.Tgl_Inisiasi</td>
+                          }
+                          <td>
+                              <div>
+                                  <a href="/SuratDiterima/UbahJadwalRegis?Kd_Jalur=@item.Kd_Jalur&Periode=@item.Periode" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Ubah</a>
+                                  <form style="display:inline" asp-action="DeleteJadwalRegis" asp-controller="SuratDiterima" method="post">
+                                      <input type="hidden" name="Kd_Jalur" value="@item.Kd_Jalur">
+                                      <input type="hidden" name="Periode" value="@item.Periode">
+                                      <button class="btn btn-sm btn-danger" onclick="return confirm('Apakah yakin ingin menghapus data jadwal registrasi jalur @item.Nama_Jalur periode @item.Periode?');"><i class="bi bi-trash"></i> Hapus</button>
+                                  </form>
+                              </div>
+                          </td>
+                      </tr>
+               }
+            </tbody>
+        </table>
+        <br /><br />
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#TabelRegis').DataTable({
+            pagingType: 'simple_numbers',
+            ordering: false,
+            scrollX: true,
+        });
+    });
+</script>

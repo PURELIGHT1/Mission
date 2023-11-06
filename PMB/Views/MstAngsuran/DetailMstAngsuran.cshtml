@@ -1,0 +1,497 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Detail Data Master Angsuran";
+}
+
+@section Styles{
+    <style>
+        #TabelRumus thead th {
+            white-space: nowrap;
+        }
+
+        #TabelRumus tbody td {
+            white-space: nowrap;
+        }
+
+        .btn-back {
+            color: white;
+            background-color:indianred;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 5px #999;
+        }
+
+        .btn-back:hover {
+            background-color: #9f5754;
+        }
+
+        .btn-back:active {
+            background-color: #FF9966;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+    </style>
+}
+@model RmsAngsuranView
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <!-- /.card-header-->
+            <div class="card-header">
+                <h3 class="card-title">Detail Data Rumus Angsuran</h3>
+                <input type="hidden" asp-for="RmsAngsuran.id_rumus" id="id_rumus" />
+                <input type="hidden" asp-for="RmsAngsuran.jlh_angsuran" id="jlh_tagihan" />
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-12">
+                    <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah Rumus Angsuran</a>
+                    <br /><br />
+                    <table id="TabelRumus" class="table table-responsive-lg table-bordered table-striped display text-center" style="width: 100%;">
+                        <thead style="background-color: #284387; color: white;">
+                            <tr>
+                                <th>No</th>
+                                <th>Angsuran Ke</th>
+                                <th>Jenis Tagihan</th>
+                                <th>Persentase</th>
+                                <th>Batas Awal</th>
+                                <th>Batas Akhir</th>
+                                <th>Keterangan</th>
+                                <th>Jaminan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-light">
+                            @*<div>
+                                            <a href="/RumusAngsuran/UbahRumus?id_detail=@item.id_detail" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> </a>
+                                            <form style="display:inline" asp-action="DeleteRmsAngsuran" asp-controller="RumusAngsuran" method="post">
+                                                <input type="hidden" name="id_detail" value="@item.id_detail" />
+                                                <input type="hidden" name="id_rumus" value="@item.id_rumus" />
+                                                <button class="btn btn-sm btn-danger" onclick="return confirm('Apakah yakin ingin menghapus data rumus @item.id_rumus dengan detail ke @item.id_detail?');"><i class="bi bi-trash"></i> </button>
+                                            </form>
+                                        *@
+                        </tbody>
+                    </table>
+
+                    <a href="/MstAngsuran/MstAngsuran" class="btn btn-sm btn-back">Kembali</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Rumus Angsuran</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="jnsTagihan">
+                        <option selected value="">-- Pilih Jenis Tagihan --</option>
+                        @foreach (var item in Model.TagihanList)
+                        {
+                            <option value="@item.id_tagihan">@item.nama_tagihan</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jnsTagihan"></span>
+                </div>
+                <div class="form-group">
+                    <label>Angsuran Ke</label>
+                    <select class="form-select text-center" id="angsuranke">
+                        <option selected value="">-- Pilih Angsuran Ke Berapa --</option>
+                        @for (var i = 1; i <= Model.RmsAngsuran.jlh_angsuran; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_angsuranke"></span>
+                </div>
+                <div class="form-group">
+                    <label>Persentase</label>
+                    <div class="input-group date" id="group" data-target-input="nearest">
+                        <input type="number" class="form-control" id="persentase" value="100" />
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-percentage"></i></div>
+                        </div>
+                    </div>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_persentase"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jadwal Angsuran</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control float-right" id="jadwal">
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <div class="form-group">
+                    <div class="icheck-success d-inline">
+                        <input type="checkbox" id="checkboxSuccess1">
+                        <label for="checkboxSuccess1">
+                            Jaminan
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Rumus Angsuran</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" class="form-control" id="id_detail"/>
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="u_jnsTagihan">
+                        <option selected value="">-- Pilih Jenis Tagihan --</option>
+                        @foreach (var item in Model.TagihanList)
+                        {
+                            <option value="@item.id_tagihan">@item.nama_tagihan</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_u_jnsTagihan"></span>
+                </div>
+                <div class="form-group">
+                    <label>Angsuran Ke</label>
+                    <select class="form-select text-center" id="u_angsuranke">
+                        <option selected value="">-- Pilih Angsuran Ke Berapa --</option>
+                        @for (var i = 1; i <= Model.RmsAngsuran.jlh_angsuran; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_u_angsuranke"></span>
+                </div>
+                <div class="form-group">
+                    <label>Persentase</label>
+                    <div class="input-group date" id="group" data-target-input="nearest">
+                        <input type="number" class="form-control" id="u_persentase" value="100"/>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><i class="fas fa-percentage"></i></div>
+                        </div>
+                    </div>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_u_persentase"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jadwal Angsuran</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control float-right" id="u_jadwal">
+                    </div>
+                    <!-- /.input group -->
+                </div>
+                <div class="form-group">
+                    <div class="icheck-success d-inline">
+                        <input type="checkbox" id="checkboxSuccess2">
+                        <label for="checkboxSuccess2">
+                            Jaminan
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var jnsTagihan = $("#jnsTagihan").val();
+            var error1 = $("#m_jnsTagihan");
+
+            var angsuran = $("#angsuranke").val();
+            var error2 = $("#m_angsuranke");
+
+            var persentase = $("#persentase").val();
+            var error3 = $("#m_persentase");
+
+            var isValid = true;
+
+            if (jnsTagihan === "") {
+                error1.text("Jenis Tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error1.text("");
+            }
+
+            if (angsuran === "") {
+                error2.text("Angsuran wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (persentase > 100 || persentase < 1) {
+                error3.text("Persentase wajib bernilai 1-100!"); isValid = false;
+            }  else {
+                error3.text("");
+            }
+            return isValid;
+        }
+
+        function ValidateUbah() {
+            var jnsTagihan = $("#u_jnsTagihan").val();
+            var error1 = $("#m_u_jnsTagihan");
+
+            var angsuran = $("#u_angsuranke").val();
+            var error2 = $("#m_u_angsuranke");
+
+            var persentase = $("#u_persentase").val();
+            var error3 = $("#m_u_persentase");
+
+            var isValid = true;
+
+            if (jnsTagihan === "") {
+                error1.text("Jenis Tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error1.text("");
+            }
+
+            if (angsuran === "") {
+                error2.text("Angsuran wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (persentase > 100 || persentase < 1) {
+                error3.text("Persentase wajib bernilai 1-100!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+            return isValid;
+        }
+        $("#jnsTagihan").on("input", ValidateInput);
+        $("#angsuranke").on("input", ValidateInput);
+        $("#persentase").on("input", ValidateInput);
+
+        $("#u_jnsTagihan").on("input", ValidateUbah);
+        $("#u_angsuranke").on("input", ValidateUbah);
+        $("#u_persentase").on("input", ValidateUbah);
+
+        $('#jadwal').daterangepicker();
+        var id = $('#id_rumus').val();
+
+        var table = $('#TabelRumus').DataTable({
+            // "data": data, // Menggunakan data yang diterima dari AJAX
+            "columns": [
+                { "data": "nomor" },
+                { "data": "angsuran_ke" },
+                { "data": "jenis_tagihan" },
+                { 
+                    "data": "jml_persentase",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = row.jml_persentase;
+                            return ' <td>' + text + '%</td>';
+                        }
+                        else {
+                            return data;
+                        }
+                    }
+                },
+                { "data": "tgl_buka" },
+                { "data": "tgl_tutup" },
+                { "data": "keterangan" },
+                {
+                    "data": "is_jaminan",
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            var text = row.is_jaminan;
+                            if (text == "Tidak") {
+                                return '<td><span class="badge bg-danger">' + text + '</span></td>';
+                            }
+                            else if (text == "Ya") {
+                                return '<td><span class="badge bg-success">' + text + '</span></td>';
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+                    }
+                },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        return '<div class="text-center">' +
+                            ' <a href="#" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-id="' + data.id_detail + '" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                            '<a data-rumus="' + data.id_rumus + '" data-id="' + data.id_detail + '" data-angsuran="' + data.angsuran_ke + '" data-jenis="' + data.jenis_tagihan + '" class="btn btn-sm btn-danger hapus-button mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
+                            '</div>';
+                    }
+                },
+            ],
+            "lengthMenu": [10, 20, 50],
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetRumusAngsuran", "RumusAngsuran")?id='+id,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data referensi.');
+            }
+        });
+
+        $("#modalSimpan").on('click', function () {
+            if (ValidateInput()) {
+                var jadwal = $('#jadwal').val();
+                var tgl = jadwal.split(" - ");
+
+                var dataToSend = {
+                    id_detail: 0,
+                    id_rumus: $('#id_rumus').val(),
+                    id_tagihan: $('#jnsTagihan').val(),
+                    angsuran_ke: $('#angsuranke').val(),
+                    jml_persentase: $('#persentase').val(),
+                    tgl_buka: tgl[0],
+                    tgl_tutup: tgl[1],
+                    jaminan: $('#checkboxSuccess1').get(0).checked
+
+                }
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveRumus", "RumusAngsuran")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailMstAngsuran", "MstAngsuran")?id_rumus=' + id;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelRumus').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+            console.log(id);
+            $('#id_detail').val(id);
+
+            $.ajax({
+                url: '@Url.Action("GetDataRumusAngsuran", "RumusAngsuran")?id='+id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    $('#u_jnsTagihan').val(data.ID_TAGIHAN);
+                    $('#u_angsuranke').val(data.ANGSURAN_KE);
+                    $('#u_persentase').val(data.JML_PERSENTASE);
+                    $('#u_jadwal').daterangepicker({ startDate: data.TGL_BUKA, endDate: data.TGL_TUTUP });
+
+                    if(data.IS_JAMINAN === "Ya"){
+                        $('#checkboxSuccess2').get(0).checked = true;
+                    }else {
+                        $('#checkboxSuccess2').get(0).checked = false;
+                    }
+                    ValidateUbah();
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+        });
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var jadwal = $('#u_jadwal').val();
+                var tgl = jadwal.split(" - ");
+
+                var dataToSend = {
+                    id_detail: $('#id_detail').val(),
+                    id_rumus: $('#id_rumus').val(),
+                    id_tagihan: $('#u_jnsTagihan').val(),
+                    angsuran_ke: $('#u_angsuranke').val(),
+                    jml_persentase: $('#u_persentase').val(),
+                    tgl_buka: tgl[0],
+                    tgl_tutup: tgl[1],
+                    jaminan: $('#checkboxSuccess2').get(0).checked
+
+                }
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveRumus", "RumusAngsuran")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailMstAngsuran", "MstAngsuran")?id_rumus=' + id;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        
+
+        $('#TabelRumus').on('click', '.hapus-button', function () {
+            var rumus = $(this).data('rumus');
+            var id = $(this).data('id');
+            var jenis = $(this).data('jenis');
+            var angsuran = $(this).data('angsuran');
+
+            if (confirm('Anda yakin ingin menghapus rumus angsuran dari tagihan ' + jenis + ' pada angsuran ke -' + angsuran + '?')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteRmsAngsuran", "RumusAngsuran")?id=' + id,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailMstAngsuran", "MstAngsuran")?id_rumus=' + rumus;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        ValidateInput();
+        ValidateUbah();
+    });
+</script>

@@ -1,0 +1,201 @@
+﻿@{ 
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous" />
+
+    <!-- Material Icon -->
+    <link href="/image/materialdesignicons.min.css"
+          rel="stylesheet" />
+    <link rel="stylesheet" href="/style.css" />
+
+    <!-- Animate on Scroll -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <link href="~/Assets/plugins/toastr/toastr.min.css" rel="stylesheet" />
+
+    <title>PMB UAJY | Login</title>
+</head>
+<body>
+    <p style="display:none;" class="lblpesan">@TempData["Message"]</p>
+    <div class="page-wrapper">
+        <!-- Card Wrapper -->
+        <div class="d-flex justify-content-center align-items-center card-wrapper">
+            <!-- Card Login -->
+            <div data-aos="zoom-out-up" class="login-card">
+                <div class="row login-card-row">
+                    <!-- Left Side Column -->
+                    <div class="col-md-7 col-xs-12 pt-2 px-4">
+                        <!-- Atma Jaya Icon -->
+                        <img data-aos="fade-right"
+                             data-aos-delay="200"
+                             src="/image/atma-logo.png"
+                             alt="Atma Icon"
+                             class="img-fluid login-atma-icon mx-auto d-flex" />
+
+                        <!-- Sistem Name-->
+                        <p data-aos="fade-right" data-aos-delay="300" class="text-title" style="margin-top:-25px; margin-bottom:20px">
+                            Penerimaan Mahasiswa Baru
+                            <br />
+                            Universitas Atma Jaya Yogyakarta
+                        </p>
+
+                        <!-- Description -->
+                        <p data-aos="fade-right"
+                           data-aos-delay="400"
+                           class="text-description"
+                           style="font-size:10pt">
+                            Aplikasi berbasis web ini digunakan untuk menunjang proses administrasi
+                            Penerimaan Mahasiswa Baru Universitas Atma Jaya Yogyakarta (PMB UAJY)
+                            di Universitas Atma Jaya Yogyakarta.
+                        </p>
+                        <hr />
+
+                        <!-- Link Helpdesk -->
+                        <p data-aos="fade-right"
+                           data-aos-delay="500"
+                           class="text-description pb-2">
+                            @*<i class="mdi mdi-book-open-variant"></i> Download Manual SIMKA
+                            <a href="">disini</a>*@
+                            <br />
+                            <i class="mdi mdi-phone mb-3"></i> KSI Helpdesk
+                            <a href="">disini</a>
+                        </p>
+
+                        <!-- Yellow Flower Icon -->
+                        <div class="wrapper-zero d-flex justify-content-end">
+                            <img data-aos="zoom-in-up"
+                                 data-aos-delay="800"
+                                 class="shape-yellow"
+                                 src="/image/decoration-yellow.png"
+                                 alt="decoration-yellow" />
+                        </div>
+                    </div>
+
+                    <!-- Right Side Column -->
+                    <div class="col-md-5 col-xs-12 login-right-content">
+                        <!-- Title Login -->
+                        <p data-aos="fade-left"
+                           data-aos-delay="200"
+                           class="login-card-text">
+                            Log in
+                        </p>
+                        <form asp-action="ActLogin" asp-controller="Account" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" value="@ViewBag.returnUrl" name="return_url" />
+                            <!-- Username Field -->
+                            <div data-aos="fade-left"
+                                 data-aos-delay="300"
+                                 class="input-group flex-nowrap mb-4 px-5">
+                                <span class="input-group-text" id="addon-wrapping">
+                                    <i class="mdi mdi-account" aria-hidden="true"> </i>
+                                </span>
+                                <input type="text"
+                                       id="txtusername"
+                                       class="form-control"
+                                       placeholder="Username"
+                                       name="username"
+                                       aria-label="Username"
+                                       aria-describedby="addon-wrapping" value="@TempData["username"]" />
+                            </div>
+
+                            @*<div data-aos="fade-left"
+                                     data-aos-delay="300"
+                                     class="input-group flex-nowrap mb-4 px-5 divrole" style="display: none;">
+                                    <select class="form-control selrole" name="fakultas">
+                                        @foreach (var item in Model)
+                                        {
+                                            <option value="@item.ID_FAKULTAS">Fakultas @item.FAKULTAS</option>
+                                        }
+                                    </select>
+                                </div>*@
+
+                            <!-- Password Field -->
+                            <div data-aos="fade-left"
+                                 data-aos-delay="400"
+                                 class="input-group flex-nowrap mb-4 px-5">
+                                <span class="input-group-text" id="addon-wrapping">
+                                    <i class="mdi mdi-key" aria-hidden="true"> </i>
+                                </span>
+                                <input type="password"
+                                       class="form-control"
+                                       placeholder="Password"
+                                       aria-label="Password"
+                                       name="password"
+                                       aria-describedby="addon-wrapping" />
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div data-aos="fade-left"
+                                 data-aos-delay="500"
+                                 class="input-group d-flex justify-content-center">
+                                <input type="submit"
+                                       class="btn btn-primary"
+                                       name="buttonLogin" />
+                            </div>
+                        </form>
+
+                        <!-- Motto -->
+                        <div class="mt-auto wrapper-motto">
+                            <p data-aos="zoom-in-up" data-aos-delay="900" class="motto">
+                                UNGGUL - INKLUSIF - HUMANIS - BERINTEGRITAS
+                            </p>
+                        </div>
+
+                        <div class="wrapper-two d-flex justify-content-end">
+                            <img class="shape-blue"
+                                 src="/image/decoration-blue-tip-2.png"
+                                 alt="decoration-blue-tip-2" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-login pt-2">
+            <p>
+                &copy; 2022 Kantor Sistem Informasi Universitas Atma Jaya Yogyakarta
+            </p>
+        </div>
+    </div>
+
+    <!-- Animate on Scroll Script -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true });
+    </script>
+    <script src="~/Assets/plugins/jquery/jquery.min.js"></script>
+    <script src="~/Assets/plugins/toastr/toastr.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            var texterr = $(".lblpesan").html();
+            if (texterr != "" && texterr != undefined) {
+                toastr.options.timeOut = 2000;
+                toastr.options.positionClass = "toast-top-center";
+                toastr.error(texterr);
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!-- Motto -->
+<!-- <p data-aos="fade-right" data-aos-delay="300" class="motto">
+  UNGGUL - INKLUSIF - HUMANIS - BERINTEGRITAS
+</p> -->
+<!-- max length on input
+oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+minlength="6"
+maxlength="6" -->

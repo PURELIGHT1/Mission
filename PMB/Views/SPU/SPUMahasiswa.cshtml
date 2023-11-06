@@ -1,0 +1,461 @@
+﻿@{
+    ViewData["Title"] = "SPU Mahasiswa";
+    var menu = User.Claims
+        .Where(c => c.Type == "menu")
+            .Select(c => c.Value).SingleOrDefault();
+}
+@model SPUMhsView
+
+@section Styles{
+    <style>
+        .btntambah{
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #TabelSPU thead th {
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTables_scroll {
+            max-width: 100%;
+        }
+
+        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
+        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .separator {
+            flex: 0 0 auto;
+            padding: 0 10px;
+            align-self: center;
+        }
+    </style>
+
+    <!--custom date picker-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.2/dist/flatpickr.min.css">
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah SPU</a>
+        <div class="table-container">
+            <table id="TabelSPU" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                <thead style="background-color: #284387; color: white;">
+                    <tr>
+                        <th>No</th>
+                        <th>Kode Calon</th>
+                        <th>Nama Calon</th>
+                        <th>Prodi diterima</th>
+                        <th>Jalur</th>
+                        <th>Periode</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+            </table>
+        </div>
+        <br /><br />
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah SPU Mahasiswa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" value="@User.Identity.Name" id="username"/>
+                    <label>Tanggal Cetak</label>
+                    <input type="text" id="tgl_cetak" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_cetak"></span>
+                </div>
+                <div class="form-group">
+                    <label>Kode Calon</label>
+                    <div class="flex-container">
+                        <input class="form-control" id="kodeAwal" type="number" placeholder="Kode Calon Paling Kecil" />
+                        <div class="separator">-</div>
+                        <input class="form-control" id="kodeAkhir" type="number" placeholder="Kode Calon Paling Tinggi" />
+                    </div>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_kode"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jalur</label>
+                    <select class="form-select text-center" id="jalur"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jalur"></span>
+                </div>
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <select class="form-select text-center" id="prodi"></select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah SPU Mahasiswa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" value="@User.Identity.Name" id="username" />
+                    <label>Tanggal Cetak</label>
+                    <input type="text" id="tgl_cetak_u" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_cetak_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Kode Calon</label>
+                    <input type="text" id="kode_u" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Jalur</label>
+                    <input type="text" id="jalur_u" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Prodi</label>
+                    <input type="text" id="prodi_u" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label>SPU</label>
+                    <input type="number" id="spu_u" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_spu_u"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var awal = $("#kodeAwal").val();
+            var akhir = $("#kodeAkhir").val();
+            var error1 = $("#m_kode");
+
+            var jalur = $("#jalur").val();
+            var error2 = $("#m_jalur");
+
+            var prodi = $("#prodi").val();
+            var error3 = $("#m_prodi");
+
+            var isValid = true;
+
+            if (awal === "" || akhir === "") {
+                error1.text("Kedua inputan untuk kode Calon harus berisi!"); isValid = false;
+            } 
+            else if (akhir <= awal) {
+                error1.text("Kode calon harus dari kecil ke besar!"); isValid = false;
+            }
+            else {
+                error1.text("");
+            }
+
+            if (jalur === "") {
+                error2.text("Jalur masuk wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (prodi === "") {
+                error3.text("Prodi wajib dipilih!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+            return isValid;
+        }
+
+
+        function ValidateUbah() {
+            var spu = $("#spu_u").val();
+            var error1 = $("#m_spu_u");
+
+            var isValid = true;
+
+            if (spu <= 0) {
+                error1.text("SPU harus lebih dari atau sama dengan 0!"); isValid = false;
+            }
+            else {
+                error1.text("");
+            }
+
+            return isValid;
+        }
+
+        $("#kodeAwal").on("input", ValidateInput);
+        $("#kodeAkhir").on("input", ValidateInput);
+        $("#jalur").on("change", ValidateInput);
+        $("#prodi").on("change", ValidateInput);
+
+        $("#spu_u").on("change", ValidateUbah);
+
+        var table = $('#TabelSPU').DataTable({
+            "columns": [
+                { "data": "No" },
+                { "data": "kd_calon" },
+                { "data": "nm_calon" },
+                { "data": "prodi_diterima" },
+                { "data": "nama_jalur" },
+                { "data": "periode" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            return '<div class="text-center">' +
+                                '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-warning mb-2 mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                // '<a data-id="' + data.id_dtl_potongan + '" data-jalur="' + data.nama_jalur + '" class="btn btn-sm btn-danger hapus-button mb-2 mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
+                                '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-primary cetak-button mb-2 mr-2 ml-2"> <i class="bi bi-file-earmark-pdf-fill"></i> Cetak</a >' +
+                                   '</div>';
+                        }
+                        return data;
+
+                    }
+                },
+            ],
+            "lengthMenu": [20, 50, 100],
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetSPUMahasiswa", "SPU")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].No = i + 1;
+                }
+                console.log(data);
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetProdiList", "CalonMhs")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var select = $("#prodi");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Prodi --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.ID_PRODI);
+                    option.text(item.JENJANG + " - " + item.NM_PRODI);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetJalurList", "SPU")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#jalur");
+                select.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Jalur Masuk --');
+                select.append(emptyOption);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.kd_jalur);
+                    option.text(item.nama_jalur);
+                    select.append(option);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $("#modalSimpan").on('click', function () {
+            if (ValidateInput()) {
+                var dataToSend = {
+                    tgl_cetak: $('#tgl_cetak').val(),
+                    kode_calon_awal: $("#kodeAwal").val(),
+                    kode_calon_akhir: $("#kodeAkhir").val(),
+                    kd_jalur: $("#jalur").val(),
+                    id_prodi: $("#prodi").val(),
+                    username: $("#username").val(),
+                    spu: 0
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveDataSPU", "SPU")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+
+        $('#TabelSPU').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+
+            $.ajax({
+                url: '@Url.Action("GetDetailSPUMahasiswa", "SPU")?kd_calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    $('#kode_u').val(data.kd_calon);
+                    $('#jalur_u').val(data.nama_jalur);
+                    $('#prodi_u').val(data.prodi_diterima);
+
+                    $('#spu_u').val(data.spu);
+                    var formattedDatetime = moment(data.tgl_cetak, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DD HH:mm');
+                    $('#tgl_cetak_u').val(formattedDatetime);
+
+                    flatpickr("#tgl_cetak_u", {
+                        enableTime: true,
+                        dateFormat: "Y-m-d H:i",
+                        defaultDate: formattedDatetime,
+                    });
+
+                    ValidateUbah();
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+        });
+
+        $('#TabelSPU').on('click', '.cetak-button', function () {
+            var id = $(this).data('id');
+
+            window.location.href = "@Url.Action("CetakSKPUK","SKPUK")?kd_calon=" + id;
+            // $.ajax({
+            //     url: '@Url.Action("CetakSKPUK", "SKPUK")?kd_calon=' + id,
+            //     method: 'GET',
+            //     dataType: 'json',
+            //     success: function (data) {
+            //         console.log(data);
+            //         $('#kode_u').val(data.kd_calon);
+            //         $('#jalur_u').val(data.nama_jalur);
+            //         $('#prodi_u').val(data.prodi_diterima);
+
+            //         $('#spu_u').val(data.spu);
+            //         var formattedDatetime = moment(data.tgl_cetak, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DD HH:mm');
+            //         $('#tgl_cetak_u').val(formattedDatetime);
+
+            //         flatpickr("#tgl_cetak_u", {
+            //             enableTime: true,
+            //             dateFormat: "Y-m-d H:i",
+            //             defaultDate: formattedDatetime,
+            //         });
+
+            //         ValidateUbah();
+            //     },
+            //     error: function () {
+            //         console.error('Gagal mengambil data.');
+            //     }
+            // });
+
+        });
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var dataToSend = {
+                    tgl_cetak: $('#tgl_cetak_u').val(),
+                    kode_calon_awal: $("#kode_u").val(),
+                    kode_calon_akhir: "ubah",
+                    kd_jalur: "",
+                    id_prodi: "",
+                    username: $("#username").val(),
+                    spu: $("#spu_u").val()
+                };
+
+                console.log(dataToSend);
+                $.ajax({
+                    url: '@Url.Action("SaveUbahSPU", "SPU")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+@section Scripts{
+    <!--Custom date time picker-->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.2/dist/flatpickr.min.js"></script>
+
+    <script>
+        flatpickr("#tgl_cetak", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+    </script>
+}

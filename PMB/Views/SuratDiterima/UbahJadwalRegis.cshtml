@@ -1,0 +1,88 @@
+﻿@using PMB.DAO;
+
+@{
+    ViewData["Title"] = "Pengelolaan Surat Diterima";
+
+    var mstAgsDAO = new MstAngsuranDAO();
+}
+@model SuratDiterimaView
+
+<div class="row">
+    <div class="col-md-11">
+        <div class="card">
+            <!-- /.card-header -->
+            <div class="card-header">
+                <h3 class="card-title">Ubah Data Surat Diterima</h3>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-body">
+                <div class="col-md-6">
+                    <form asp-action="UbahJadwalRegis" asp-controller="SuratDiterima" method="post">
+                        <div class="form-group">
+                            <label>Nomor Surat</label>
+                            <br />
+                            <div>
+                                <input class="form-control text-center" asp-for="KetDiterima.No_Surat" />
+                            </div>
+                            <span style="color:darkgray">Contoh Format : 002/Eks-KAA-UAJY/2022</span> <br />
+                        </div>
+                        <div class="form-group" style="margin-top: 5px">
+                            <label>Jalur</label>
+                            <br />
+                            <div class="row" style="width:100%">
+                                <input class="form-control text-center" style="width:60px; margin-left:10px; margin-right:9px" asp-for="KetDiterima.Kd_Jalur" readonly />
+                                <input class="form-control text-center" style="width:85%" asp-for="KetDiterima.Nama_Jalur" disabled />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Periode Jalur</label>
+                            <br />
+                            <div>
+                                <input class="form-control text-center" asp-for="KetDiterima.Periode" readonly/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Mulai Perkuliahan</label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Perkuliahan" />
+                            <span style="color:darkgray">Contoh Format : 22 Agustus 2022</span> <br />
+                        </div>
+                        <div class="form-group">
+                            <label>Periode Registrasi</label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Periode_Regis" />
+                            <span style="color:darkgray">Contoh Format : 30 Mei - 2 Juni 2022</span> <br />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                Tanggal Registrasi
+                                <p class="text-black" data-bs-toggle="tooltip" data-bs-placement="left" title="Ubah tanggalnya saja" style="display:inline">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                </p>
+                            </label>
+                            <input type="text" class="form-control text-center" asp-for="KetDiterima.Tgl_Regis" />
+                            <span style="color:darkgray">Contoh Format : 4 - 5 Agustus 2022</span> <br />
+                        </div>
+
+                        <br />
+                        <button type="submit" class="btn btn-sm btn-success">Simpan</button>
+                    </form>
+                    <a href="~/SuratDiterima/SuratDiterima" class="btn btn-sm btn-warning" style="margin-left: 80px; margin-top: -60px">Batal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+}
