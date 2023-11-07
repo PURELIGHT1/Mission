@@ -9,30 +9,13 @@
             float: right;
         }
 
-        #TabelCalonMhs thead th {
-            white-space: nowrap;
-            text-align: center;
-        }
-
-        #TabelCalonMhs td {
-            white-space: nowrap;
-        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        } 
 
         .hidden {
             display: none;
-        }
-
-        /* Mengatur lebar maksimum untuk tabel */
-        .dataTables_wrapper .dataTables_scroll {
-            max-width: 100%;
-        }
-
-        .dataTables_wrapper .dataTables_scrollHead th:nth-child(2),
-        .dataTables_wrapper .dataTables_scrollBody td:nth-child(2) {
-            max-width: 100px; /* Ganti dengan lebar maksimum yang Anda inginkan */
-            white-space: nowrap; /* Menjaga teks agar tidak terlalu panjang */
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .customRow {
@@ -55,15 +38,60 @@
             border-radius: 0 5px 5px 0;
         }
 
-        ./* excel-button {
-            margin-left: auto;
-            padding: 10px 20px;
-            background-color: green;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        } */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #custom-search {
+            float: right;
+        }
+
+        #TabelCalonMhs thead th {
+            text-align: center;
+        }
+
+        #TabelCalonMhs thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        .freeze-column {
+            width: fit-content; /* Adjust to fit your needs */
+            max-width: 100%;
+            overflow-x: auto;
+            border: 1px solid #777777;
+        }
+
+        .freeze-column table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            width: 100%; /* Optional: To remove spacing between cells */
+        }
+
+        .freeze-column td {
+            border-right: 1px solid #bbbbbb;
+            border-bottom: 1px solid #bbbbbb;
+            padding: inherit;
+            word-wrap: break-word;
+            text-align: center;
+        }
+
+        .freeze-column td:nth-child(1) {
+            position: sticky;
+            font-weight: normal;
+            z-index: 2;
+        }
+
+        .freeze-column td:nth-child(1) {
+            left: 0; /* Width of the first column */
+            width: 70px;
+            min-width: 70px;
+        }
+
+        .freeze-column td:nth-child(1){
+            background: #f5ac1d;
+        }
     </style>
 }
 
@@ -78,10 +106,19 @@
                         <option value="S2">Pasca Sarjana</option>
                     </select>
 
-                    <select id="customFilter2" class="form-select" style="width: 200px;">
+                    <select id="customFilter2" class="form-select" style="width: 200px; margin-right: 10px;">
+                    <option value="All" selected>Semua</option>
                         @foreach (var item in Model.AllTahunAkademik)
                         {
                             <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+
+                    <select id="customFilter3" class="form-select" style="width: 200px; margin-right: 10px;">
+                    <option value="All" selected>Semua</option>
+                    @foreach (var item in Model.JalurList)
+                        {
+                        <option value="@item.kd_jalur">@item.nama_jalur</option>
                         }
                     </select>
                 </div>
@@ -89,30 +126,43 @@
                 <div class="item-right">
                     <button class="btn btn-success" id="ExportExcelCalon"><i class="bi bi-file-excel"></i> Export Calon Mahasiswa</button>
 
-                        @* <a href="TambahPrestasiCalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-success"><i class="bi bi-plus"></i> Tambah Prestasi</a> *@
                 </div>
             </div>
+           @*  <div class="col-md-12">
+                <div class="form-group">
+                    <label>
+                        <input id="customFilter4" type="checkbox" class="column-toggle" data-column="3"> Kebutuhan Khusus</input>
+                    </label>
+                </div>
+            </div> *@
+       
 
         @*Tabel data-data Calon Mahasiswa*@
-            <table id="TabelCalonMhs" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+        <div class="table-container">
+        <table id="TabelCalonMhs" class="freeze-column">
                 <thead style="background-color: #284387; color: white;">
                     <tr>
                         <th>Kode Calon</th>
                         <th>Nama Calon</th>
-                        <th>Jenis Kelamin</th>
-                        <th>Tempat Lahir</th>
-                        <th>Tanggal Lahir</th>
-                        <th>Agama</th>
-                        <th>Program Studi</th>
-                        <th>Tahun Akademik</th>
+                        <th>Jalur Masuk</th>
+                        <th>Pilihan 1</th>
+                        <th>Pilihan 2</th>
+                        <th>Pilihan 3</th>
+                        <th>Prodi Diterima</th>
+                        <th>Disabilitas</th>
+                        <th>Nama SMA</th>
+                        <!--Hidden-->
                         <th>Jenjang</th>
-                        <th>Keterangan</th>
+                        <th>Tahun Akademik</th>
+                        <th>KD Jalur</th>
+                        <!--Hidden-->
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="table-light">
                 </tbody>
         </table>
+        </div>
         <br /><br />
     </div>
 </div>
@@ -122,45 +172,21 @@
         var table = $('#TabelCalonMhs').DataTable({
             // "data": data, // Menggunakan data yang diterima dari AJAX
             "columns": [
-                { "data": "kd_Calon" },
-                { "data": "nm_Calon" },
-                {
-                    "data": "jns_Kel",
+                { "data": "KD_CALON" },
+                { "data": "NM_CALON" },
+                { "data": "NAMA_JALUR" },
+                { "data": "PILIHAN_1" },
+                { "data": "PILIHAN_2" },
+                { "data": "PILIHAN_3" },
+                { 
+                    "data": "MASUK",
                     "render": function (data, type, row) {
                         if (type === 'display') {
-                            var text = row.jns_Kel;
-                            if (text == "P") {
-                                return '<td class="text-center"><span class="badge" style = "background-color: pink; color:black;" > <i class="bi bi-gender-female" > </i></span></td>';
+                            var text = row.MASUK;
+                            if (text == null) {
+                                return '<td><span class="badge bg-danger"> Tidak diterima </span></td >';
                             }
                             else {
-                                return '<td class="text-center"><span class="badge" style = "background-color: lightblue; color:black;" > <i class="bi bi-gender-male" > </i></span></td>';
-                            }
-                        }
-                        else {
-                            return data;
-                        }
-                    }
-                },
-                { "data": "tmp_Lahir" },
-                { "data": "tgl_Lahir" },
-                { "data": "agama" },
-                { "data": "nm_Prodi" },
-                { "data": "thnakademik" },
-                {
-                    "data": "jenjang"
-                },
-                {
-                    "data": "keterangan",
-                    "render": function (data, type, row) {
-                        if (type === 'display') {
-                            var text = row.keterangan;
-                            if (text == "Tidak diterima") {
-                                return '<td><span class="badge bg-danger">' + text + '</span></td >';
-                            }
-                            else if (text == "Diterima") {
-                                return '<td><span class="badge bg-success">' + text + '</span></td >';
-                            }
-                            else if (text == "Dalam proses") {
                                 return '<td><span class="badge bg-warning">' + text + '</span></td >';
                             }
                         }
@@ -170,23 +196,28 @@
                         }
                     }
                 },
+                { "data": "KEBUTUHAN_KHUSUS_MHS" },
+                { "data": "NAMA_SMA" },
+                { "data": "JENJANG" },
+                { "data": "THNAKADEMIK" },
+                { "data": "KD_JALUR" },
                 {
                     "data": null,
                     "render": function (data, type, row) {
-                        return '<div class="text-center mr-2 ml-2">' +
-                            '<a href="/CalonMhs/DetailAngsuranCalonMhs?Kd_Calon=' + data.kd_Calon + '" class="btn btn-sm btn-info text-white" > <i class="bi bi-info-circle-fill" > </i> Detail SKPUK</a >' +
-                            '<a href="/CalonMhs/DetailCalonMhs?Kd_Calon=' + data.kd_Calon + '" class="btn btn-sm btn-warning text-black" > <i class="bi bi-info-circle-fill" > </i> Detail Calon</a >' +
+                        return '<div class="text-center">' +
+                            '<a href="/CalonMhs/DetailAngsuranCalonMhs?Kd_Calon=' + data.KD_CALON + '" class="btn btn-sm btn-info text-white mr-2 mb-2" > <i class="bi bi-info-circle-fill" > </i> Detail SKPUK</a >' +
+                            '<a href="/CalonMhs/DetailCalonMhs?Kd_Calon=' + data.KD_CALON + '" class="btn btn-sm btn-warning text-black" > <i class="bi bi-info-circle-fill" > </i> Detail Calon</a >' +
                             '</div>';
                     }
                 },
             ],
             "columnDefs": [
                 {
-                    "targets": [8], // Indeks kolom yang ingin Anda sembunyikan
-                    "visible": false, // Menyembunyikan kolom
+                    "targets": [9,10,11],
+                    "visible": false,
                 }
             ],
-            "lengthMenu": [50, 100, 150], // Opsi jumlah entri yang ditampilkan
+            "lengthMenu": [50, 100, 150],
             "searching": true
         });
 
@@ -197,8 +228,10 @@
             success: function (data) {
                 console.log(data);
                 table.rows.add(data).draw();
-                table.column(7).search('2020/2021').draw();
-                table.column(8).search('S1').draw();
+                table.column(9).search('S1').draw();
+                table.column(10).search('').draw();
+                table.column(11).search('').draw();
+
             },
             error: function () {
                 console.error('Gagal mengambil data referensi.');
@@ -210,21 +243,49 @@
             if (filterValue === '') {
                 table.columns().search('').draw();
             } else {
-                table.column(8).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+                table.column(9).search(filterValue).draw();
             }
         });
 
         $('#customFilter2').on('change', function () {
             var filterValue = $(this).val();
-            if (filterValue === '') {
+            if (filterValue === 'All') {
                 table.columns().search('').draw();
             } else {
-                table.column(7).search(filterValue).draw(); // Misalnya, kolom 2 adalah kolom status
+                table.column(10).search(filterValue).draw(); 
             }
         });
 
+        $('#customFilter3').on('change', function () {
+            var filterValue = $(this).val();
+            if (filterValue === 'All') {
+                table.columns().search('').draw();
+            } else {
+                table.column(11).search(filterValue).draw();
+            }
+        });
+
+        // $('#customFilter4').on('change', function () {
+        //     var filterValue = $(this).get(0).checked;
+        //     console.log(filterValue);
+
+        //     var rows = table.rows().nodes();
+
+        //     rows.each(function (row) {
+        //         var cellValue = table.cell(row, 6).data();
+        //         var showRow = filterValue ? cellValue === '-' : cellValue !== '-';
+
+        //         if (showRow) {
+        //             $(row).removeClass('d-none');
+        //         } else {
+        //             $(row).addClass('d-none');
+        //         }
+        //     });
+        // });
+
+        
         $('#ExportExcelCalon').on('click', function () {
-            var ta = "2020/2021";
+            var ta = "2022/2023";
             var jenjang = "S1";
             var taFilter = $("#customFilter2").val()
             var jenjangFilter = $("#customFilter").val();

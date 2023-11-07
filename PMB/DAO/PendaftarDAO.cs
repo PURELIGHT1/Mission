@@ -249,5 +249,32 @@ namespace PMB.DAO
             }
         }
 
+        public List<dynamic> GetAllJalur()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT 
+                                        kd_jalur, 
+                                        nama_jalur
+                                    FROM ref_jalur 
+                                    WHERE kd_jalur != 0
+                                    ORDER BY nama_jalur ASC;";
+                    var data = conn.Query<dynamic>(query).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
     }
 }

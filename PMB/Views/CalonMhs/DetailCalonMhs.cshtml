@@ -58,6 +58,13 @@
             display: flex;
             justify-content: space-between; 
         }
+
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
     </style>
 }
 <div class="row">
@@ -582,27 +589,55 @@
                                                     <div class="col-sm-6 item item-left" style="width: 200px">
                                                         <select id="customDokumen2" class="form-control">
                                                             <option value="-"> - Pilih Gambar/Pdf - </option>
+                                                            <option value="Pdf" selected>Pdf</option>
                                                             <option value="Gambar">Gambar</option>
-                                                            <option value="Pdf">Pdf</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-sm-6 item text-right">
                                                         <a href="UbahDokumenCalonMhs?Kd_Calon=@Model.Kd_Calon&Id_dokumen=19" class="btn btn-sm btn-light"><i class="bi bi-upload"></i> Ubah Dokumen </a>
                                                     </div>
                                                 </div><br />
-                                                <img id="toefl_2" src="" class="gambar-styled"> <!--DONE-->
-                                                <object data="" type="application/pdf" id="toefl_dokumen_2" class="pdf-styled hidden">
+                                                <img id="toefl_2" src="" class="gambar-styled hidden"> <!--DONE-->
+                                                <object data="" type="application/pdf" id="toefl_dokumen_2" class="pdf-styled">
                                                     Browser Anda tidak mendukung penampilan dokumen PDF / Data Tidak ada
                                                 </object>
                                             </div>
                                         </div>
+                                        
                                     </div>
+                                    
                                 </div><br/><br/>
-                                <div class="row">
+                                <div class="row mt-2">
+                                    <span>
+                                        Status Berkas : <input type="hidden" id="berkas" value="@Model.berkas"/>
+                                        @if(Model.berkas == "Berkas Lengkap")
+                                        {
+                                            <button class="btn btn-sm btn-success" onclick="UbahVerifikasi()">@Model.berkas</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-danger" onclick="UbahVerifikasi()">@Model.berkas</button>
+                                        }
+                                    </span>
+                                </div>
+                                <div class="row mt-1">
                                     <div class="col-md-12">
                                         <div class="card card-outline card-info">
                                             <div class="card-header">
                                                 <div class="col-md-12">
+                                                    <div class="customRow">
+                                                        <div style="display: flex;">
+                                                            <span class="mr-2">
+                                                                Catatan Berupa Dokumen yang Tidak Lengkap
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="item-right">
+                                                            <button class="btn btn-sm btn-success" id="btnTemplate"><i class="bi bi-clipboard"></i> Template</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @* <div class="col-md-12">
                                                     <div class="row mb-2 containerFilter">
                                                         <div class="col-sm-11 item item-left">
                                                             <span>
@@ -610,15 +645,16 @@
                                                             </span>
                                                         </div>
                                                         <div class="col-sm-1 item item-right">
+                                                        <button class="btn btn-sm btn-primary"><i class="bi bi-clipboard"></i> Berkas</button>
                                                             <button class="btn btn-sm btn-success" id="btnTemplate"><i class="bi bi-clipboard"></i> Template</button>
-                                                         </div>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                </div> *@
                                             </div>
                                             <!-- /.card-header -->
                                             <div class="card-body">
                                                 <textarea class="textarea" id="content" name="content"></textarea>
-                                                <button class="btn btn-sm btn-success" type="submit" style="margin-left: 5px;" id="btnSubmitBerkas"><i class="bi bi-send"></i> Kirim</button>
+                                                <button class="btn btn-sm btn-success" type="submit" style="margin-left: 5px;" id="btnSubmitBerkas" @(Model.berkas == "Berkas Lengkap" ? "disabled":"")><i class="bi bi-send"></i> Kirim</button>
                                             </div>
                                             <div class="card-footer">
                                                 <i>Tulisan akan dikirim ke email calon</i>
@@ -796,12 +832,46 @@
 </div>
 
     <script>
+        function UbahVerifikasi(){
+            var id = document.getElementById("berkas").value;
+            var kd_calon = document.getElementById("kdCalon").value;
+            var text = "";
+            if(id === "Berkas Lengkap"){
+                id = 0;
+                text = "tidak lengkap";
+            }
+            else
+            {
+                id = 1;
+                text = "lengkap";
+            }
+            console.log(id); console.log(kd_calon);
+            
+            if (confirm('Anda yakin ingin mengubah berkas menjadi '+text+'?')) { 
+                $.ajax({
+                    url: '@Url.Action("UbahVerifikasiKelengkapan", "CalonMhs")?kd_calon='+kd_calon+'&id=' +id,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        }
+
         $(document).ready(function () {
             $('#myTabs a').on('click', function (e) {
                 e.preventDefault();
                 $(this).tab('show');
             });
-
             var id = $('#kdCalon').val();
             var calonOnline = $('#idCalonOnline').val(); 
             var namaCalon = $('#namaCalon').val(); 
@@ -810,7 +880,7 @@
             var text = "-";
             // Data Diri
             $.ajax({
-                url: '@Url.Action("GetDataDiri", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDataDiri", "CalonMhs")?Kd_Calon=' + id,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -949,12 +1019,12 @@
             // Propinsi dan Kabupaten
             function GetPropinsiName(id, idData) {
                 $.ajax({
-                    url: '@Url.Action("GetDetailProvinsi", "CalonMhs")?id=' + id,// Ganti dengan URL controller Anda
+                    url: '@Url.Action("GetDetailProvinsi", "CalonMhs")?id=' + id,
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
                     console.log(data);
-                        $(idData).text("Propinsi: "+data.namA_PROP);
+                    $(idData).text("Propinsi: " + data.NAMA_PROP);
                     },
                     error: function () {
                         console.error('Gagal mengambil data.');
@@ -964,7 +1034,7 @@
 
             function GetKabupatenName(id, idData) {
                 $.ajax({
-                url: '@Url.Action("GetDetailKabupaten", "CalonMhs")?id=' + id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDetailKabupaten", "CalonMhs")?id=' + id,
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
@@ -977,10 +1047,9 @@
                 });
             }
 
-
             // Data SMA
             $.ajax({
-                url: '@Url.Action("GetDataSMA", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDataSMA", "CalonMhs")?Kd_Calon=' + id,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -1010,7 +1079,7 @@
             });
 
             $.ajax({
-                url: '@Url.Action("GetDataProdi", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDataProdi", "CalonMhs")?Kd_Calon=' + id,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -1068,7 +1137,7 @@
             });
 
             $.ajax({
-                url: '@Url.Action("GetPrestasiCalonMhs", "CalonMhs")?Kd_Calon='+id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetPrestasiCalonMhs", "CalonMhs")?Kd_Calon='+id,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -1208,12 +1277,12 @@
             $('#customDokumen2').on('change', function () {
                 var filterValue = $(this).val();
                 console.log(filterValue);
-                if (filterValue === '-' || filterValue === 'Gambar') {
-                    $('#toefl_2').removeClass("hidden");
-                    $('#toefl_dokumen_2').addClass("hidden");
-                } else {
-                    $('#toefl_dokumen_2').removeClass("hidden");
+            if (filterValue === '-' || filterValue === 'Pdf') {
                     $('#toefl_2').addClass("hidden");
+                    $('#toefl_dokumen_2').removeClass("hidden");
+                } else {
+                    $('#toefl_dokumen_2').addClass("hidden");
+                $('#toefl_2').removeClass("hidden");
                 }
             });
             $('#customDokumen').on('change', function () {
@@ -1229,7 +1298,7 @@
         });
 
             $.ajax({
-                url: '@Url.Action("GetDokumenList", "CalonMhs")?Kd_Calon=' + id,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDokumenList", "CalonMhs")?Kd_Calon=' + id,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -1260,32 +1329,58 @@
             });
 
             $.ajax({
-                url: '@Url.Action("GetDataDokumen", "CalonMhs")?id_calon_online=' + calonOnline,// Ganti dengan URL controller Anda
+                url: '@Url.Action("GetDataDokumen", "CalonMhs")?id_calon_online=' + calonOnline,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     console.log(data);
-
-                    $("#ijasah").attr("data", "data:application/pdf;base64," + data.foto_ijasah);
-                    $("#toefl").attr("src", "data:image/jpeg;base64," + data.foto_toefl); $("#toefl_dokumen").attr("data", "data:application/pdf;base64," + data.foto_toefl);
-                    $("#foto_rapot").attr("data", "data:application/pdf;base64," + data.foto_nilai);
-                    $("#keterangan_rangking").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan);
-                    $("#keterangan_prestasi").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_prestasi);
-                    $("#foto_slip_ortu").attr("data", "data:application/pdf;base64," + data.foto_slip_gaji_ortu);
-                    $("#rekomendasi").attr("data", "data:application/pdf;base64," + data.foto_surat_rekomendasi);
-                    $("#tidak_mampu").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_tidak_mampu);
-                    $("#foto_kk").attr("data", "data:application/pdf;base64," + data.foto_kartu_keluarga);
+                    if(data.foto_ijasah != null){
+                        $("#ijasah").attr("data", "data:application/pdf;base64," + data.foto_ijasah);
+                    }
+                    $("#toefl").attr("src", "data:image/jpeg;base64," + data.foto_toefl); 
+                    if(data.foto_toefl != null){
+                        $("#toefl_dokumen").attr("data", "data:application/pdf;base64," + data.foto_toefl);
+                        $("#toefl_dokumen_2").attr("data", "data:application/pdf;base64," + data.foto_toefl);
+                    }
+                    if(data.foto_nilai != null){
+                        $("#foto_rapot").attr("data", "data:application/pdf;base64," + data.foto_nilai);
+                    }
+                    if(data.foto_surat_keterangan != null){
+                        $("#keterangan_rangking").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan);
+                    }
+                    if(data.foto_surat_keterangan_prestasi != null){
+                        $("#keterangan_prestasi").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_prestasi);
+                    }
+                    if(data.foto_slip_gaji_ortu != null){
+                        $("#foto_slip_ortu").attr("data", "data:application/pdf;base64," + data.foto_slip_gaji_ortu);
+                    }
+                    if(data.foto_surat_rekomendasi != null){
+                        $("#rekomendasi").attr("data", "data:application/pdf;base64," + data.foto_surat_rekomendasi);
+                    }
+                    if(data.foto_surat_keterangan_tidak_mampu != null){
+                        $("#tidak_mampu").attr("data", "data:application/pdf;base64," + data.foto_surat_keterangan_tidak_mampu);
+                    }
+                    if (data.foto_kartu_keluarga != null) {
+                        $("#foto_kk").attr("data", "data:application/pdf;base64," + data.foto_kartu_keluarga);
+                    }
                     // 10 - Dokumen ijazah / UAS
-                    $("#foto_utbk").attr("data", "data:application/pdf;base64," + data.foto_utbk);
+                    if (data.foto_utbk != null) {
+                        $("#foto_utbk").attr("data", "data:application/pdf;base64," + data.foto_utbk);
+                    }
                     // 12 - tulisan singkat
                     // 13 - Transkip Nilai (dibawah untuk s2)
-                    $("#transkip_nilai").attr("data", "data:application/pdf;base64," + data.foto_nilai);
+                    if (data.foto_nilai != null) {
+                        $("#transkip_nilai").attr("data", "data:application/pdf;base64," + data.foto_nilai);
+                    }
+                    
                     // 14 - Akte Kelahiran
                     $("#foto_diri").attr("src", "data:image/jpeg;base64," + data.foto);// $("#foto_diri").attr("data", "data:application/pdf;base64," + data.foto);
                     $("#ktp").attr("src", "data:image/jpeg;base64," + data.foto_identitas);// $("#ktp").attr("data", "data:application/pdf;base64," + data.foto_identitas);
                     // 17 - Dokumen penunjang lain : sertifikat, piagam
-                    $("#kip").attr("data", "data:application/pdf;base64," + data.foto_kip);
-                    $("#toefl_2").attr("src", "data:image/jpeg;base64," + data.foto_toefl); $("#toefl_dokumen_2").attr("data", "data:application/pdf;base64," + data.foto_toefl);
+                    if (data.foto_kip != null) {
+                        $("#kip").attr("data", "data:application/pdf;base64," + data.foto_kip);
+                    }
+                    $("#toefl_2").attr("src", "data:image/jpeg;base64," + data.foto_toefl);
 
                     // ("#foto_nilai_nus_1").attr("data", "data:application/pdf;base64," + data.foto_nilai_nus_1);
                     $("#foto_nilai_nus_1").attr("src", "data:image/jpeg;base64," + data.foto_nilai_nus_1);
@@ -1435,7 +1530,7 @@
 
                 // Mengirim data ke controller menggunakan AJAX
                 $.ajax({
-                    url: '/CalonMhs/UbahNilaiCalonMhs', // Ganti dengan URL controller Anda
+                    url: '/CalonMhs/UbahNilaiCalonMhs', 
                     type: 'POST',
                     dataType: 'json',
                     contentType: 'application/json',

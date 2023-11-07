@@ -59,5 +59,6 @@ namespace PMB.Models
         public List<dynamic> SMAList { get; set; }
         public List<Kategori> ListKategori { get; set; }
         public List<dynamic> ProdiList { get; set; }
+        public List<dynamic> JalurList { get; set; }
     }
 }

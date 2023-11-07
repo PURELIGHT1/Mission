@@ -21,7 +21,7 @@
             </div>
             <!-- /.card-body -->
             <div class="card-body">
-                <form onsubmit="submitForm(event)">
+                <form id="submitFormDiri">
                     <div class="row">
                         <div class="col-12 col-sm-6">
                             <div class="form-group">
@@ -33,14 +33,14 @@
                                 <label for="namaCalon">Nama Calon</label>
                                 <input type="text" class="form-control" id="data_2" placeholder="Masukkan Nama Calon">
                             </div>
-                            <div class="form-group">
+                            @* <div class="form-group">
                                 <label for="nik">NIK</label>
                                 <input type="number" class="form-control" id="data_3" placeholder="Masukkan Nik Calon">
                             </div>
                             <div class="form-group">
                                 <label for="noKK">No. KK</label>
                                 <input type="number" class="form-control" id="data_4">
-                            </div>
+                            </div> *@
                             <div class="form-group">
                                 <label for="tempatLahir">Tempat Lahir</label>
                                 <input type="text" class="form-control" id="data_5" placeholder="Masukkan Tempat Lahir Calon">
@@ -74,18 +74,18 @@
                             <div class="form-group">
                                 <label for="hp">HP</label>
                                 <input type="text" class="form-control" id="data_9" placeholder="Masukkan Nomor HP Calon">
+                            </div>
+                             <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="data2_1" placeholder="Masukkan Email Calon">
                             </div><br />
 
                             <div class="text-left">
-                                <a href="@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-short"></i> Kembali</a>
+                                <a href="javascript:window.history.back();" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-short"></i> Kembali</a>
                             </div>
                         </div>
 
                         <div class="col-12 col-sm-6">
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="data2_1" placeholder="Masukkan Email Calon">
-                            </div>
                             <div class="form-group">
                                 <label for="periode">Periode</label>
                                 <select id="data2_2" class="form-select">
@@ -105,11 +105,6 @@
                                     <option value="Tuna Wicara">Tuna Wicara</option>
                                     <option value="Tuna Daksa">Tuna Daksa</option>
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="namaCalon">Nama Ibu</label>
-                                <input type="hidden" class="form-control" id="ortu" asp-for="Id_Ortu">
-                                <input type="text" class="form-control" id="data2_4" placeholder="Masukkan Nama Ibu">
                             </div>
                             <div class="form-group">
                                 <label for="alamat">Alamat Asal</label>
@@ -137,6 +132,11 @@
                             <div class="form-group">
                                 <label for="pos">Kode Pos Asal</label>
                                 <input type="text" class="form-control" id="data2_9" placeholder="Masukkan Kode Pos Calon" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="namaCalon">Nama Ibu</label>
+                                <input type="hidden" class="form-control" id="ortu" asp-for="Id_Ortu">
+                                <input type="text" class="form-control" id="data2_4" placeholder="Masukkan Nama Ibu">
                             </div>
                             <div class="form-group">
                                 <label for="kps">KPS</label>
@@ -168,6 +168,7 @@
         var kabId = 0;
         GetPropJas();
         var text = "";
+
         $.ajax({
             url: '@Url.Action("GetDataDiri", "CalonMhs")?Kd_Calon=' + kdCalon,// Ganti dengan URL controller Anda
             method: 'GET',
@@ -267,6 +268,62 @@
                 $('#selectHidden').addClass("hidden");
             }
         });
+
+        $('#submitFormDiri').submit(function (event) {
+            event.preventDefault();
+            var dataToSend = {
+                Kd_Calon: $('#kdCalon').val(),
+                Id_ortu: $('#ortu').val(),
+                Nisn: $('#data_1').val(),
+                Nm_Calon: $('#data_2').val(),
+                // Nik: $('#data_3').val(),
+                // No_kk: $('#data_4').val(),
+                Tmp_Lahir: $('#data_5').val(),
+                Tgl_Lahir: $('#data_6').val(),
+                Jns_Kel: $('#data_10').val(),
+                Agama: $('#data_11').val(),
+                Kwrganegaraan: $('#data_7').val(),
+                Negara: $('#data_8').val(),
+                pendaftar: $('#data_9').val(),
+                Email: $('#data2_1').val(),
+                Periode: $('#data2_2').val(),
+                Kebutuhan_khusus_mhs: $('#data2_3').val(),
+                Nama_ibu: $('#data2_4').val(),
+                Alamat: $('#data2_5').val(),
+                Kota_asal: $('#data2_7').val(),
+                Kec_asal: $('#data2_8').val(),
+                Kode_pos: $('#data2_9').val(),
+                No_kps: $('#data2_10').val(),
+                Jas: $('#data2_11').val()
+            }
+
+            if (dataToSend.Nisn === "") {
+                $("#m_data_1").text("Nisn wajib diisi!");
+                // alert("Nisn wajib diisi!");
+                return;
+            } else {
+                $("#m_data_1").text("");
+            }
+
+            $.ajax({
+                url: '@Url.Action("SaveDataDiri", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    console.log(response);
+                    if (response.success) {
+                        window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        ValidateInput();
     });
 
     function GetPropJas() {
@@ -365,53 +422,7 @@
             }
         });
     }
-
-    function submitForm(event) {
-        event.preventDefault();
-
-        var dataToSend = {
-            Kd_Calon: $('#kdCalon').val(),
-            Id_ortu: $('#ortu').val(),
-            Nisn: $('#data_1').val(),
-            Nm_Calon: $('#data_2').val(),
-            Nik: $('#data_3').val(),
-            No_kk: $('#data_4').val(),
-            Tmp_Lahir: $('#data_5').val(),
-            Tgl_Lahir: $('#data_6').val(),
-            Jns_Kel: $('#data_10').val(),
-            Agama: $('#data_11').val(),
-            Kwrganegaraan: $('#data_7').val(),
-            Negara: $('#data_8').val(),
-            pendaftar: $('#data_9').val(),
-            Email: $('#data2_1').val(),
-            Periode: $('#data2_2').val(),
-            Kebutuhan_khusus_mhs: $('#data2_3').val(),
-            Nama_ibu: $('#data2_4').val(),
-            Alamat: $('#data2_5').val(),
-            Kota_asal: $('#data2_7').val(),
-            Kec_asal: $('#data2_8').val(),
-            Kode_pos: $('#data2_9').val(),
-            No_kps: $('#data2_10').val(),
-            Jas: $('#data2_11').val()
-        }
-
-        $.ajax({
-            url: '@Url.Action("SaveDataDiri", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
-            type: 'POST',
-            dataType: 'json', 
-            contentType: 'application/json',
-            data: JSON.stringify(dataToSend),
-            success: function (response) {
-                console.log(response);
-                if (response.success) {
-                    window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
-                }
-            },
-            error: function (error) {
-                console.error('Terjadi kesalahan:', error);
-            }
-        });
-    }
+    
 </script>
 @* @section Scripts {
     @{

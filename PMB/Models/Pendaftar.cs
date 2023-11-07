@@ -52,14 +52,15 @@ namespace PMB.Models
         public string email { get; set; }
         public string nama_jalur { get; set; }
         public int id_template_nilai { get; set; }
+        public string berkas { get; set; }
     }
 
     public class DataDiri
     {
         public string Kd_Calon { get; set; }
         public string Nm_Calon { get; set; }
-        public string Nik { get; set; }
-        public string No_kk { get; set; }
+        //public string Nik { get; set; }
+        //public string No_kk { get; set; }
         public string Tmp_Lahir { get; set; }
         public string Tgl_Lahir { get; set; }
         public string Jns_Kel { get; set; }

@@ -52,7 +52,7 @@ namespace PMB.DAO
             }
         }
 
-        public List<Pendaftar> GetAllFilterCalonMhs()
+        public List<dynamic> GetAllFilterCalonMhs()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
@@ -60,29 +60,32 @@ namespace PMB.DAO
                 {
                     string query = @"SELECT [KD_CALON]
                                           ,[NM_CALON]
-                                          ,[JNS_KEL]
-                                          ,[TMP_LAHIR]
-                                          ,FORMAT([TGL_LAHIR],'dd MMMM yyyy','id-id') AS [TGL_LAHIR]
-                                          ,[AGAMA]
-                                          ,[KWRGANEGARAAN]
-                                          ,[MASUK]
-                                          ,CASE 
-												WHEN PRD.[NM_PRODI] = '' THEN '-'
-												ELSE PRD.[NM_PRODI]
-										   END AS NM_PRODI
-                                          ,[THNAKADEMIK]
-										  ,[PERIODE]
-										  ,MHS.[KD_JALUR]
+										  ,JLR.[NAMA_JALUR]
+										  ,PRD_1.[NM_PRODI] as PILIHAN_1
+										  ,PRD_2.[NM_PRODI] as PILIHAN_2
+										  ,PRD_3.[NM_PRODI] as PILIHAN_3
+										  ,MSK.[NM_PRODI] as MASUK
 										  ,CASE
-												WHEN [MASUK] = '00' THEN 'Tidak diterima'
-												WHEN [MASUK] != '00' THEN 'Diterima'
-												ELSE 'Dalam proses'
-										   END AS KETERANGAN
-                                          ,[ID_ORTU]
-                                          ,JLR.[JENJANG]
+												WHEN [KEBUTUHAN_KHUSUS_MHS] is null THEN '-'
+												WHEN [KEBUTUHAN_KHUSUS_MHS] = '' THEN '-'
+												ELSE [KEBUTUHAN_KHUSUS_MHS]
+										   END AS [KEBUTUHAN_KHUSUS_MHS] 
+										  ,SMA.[NAMA_SMA]
+										  ,CASE
+												WHEN JLR.[JENJANG] = 's1' THEN 'S1'
+												WHEN JLR.[JENJANG] = 's2' THEN 'S2'
+                                                WHEN JLR.[JENJANG] = 's3' THEN 'S3'
+												ELSE '-'
+										   END AS JENJANG 
+										  ,[THNAKADEMIK]
+										  ,MHS.[KD_JALUR]
                                       FROM [dbo].[MHS_PENDAFTAR] MHS
-                                      LEFT OUTER JOIN [dbo].[REF_PRODI] PRD ON MHS.[MASUK] = PRD.[ID_PRODI]
-                                      LEFT OUTER JOIN [dbo].[REF_JALUR] JLR ON MHS.[KD_JALUR] = JLR.[KD_JALUR]";
+                                      LEFT OUTER JOIN [dbo].[REF_PRODI] PRD_1 ON MHS.[PILIHAN_1] = PRD_1.[ID_PRODI]
+									  LEFT OUTER JOIN [dbo].[REF_PRODI] PRD_2 ON MHS.[PILIHAN_2] = PRD_2.[ID_PRODI]
+									  LEFT OUTER JOIN [dbo].[REF_PRODI] PRD_3 ON MHS.[PILIHAN_3] = PRD_3.[ID_PRODI]
+									  LEFT OUTER JOIN [dbo].[REF_PRODI] MSK ON MHS.[MASUK] = MSK.[ID_PRODI]
+                                      LEFT OUTER JOIN [dbo].[REF_JALUR] JLR ON MHS.[KD_JALUR] = JLR.[KD_JALUR]
+									  LEFT OUTER JOIN [Mst_Referensi].[dbo].[REF_SMA] SMA ON MHS.[ID_SMA] = SMA.[ID_SMA]";
                                       //WHERE " ;
                     //if (String.IsNullOrEmpty(search))
                     //{
@@ -98,10 +101,10 @@ namespace PMB.DAO
                     //    query = query + @"([THNAKADEMIK] = @thnAkademik and [KD_CALON] LIKE '%" + HttpUtility.UrlEncode(search) + "%' OR " +
                     //       "[NM_CALON] LIKE '%" + HttpUtility.UrlEncode(search) + "%')";
                     //}
-                    query = query + @"ORDER BY CONVERT(INT, [KD_CALON]) ASC";
+                    query = query + @"ORDER BY CONVERT(INT, [KD_CALON]) DESC;";
 
                     //WHERE [KD_CALON] = '22334455'";
-                    var data = conn.Query<Pendaftar>(query).AsList();
+                    var data = conn.Query<dynamic>(query).AsList();
 
                     return data;
                 }
@@ -122,22 +125,40 @@ namespace PMB.DAO
             {
                 try
                 {
-                    string query = @"SELECT a.[KD_CALON]
-                                          ,a.[NM_CALON]
-                                          ,a.[PERIODE]
-                                          ,a.[EMAIL]
-                                          ,a.[HP_PENDAFTAR]
-	                                      ,CASE 
-												WHEN b.[NM_PRODI] = '' THEN '-'
-												ELSE b.[NM_PRODI]
-										   END AS NM_PRODI
-                                          ,a.[THNAKADEMIK]
-                                          ,c.[NAMA_JALUR]
-                                      FROM [dbo].[MHS_PENDAFTAR] a
-                                      LEFT OUTER JOIN [dbo].[REF_PRODI] b ON a.[MASUK] = b.[ID_PRODI]
-                                      LEFT OUTER JOIN [dbo].[REF_JALUR] c ON a.[KD_JALUR] = c.[KD_JALUR]
-                                      WHERE c.jenjang = @jenjang and a.thnakademik = @ta
-                                      ORDER BY CONVERT(INT, [KD_CALON]) ASC";
+                    string query = @"SELECT a.kd_calon
+                                           nm_calon,
+	                                       c.nama_jalur,
+	                                       b.alamat,
+	                                       no_kk,
+	                                       nik,
+	                                       gol_darah,
+	                                       agama,
+	                                       kwrganegaraan,
+	                                       tmp_lahir,
+	                                       FORMAT(tgl_lahir,'dd MMMM yyyy','id-id') as tgl_lahir,
+	                                       CASE 
+			                                    WHEN a.jns_kel = 'L' THEN 'Laki-laki'
+			                                    WHEN a.jns_kel = 'P' THEN 'Perempuan'
+			                                    ELSE a.jns_kel
+	                                       END jns_kel,
+	                                       hp_pendaftar,
+	                                       periode,
+	                                       thnakademik,
+                                           h.nama_sma,
+	                                       d.nm_prodi as pil_1,
+	                                       e.nm_prodi as pil_2,
+	                                       f.nm_prodi as pil_3,
+                                           g.nm_prodi as prodi_diterima
+                                    FROM [MHS_PENDAFTAR] a
+                                    LEFT OUTER JOIN dt_alamat_asal b ON a.kd_calon =  b.kd_calon
+                                    LEFT OUTER JOIN ref_jalur c ON a.kd_jalur = c.kd_jalur
+                                    LEFT OUTER JOIN ref_prodi d ON a.pilihan_1 = d.id_prodi
+                                    LEFT OUTER JOIN ref_prodi e ON a.pilihan_2 = e.id_prodi
+                                    LEFT OUTER JOIN ref_prodi f ON a.pilihan_3 = f.id_prodi
+                                    LEFT OUTER JOIN ref_prodi g ON a.masuk = g.id_prodi
+                                    LEFT OUTER JOIN Mst_Referensi.[dbo].ref_sma h ON a.id_sma = h.ID_SMA
+                                    WHERE c.jenjang = @jenjang and a.thnakademik = @ta
+                                    ORDER BY CONVERT(INT, a.kd_calon) ASC";
 
                     var data = conn.Query<dynamic>(query, new { jenjang = jenjang, ta = ta }).AsList();
 
@@ -377,7 +398,11 @@ namespace PMB.DAO
                                         b.JENJANG,
                                         a.EMAIL,
                                         b.nama_jalur,
-                                        b.id_template_nilai
+                                        b.id_template_nilai,
+										CASE 
+											WHEN a.is_lengkap_berkas = 1 THEN 'Berkas Lengkap'
+											ELSE 'Berkas Tidak Lengkap'
+										END berkas
                                     FROM MHS_PENDAFTAR a
                                     JOIN REF_JALUR b ON a.KD_JALUR = b.KD_JALUR
                                     WHERE a.KD_CALON = @Kd_Calon";
@@ -870,8 +895,6 @@ namespace PMB.DAO
                 {
                     string query = @"UPDATE MHS_PENDAFTAR SET
                                  [NM_CALON] = @Nm_Calon,
-                                 [NIK] = @Nik,
-                                 [NO_KK] = @No_kk,
                                  [TMP_LAHIR] = @Tmp_Lahir,
                                  [TGL_LAHIR] = @Tgl_Lahir,
                                  [JNS_KEL] = @Jns_Kel,
@@ -945,8 +968,6 @@ namespace PMB.DAO
                     {
                         Kd_Calon = ubah.Kd_Calon,
                         Nm_Calon = ubah.Nm_Calon,
-                        Nik = ubah.Nik,
-                        No_kk = ubah.No_kk,
                         Tmp_Lahir = ubah.Tmp_Lahir,
                         Tgl_Lahir = ubah.Tgl_Lahir,
                         Jns_Kel = ubah.Jns_Kel,
@@ -1142,6 +1163,36 @@ namespace PMB.DAO
                     {
                         Kd_Calon = verifikasi.kd_calon,
                         Berkas = verifikasi.content
+                    };
+
+                    var data = conn.Execute(query, param);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool VerifikasiKelengkapanBerkasCalonMhs(string id, int is_lengkap)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"UPDATE MHS_PENDAFTAR SET
+                                         is_lengkap_berkas = @is_lengkap 
+                                    WHERE [KD_CALON] = @kd_calon";
+
+                    var param = new
+                    {
+                        kd_calon = id,
+                        is_lengkap = is_lengkap
                     };
 
                     var data = conn.Execute(query, param);

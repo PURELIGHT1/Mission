@@ -26,13 +26,14 @@ namespace PMB.Controllers
 
             String tahun = DateTime.Now.Year + "/" + (DateTime.Now.Year + 1);
             pendaftar.AllTahunAkademik = pendaftar.getAllTahunAkademik();
+            pendaftar.JalurList = pendaftarDAO.GetAllJalur();
             return View(pendaftar);
         }
 
 
         public IActionResult GetAllCalonMhs()
         {
-            List<Pendaftar> data = null;
+            List<dynamic> data = null;
 
             data = dao.GetAllFilterCalonMhs();
 
@@ -41,7 +42,11 @@ namespace PMB.Controllers
 
         public IActionResult ExportExcelCalon(string ta, string jenjang)
         {
-            
+            if (ta.Equals("All"))
+            {
+                String tahun = DateTime.Now.Year + "/" + (DateTime.Now.Year + 1);
+                ta = tahun;
+            }
             List<dynamic> data = dao.GetAllExcelCalonMhs(ta, jenjang);
             try
             {
@@ -53,25 +58,49 @@ namespace PMB.Controllers
                     // Tambahkan header
                     worksheet.Cells["A1"].Value = "KD Calon";
                     worksheet.Cells["B1"].Value = "Nama Calon";
-                    worksheet.Cells["C1"].Value = "Tahun Akademik";
-                    worksheet.Cells["D1"].Value = "Jalur";
-                    worksheet.Cells["E1"].Value = "Prodi";
-                    worksheet.Cells["F1"].Value = "Email";
-                    worksheet.Cells["G1"].Value = "HP";
-                    worksheet.Cells["H1"].Value = "Periode";
+                    worksheet.Cells["C1"].Value = "Jalur";
+                    worksheet.Cells["D1"].Value = "Alamat Asal";
+                    worksheet.Cells["E1"].Value = "NO KK";
+                    worksheet.Cells["F1"].Value = "NIK";
+                    worksheet.Cells["G1"].Value = "Golongan Darah";
+                    worksheet.Cells["H1"].Value = "Agama";
+                    worksheet.Cells["I1"].Value = "Kewarganegaraan";
+                    worksheet.Cells["J1"].Value = "Tempat Lahir";
+                    worksheet.Cells["K1"].Value = "Tanggal Lahir";
+                    worksheet.Cells["L1"].Value = "Jenis Kelamin";
+                    worksheet.Cells["M1"].Value = "No Hp";
+                    worksheet.Cells["N1"].Value = "Periode";
+                    worksheet.Cells["O1"].Value = "Tahun Akademik";
+                    worksheet.Cells["P1"].Value = "Nama SMA";
+                    worksheet.Cells["Q1"].Value = "Pilihan 1";
+                    worksheet.Cells["R1"].Value = "Pilihan 2";
+                    worksheet.Cells["S1"].Value = "Pilihan 3";
+                    worksheet.Cells["T1"].Value = "Prodi Diterima";
 
                     // Isi data
                     var row = 2;
                     foreach (var item in data)
                     {
-                        worksheet.Cells[string.Format("A{0}", row)].Value = item.KD_CALON;
-                        worksheet.Cells[string.Format("B{0}", row)].Value = item.NM_CALON;
-                        worksheet.Cells[string.Format("C{0}", row)].Value = item.THNAKADEMIK;
-                        worksheet.Cells[string.Format("D{0}", row)].Value = item.NAMA_JALUR;
-                        worksheet.Cells[string.Format("E{0}", row)].Value = item.NM_PRODI;
-                        worksheet.Cells[string.Format("F{0}", row)].Value = item.EMAIL;
-                        worksheet.Cells[string.Format("G{0}", row)].Value = item.HP_PENDAFTAR;
-                        worksheet.Cells[string.Format("H{0}", row)].Value = item.PERIODE;
+                        worksheet.Cells[string.Format("A{0}", row)].Value = item.kd_calon;
+                        worksheet.Cells[string.Format("B{0}", row)].Value = item.nm_calon;
+                        worksheet.Cells[string.Format("C{0}", row)].Value = item.nama_jalur;
+                        worksheet.Cells[string.Format("D{0}", row)].Value = item.alamat;
+                        worksheet.Cells[string.Format("E{0}", row)].Value = item.no_kk;
+                        worksheet.Cells[string.Format("F{0}", row)].Value = item.nik;
+                        worksheet.Cells[string.Format("G{0}", row)].Value = item.gol_darah;
+                        worksheet.Cells[string.Format("H{0}", row)].Value = item.agama;
+                        worksheet.Cells[string.Format("I{0}", row)].Value = item.kwrganegaraan;
+                        worksheet.Cells[string.Format("J{0}", row)].Value = item.tmp_lahir;
+                        worksheet.Cells[string.Format("K{0}", row)].Value = item.tgl_lahir;
+                        worksheet.Cells[string.Format("L{0}", row)].Value = item.jns_kel;
+                        worksheet.Cells[string.Format("M{0}", row)].Value = item.hp_pendaftar;
+                        worksheet.Cells[string.Format("N{0}", row)].Value = item.periode;
+                        worksheet.Cells[string.Format("O{0}", row)].Value = item.thnakademik;
+                        worksheet.Cells[string.Format("P{0}", row)].Value = item.nama_sma;
+                        worksheet.Cells[string.Format("Q{0}", row)].Value = item.pil_1;
+                        worksheet.Cells[string.Format("R{0}", row)].Value = item.pil_2;
+                        worksheet.Cells[string.Format("S{0}", row)].Value = item.pil_3;
+                        worksheet.Cells[string.Format("T{0}", row)].Value = item.prodi_diterima;
                         row++;
                     }
 
@@ -249,16 +278,14 @@ namespace PMB.Controllers
         {
             try
             {
-                    if (dao.UbahCalonMhs(data))
-                    {
-                        TempData["success"] = "Berhasil mengubah data diri!";
-                    }
-                    else
-                    {
-                        TempData["error"] = "Gagal mengubah data diri!";
-                    }
-
-                //return Redirect($"~/CalonMhs/DetailCalonMhs?Kd_Calon={data.Kd_Calon}");
+                if (dao.UbahCalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah data diri!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah data diri!";
+                }
 
                 return Json(new { success = true, kd_calon = data.Kd_Calon });
             }
@@ -428,6 +455,27 @@ namespace PMB.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult UbahVerifikasiKelengkapan(string kd_calon, int id)
+        {
+            try
+            {
+                if (dao.VerifikasiKelengkapanBerkasCalonMhs(kd_calon, id))
+                {
+                    TempData["success"] = "Berhasil mengubah kelengkapan berkas calon!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah kelengkapan berkas calon!";
+                }
+                return Json(new { success = true, kd_calon = kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, kd_calon = ex.Message });
+            }
+        }
+        
         public IActionResult UbahDokumenCalonMhs(string Kd_Calon, int Id_dokumen)
         {
 

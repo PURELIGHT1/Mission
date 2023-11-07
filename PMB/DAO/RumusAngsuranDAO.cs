@@ -250,6 +250,60 @@ namespace PMB.DAO
             }
         }
 
+        public List<string> CekTagihanRumus(string rumus)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"select b.nama_tagihan  from detail_rumus_angsuran a join ref_tagihan b ON a.id_tagihan = b.id_tagihan where id_rumus  = @id_rumus";
+
+
+                    var param = new
+                    {
+                        id_rumus = rumus
+                    };
+
+                    var data = conn.Query<string>(query, param).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public string CekNamaTagihan(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT TOP(1) nama_tagihan
+                                      FROM ref_tagihan 
+                                      where id_tagihan = @id";
+
+                    var data = conn.QueryFirstOrDefault<string>(query, new { id = id });
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+        
         public bool UbahRmsAngsuran(RmsAngsuranView rumus)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))

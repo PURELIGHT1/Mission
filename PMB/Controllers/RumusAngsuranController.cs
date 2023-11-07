@@ -47,6 +47,8 @@ namespace PMB.Controllers
             try
             {
                 int total = 0;
+                string dataTagihan = "a";
+                string dataTagihanStore = "b";
                 List<int> presentasi = dao.CekTotalPresentasiRumus(data.id_rumus.ToString(), data.id_tagihan);
                 if(presentasi.Count() > 0)
                 {
@@ -67,9 +69,43 @@ namespace PMB.Controllers
                     total = total + data.jml_persentase;
                 }
 
-                if (total < 101)
+                List<string> tagihan = dao.CekTagihanRumus(data.id_rumus.ToString());
+
+                for(int  i = 0; i < tagihan.Count; i++)
+                {
+                    if (tagihan[i].Contains("SPU"))
+                    {
+                        dataTagihan = tagihan[i];
+                        break;
+                    }
+                }
+                dataTagihanStore = dao.CekNamaTagihan(data.id_tagihan);
+
+                if (total > 101)
                 {
 
+                    if (data.id_detail < 1)
+                    {
+                        TempData["error"] = "Gagal menambah data rumus angsuran, Total Persentase melebihi 100%!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Gagal mengubah data rumus angsuran, Total Persentase melebihi 100%!";
+                    }
+                }
+                else if(!dataTagihan.Equals(dataTagihanStore))
+                {
+                    if (data.id_detail < 1)
+                    {
+                        TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                    }
+                }
+                else
+                {
                     if (dao.SimpanRumus(data))
                     {
                         if (data.id_detail < 1)
@@ -91,17 +127,6 @@ namespace PMB.Controllers
                         {
                             TempData["error"] = "Gagal mengubah data rumus angsuran!";
                         }
-                    }
-                }
-                else
-                {
-                    if (data.id_detail < 1)
-                    {
-                        TempData["error"] = "Gagal menambah data rumus angsuran, Total Persentase melebihi 100%!";
-                    }
-                    else
-                    {
-                        TempData["error"] = "Gagal mengubah data rumus angsuran, Total Persentase melebihi 100%!";
                     }
                 }
 
