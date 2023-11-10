@@ -637,12 +637,12 @@ namespace PMB.DAO
                     string query = @"SELECT TOP(1)
                                       [id_prestasi],
                                       [kd_calon],
-                                      CASE WHEN [kelas] = '12' THEN 'XII' ELSE 'XII' END Kelas,
-                                      [semester],
+                                      CASE WHEN [kelas] = '12' THEN 'XII' ELSE 'XII' END kelas,
+                                      CASE WHEN [semester] = '1' THEN '1' ELSE '1' END semester,
                                       [matematika],
                                       [bhs_inggris],
                                       [bahasa],
-                                      CASE WHEN [rangking] = null THEN '0' ELSE '0' END rangking
+                                      CASE WHEN [rangking] is null THEN '0' ELSE rangking END rangking
                                   FROM dt_prestasi_pendidikan
                                   WHERE kd_calon = @kd_calon";
 
@@ -660,6 +660,77 @@ namespace PMB.DAO
                 }
             }
         }
+
+        public List<dynamic> GetNilaiNUS(string kd_calon)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT TOP(1)
+                                      [id_prestasi],
+                                      [kd_calon],
+                                      [matematika],
+                                      [bhs_inggris],
+                                      [bahasa]
+                                  FROM dt_prestasi_pendidikan
+                                  WHERE kd_calon = @kd_calon";
+
+                    var data = conn.Query<dynamic>(query, new { kd_calon = kd_calon }).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> GetNilaiRapot(string kd_calon)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT
+                                      [id_prestasi],
+                                      [kd_calon],
+									   CASE
+											WHEN [kelas] = '10' THEN 'X'
+											WHEN [kelas] = '11' THEN 'XI'
+											ELSE [kelas]
+									  END kelas,
+									  [semester],
+									  [kkm_matematika],
+                                      [matematika],
+									  [kkm_inggris],
+                                      [bhs_inggris],
+									  [kkm_indonesia],
+                                      [bahasa],
+									  [rangking]
+                                  FROM dt_prestasi_pendidikan
+                                  WHERE kd_calon = @kd_calon";
+
+                    var data = conn.Query<dynamic>(query, new { kd_calon = kd_calon }).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<Prestasi> GetListPrestasiCalonMhs(string Kd_calon)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
@@ -1423,9 +1494,131 @@ namespace PMB.DAO
                 }
             }
         }
-        public bool UbahNilaiCalonMhs(List<Nilai> ubah)
+
+        public bool UbahSMT5CalonMhs(List<SMT5> ubah)
         {
-            return false;
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+
+                    string query = @"UPDATE dt_prestasi_pendidikan SET
+                                        matematika = @mm,
+                                        bhs_inggris = @bing,
+                                        bahasa = @bindo,
+                                        rangking = @rank
+                                     WHERE kd_calon = @kd_calon";
+
+                    for (int i = 0; i < ubah.Count; i++)
+                    {
+                        var param = new
+                        {
+                            mm = ubah[i].mm,
+                            bing = ubah[i].bing,
+                            bindo = ubah[i].bindo,
+                            rank = ubah[i].rank,
+                            kd_calon = ubah[0].Kd_calon,
+                        };
+
+                        var data = conn.Execute(query, param);
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
         }
+
+        public bool UbahNUSCalonMhs(List<NUS> ubah)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+
+                    string query = @"UPDATE dt_prestasi_pendidikan SET
+                                        matematika = @mm,
+                                        bhs_inggris = @bing,
+                                        bahasa = @bindo
+                                     WHERE kd_calon = @kd_calon";
+
+                    for (int i = 0; i < ubah.Count; i++)
+                    {
+                        var param = new
+                        {
+                            mm = ubah[i].mm,
+                            bing = ubah[i].bing,
+                            bindo = ubah[i].bindo,
+                            kd_calon = ubah[0].Kd_calon,
+                        };
+
+                        var data = conn.Execute(query, param);
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool UbahRapotCalonMhs(List<Rapot> ubah)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+
+                    string query = @"UPDATE dt_prestasi_pendidikan SET
+                                        matematika = @mm,
+                                        bhs_inggris = @bing,
+                                        bahasa = @bindo,
+                                        kkm_matematika = @kkm_mm,
+                                        kkm_inggris = @kkm_bing,
+                                        kkm_indonesia = @kkm_bindo
+                                     WHERE id_prestasi = @id";
+
+                    for (int i = 0; i < ubah.Count; i++)
+                    {
+                        var param = new
+                        {
+                            mm = ubah[i].mm,
+                            bing = ubah[i].bing,
+                            bindo = ubah[i].bindo,
+                            kkm_mm = ubah[i].kkm_mm,
+                            kkm_bing = ubah[i].kkm_bing,
+                            kkm_bindo = ubah[i].kkm_bindo,
+                            id = ubah[i].id_prestasi,
+                        };
+
+                        var data = conn.Execute(query, param);
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+        
     }
 }

@@ -118,7 +118,7 @@
                     <option value="All" selected>Semua</option>
                     @foreach (var item in Model.JalurList)
                         {
-                        <option value="@item.kd_jalur">@item.nama_jalur</option>
+                        <option value="@item.nama_jalur">@item.nama_jalur</option>
                         }
                     </select>
                 </div>
@@ -230,7 +230,7 @@
                 table.rows.add(data).draw();
                 table.column(9).search('S1').draw();
                 table.column(10).search('').draw();
-                table.column(11).search('').draw();
+                table.column(2).search('').draw();
 
             },
             error: function () {
@@ -258,10 +258,11 @@
 
         $('#customFilter3').on('change', function () {
             var filterValue = $(this).val();
+            console.log(filterValue);
             if (filterValue === 'All') {
                 table.columns().search('').draw();
             } else {
-                table.column(11).search(filterValue).draw();
+                table.column(2).search(filterValue).draw();
             }
         });
 

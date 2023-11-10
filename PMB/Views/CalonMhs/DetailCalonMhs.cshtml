@@ -14,16 +14,16 @@
 
 @section Styles{
     <style>
-        #TabelPrestasi thead th {
+        .tabel-custom thead th {
             text-align: center;
         }
 
-        #TabelPrestasi thead {
+        .tabel-custom thead {
             background-color: #284387;
             color: white;
         }
 
-        #TabelPrestasi td {
+        .tabel-custom td {
             white-space: nowrap;
         }
 
@@ -65,6 +65,28 @@
             align-items: center;
             margin-bottom: 10px;
         }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .freeze-column td:nth-child(1) {
+            position: sticky;
+            font-weight: normal;
+            z-index: 2;
+        }
+
+        .freeze-column td:nth-child(1) {
+            left: 0; /* Width of the first column */
+            width: 40px;
+            min-width: 40px;
+        }
+
+        .freeze-column td:nth-child(1) {
+            background: #f5ac1d;
+        }
+
     </style>
 }
 <div class="row">
@@ -309,34 +331,122 @@
                          <!-- Nilai -->
                         <div class="tab-pane fade" id="tab4" aria-labelledby="tab4-tab">
                             <div class="p-3 mb-3">
-                                <div class="row">
                                 <!-- title row -->
-                                    @if(Model.id_template_nilai == 1){
-                                        <table id="TableReadRapot" class="table table-bordered table-striped">
+                                @if(Model.id_template_nilai == 1){
+                                    
+                                    <div class="table-container">
+                                        <div class="row">
+                                            <table id="TableReadRapot" class="table table-bordered table-striped tabel-custom">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No.</th>
+                                                        <th>Kelas</th>
+                                                        <th>Semester</th>
+                                                        <th>KKM Matematika</th>
+                                                        <th>Matematika</th>
+                                                        <th>KKM B.Inggris</th>
+                                                        <th>B.Inggris</th>
+                                                        <th>KKM B.Indonesia</th>
+                                                        <th>B.Indonesia</th>
+                                                        <th>Rangking</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="table-container">
+                                        <div class="row">
+                                            <p>Ubah Nilai</p>
+                                            <table id="TableUpdateRapot" style="margin-left: 10px;" class="table table-bordered table-striped tabel-custom">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 40px">No.</th>
+                                                        <th>Kelas</th>
+                                                        <th>Semester</th>
+                                                        <th>KKM Matematika</th>
+                                                        <th>Matematika</th>
+                                                        <th>KKM B.Inggris</th>
+                                                        <th>B.Inggris</th>
+                                                        <th>KKM B.Indonesia</th>
+                                                        <th>B.Indonesia</th>
+                                                        <th>Rangking</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                            <div class="text-left">
+                                                <button type="submit" class="btn btn-sm btn-success" id="submitNilaiRapot"><i class="bi bi-save"></i> Simpan</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if(Model.id_template_nilai == 2){
+                                    
+                                    <div class="row">
+                                        <table id="TableReadNUS" class="table table-bordered table-striped tabel-custom">
                                             <thead>
                                                 <tr>
                                                     <th>No.</th>
-                                                    <th>Kelas</th>
-                                                    <th>Semester</th>
-                                                    <th>KKM Matematika</th>
-                                                    <th>Matematika (Pengetahuan)</th>
-                                                    <th>KKM B.Inggris</th>
-                                                    <th>B.Inggris (Pengetahuan)</th>
-                                                    <th>KKM B.Indonesia</th>
-                                                    <th>B.Indonesia (Pengetahuan)</th>
-                                                    <th>Rangking</th>
+                                                    <th>Matematika</th>
+                                                    <th>B.Inggris</th>
+                                                    <th>B.Indonesia</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                             </tbody>
                                         </table>
-                                    }
-
-                                    @if(Model.id_template_nilai == 3){
-                                        <table id="TableReadSMT5" class="table table-bordered table-striped">
+                                    </div><br />
+                                    <div class="row">
+                                        <p>Ubah Nilai</p>
+                                        <table id="TableUpdateNUS" class="table table-bordered table-striped display compact tabel-custom">
                                             <thead>
                                                 <tr>
-                                                    <th>No.</th>
+                                                    <th style="width: 40px">No.</th>
+                                                    <th>Matematika</th>
+                                                    <th>B.Inggris</th>
+                                                    <th>B.Indonesia</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                        <div class="text-left">
+                                            <button type="submit" class="btn btn-sm btn-success" id="submitNilaiNUS"><i class="bi bi-save"></i> Simpan</button>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if(Model.id_template_nilai == 3){
+                                    <div class="table-container">
+                                        <div class="row">
+                                            <table id="TableReadSMT5" class="table table-bordered table-striped tabel-custom">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No.</th>
+                                                        <th>Kelas</th>
+                                                        <th>Semester</th>
+                                                        <th>Matematika</th>
+                                                        <th>B.Inggris</th>
+                                                        <th>B.Indonesia</th>
+                                                        <th>Rangking</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><br />
+                                    <div class="row">
+                                        <p>Ubah Nilai</p>
+                                        <table id="TableUpdateSMT5" class="table table-bordered table-striped display compact tabel-custom">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40px">No.</th>
                                                     <th>Kelas</th>
                                                     <th>Semester</th>
                                                     <th>Matematika</th>
@@ -348,10 +458,16 @@
                                             <tbody>
                                             </tbody>
                                         </table>
-                                    }
+                                        <div class="text-left">
+                                            <button type="submit" class="btn btn-sm btn-success" id="submitNilaiSMT5"><i class="bi bi-save"></i> Simpan</button>
+                                        </div>
+                                    </div>
+                                }
 
-                                    @if(Model.id_template_nilai == 4){
-                                        <table id="TableReadUTBK" class="table table-bordered table-striped display compact text-center">
+                                @if(Model.id_template_nilai == 4){
+                                    
+                                    <div class="row">
+                                        <table id="TableReadUTBK" class="table table-bordered table-striped display compact text-center tabel-custom">
                                             <thead>
                                                 <tr>
                                                     <th>No.</th>
@@ -364,12 +480,10 @@
                                             <tbody>
                                             </tbody>
                                         </table>
-                                    }
-                                </div><br />
-                                <div class="row">
-                                    @if(Model.id_template_nilai == 4){
-                                        <input type="hidden" id="banyakUTBK"/>
-                                        <table id="TableUpdateUTBK" class="table table-bordered table-striped display compact text-center">
+                                    </div><br />
+                                    <div class="row">
+                                        <p>Ubah Nilai</p>
+                                        <table id="TableUpdateUTBK" class="table table-bordered table-striped display compact tabel-custom">
                                             <thead>
                                                 <tr>
                                                     <th style="width: 40px">No.</th>
@@ -384,8 +498,23 @@
                                         <div class="text-left">
                                             <button type="submit" class="btn btn-sm btn-success" id="submitNilaiUTBK"><i class="bi bi-save"></i> Simpan</button>
                                         </div>
-                                    }
-                                </div>
+                                    </div>
+                                }
+                                @if (Model.id_template_nilai == 0)
+                                {
+                                    <div class="error-page">
+                                        <h2 class="headline text-warning"> 404</h2>
+
+                                        <div class="error-content">
+                                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! Halaman nilai tidak ditemukan.</h3>
+
+                                            <p>
+                                                Program ini tidak memiliki template atau diluar dari template ketentuan!
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+
                             </div>
                             <div class="text-left">
                                 <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
@@ -400,7 +529,7 @@
                             </div>
                             <div class="p-3 mb-3">
                                 <!-- title row -->
-                                <table id="TabelPrestasi" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                                <table id="TabelPrestasi" class="table table-responsive-lg table-bordered table-striped display compact tabel-custom">
                                     <thead>
                                         <tr>
                                             <th style="width: 40px">Hapus</th>
@@ -1023,8 +1152,7 @@
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                    console.log(data);
-                    $(idData).text("Propinsi: " + data.NAMA_PROP);
+                        $(idData).text("Propinsi: " + data.NAMA_PROP);
                     },
                     error: function () {
                         console.error('Gagal mengambil data.');
@@ -1038,7 +1166,6 @@
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        console.log(data);
                         $(idData).text("Kabupaten / Kota: " + data.namA_KABUPATEN);
                     },
                     error: function () {
@@ -1083,7 +1210,6 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    console.log(data);
                     if (data.PILIHAN_1 === null) {
                         data.NAMA_PIL_1 = text;
                     }
@@ -1136,6 +1262,7 @@
                 "searching": true
             });
 
+            // Read, Ubah UTBK (4)
             $.ajax({
                 url: '@Url.Action("GetPrestasiCalonMhs", "CalonMhs")?Kd_Calon='+id,
                 method: 'GET',
@@ -1166,26 +1293,6 @@
                 "searching": false
             });
 
-            var tableReadSMT5 = $('#TableReadSMT5').DataTable({
-                // "data": data, // Menggunakan data yang diterima dari AJAX
-                "columns": [
-                    { 
-                        "data": null,
-                        "render": function (data, type, row) {
-                            return row.No;
-                        }
-                    },
-                    { "data": "Kelas" },
-                    { "data": "semester" },
-                    { "data": "matematika" },
-                    { "data": "bhs_inggris" },
-                    { "data": "bahasa" },
-                    { "data": "rangking" },
-                ],
-                "lengthMenu": [4],
-                "searching": false
-            });
-            
             $.ajax({
                 url: '@Url.Action("GetUTBKCalonMhs", "CalonMhs")?Kd_Calon='+id,
                 method: 'GET',
@@ -1194,24 +1301,7 @@
                      for (var i = 0; i < data.length; i++) {
                         data[i].No = i + 1;
                     }
-                    console.log(data);
                     tableReadUTBK.rows.add(data).draw();
-                },
-                error: function () {
-                    console.error('Gagal mengambil data.');
-                }
-            });
-
-            $.ajax({
-                url: '@Url.Action("GetSMT5CalonMhs", "CalonMhs")?Kd_Calon=' + id,
-                method: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    for (var i = 0; i < data.length; i++) {
-                        data[i].No = i + 1;
-                    }
-                    console.log(data);
-                    tableReadSMT5.rows.add(data).draw();
                 },
                 error: function () {
                     console.error('Gagal mengambil data.');
@@ -1224,8 +1314,7 @@
                 dataType: 'json',
                 success: function (data) {
                     for (var i = 0; i < data.length; i++) {
-                        data[i].No = i + 1;
-                        $('#banyakUTBK').val(i+1);
+                        data[i].No = i + 1; 
                     }
                     console.log(data);
                     updateNilaiUTBK(data);
@@ -1235,6 +1324,120 @@
                 }
             });
 
+            // Read, Ubah SMT 5 (3)
+            var tableReadSMT5 = $('#TableReadSMT5').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    { 
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row.No;
+                        }
+                    },
+                    { "data": "kelas" },
+                    { "data": "semester" },
+                    { "data": "matematika" },
+                    { "data": "bhs_inggris" },
+                    { "data": "bahasa" },
+                    { "data": "rangking" },
+                ],
+                "lengthMenu": [4],
+                "searching": false
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetSMT5CalonMhs", "CalonMhs")?Kd_Calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                    }
+                    tableReadSMT5.rows.add(data).draw();
+
+                    updateNilaiSMT5(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            // Read, Ubah NUS (2)
+            var tableReadNUS = $('#TableReadNUS').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    { 
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row.No;
+                        }
+                    },
+                    { "data": "matematika" },
+                    { "data": "bhs_inggris" },
+                    { "data": "bahasa" },
+                ],
+                "lengthMenu": [4],
+                "searching": false
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetNUSCalonMhs", "CalonMhs")?Kd_Calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                    }
+                    tableReadNUS.rows.add(data).draw();
+                    updateNilaiNUS(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+
+            // Read, Ubah Rapot (1)
+            var tableReadRapot = $('#TableReadRapot').DataTable({
+                // "data": data, // Menggunakan data yang diterima dari AJAX
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return row.No;
+                        }
+                    },
+                    { "data": "kelas" },
+                    { "data": "semester" },
+                    { "data": "kkm_matematika" },
+                    { "data": "matematika" },
+                    { "data": "kkm_inggris" },
+                    { "data": "bhs_inggris" },
+                    { "data": "kkm_indonesia" },
+                    { "data": "bahasa" },
+                    { "data": "rangking" },
+                ],
+                "lengthMenu": [4],
+                "searching": false
+            });
+
+            $.ajax({
+                url: '@Url.Action("GetRapotCalonMhs", "CalonMhs")?Kd_Calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].No = i + 1;
+                    }
+                    tableReadRapot.rows.add(data).draw();
+                    updateNilaiRapot(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
 
             $('#TabelPrestasi').on('click', '.delete-button', function () {
                 var itemId = $(this).data('id');
@@ -1248,7 +1451,6 @@
                         kd_Calon: itemCalon,
                     }
 
-                    console.log(JSON.stringify(dataToSend));
                     $.ajax({
                         url: '@Url.Action("DeletePrestasiCalonMhs", "CalonMhs")?id=' + itemId + '&Kd_Calon=' + itemCalon, // Ganti dengan URL sesuai dengan controller dan action Anda
                         type: 'POST',
@@ -1256,7 +1458,6 @@
                         contentType: 'application/json',
                         data: null,
                         success: function (response) {
-                            console.log(response);
                             if (response.success) {
                                 window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
                             }
@@ -1276,8 +1477,7 @@
 
             $('#customDokumen2').on('change', function () {
                 var filterValue = $(this).val();
-                console.log(filterValue);
-            if (filterValue === '-' || filterValue === 'Pdf') {
+                if (filterValue === '-' || filterValue === 'Pdf') {
                     $('#toefl_2').addClass("hidden");
                     $('#toefl_dokumen_2').removeClass("hidden");
                 } else {
@@ -1285,17 +1485,18 @@
                 $('#toefl_2').removeClass("hidden");
                 }
             });
+
             $('#customDokumen').on('change', function () {
-            var filterValue = $(this).val();
-            console.log(filterValue);
-            if (filterValue === "-" || filterValue === "Gambar") {
-                $('#toefl').removeClass("hidden");
-                $('#toefl_dokumen').addClass("hidden");
-            } else {
-                $('#toefl_dokumen').removeClass("hidden");
-                $('#toefl').addClass("hidden");
-            }
-        });
+                var filterValue = $(this).val();
+                console.log(filterValue);
+                if (filterValue === "-" || filterValue === "Gambar") {
+                    $('#toefl').removeClass("hidden");
+                    $('#toefl_dokumen').addClass("hidden");
+                } else {
+                    $('#toefl_dokumen').removeClass("hidden");
+                    $('#toefl').addClass("hidden");
+                }
+            });
 
             $.ajax({
                 url: '@Url.Action("GetDokumenList", "CalonMhs")?Kd_Calon=' + id,
@@ -1392,7 +1593,6 @@
 
 
             $('#content').summernote();
-                console.log(id);
 
             $('#btnTemplate').click(function () {
                 var dataTemplate = '<p><span style="font-family: Arial; ">Kepada<br>Yth. Calon Mahasiswa '+namaCalon+'</span></p><p><span style="font-family: Arial; "><br></span><span style="font-family: Arial; background-color: var(--bs-card-bg); color: var(--bs-card-color); '+
@@ -1416,7 +1616,6 @@
                 kd_calon: $('#kdCalon').val(),
                     content: content
                 }
-                console.log(dataBerkasToSend);
                 $.ajax({
                     url: '@Url.Action("SubmitNoteDokumen", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
                     type: 'POST',
@@ -1424,7 +1623,6 @@
                     contentType: 'application/json',
                     data: JSON.stringify(dataBerkasToSend),
                     success: function (response) {
-                        console.log(response);
                         if (response.success) {
                             window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
                         }
@@ -1447,7 +1645,6 @@
 
                     dataToUpdate.push({ Kd_calon: $('#kdCalon').val(), id_nilai_utbk: parseInt(id), id_ref_nilai_utbk: baris+1, nilai: nilai });
                 });
-                console.log(dataToUpdate);
 
                 $.ajax({
                     url: '@Url.Action("UbahNilaiUTBK", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
@@ -1456,7 +1653,39 @@
                     contentType: 'application/json',
                     data: JSON.stringify(dataToUpdate),
                     success: function (response) {
-                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
+
+            $('#submitNilaiSMT5').click(function () {
+                var dataToUpdate = [];
+
+                $('#TableUpdateSMT5 tbody tr').each(function () {
+                    var row = $(this);
+                    var baris = row.index();
+
+                    dataToUpdate.push({ 
+                        Kd_calon: $('#kdCalon').val(), 
+                        mm: parseFloat($('#smt5_mm').val()), 
+                        bing: parseFloat($('#smt5_bing').val()),
+                        bindo: parseFloat($('#smt5_bindo').val()),
+                        rank: $('#smt5_rank').val() 
+                    });
+                });
+
+                $.ajax({
+                    url: '@Url.Action("UbahNilaiSMT5", "CalonMhs")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToUpdate),
+                    success: function (response) {
                         if (response.success) {
                             window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
                         }
@@ -1467,6 +1696,75 @@
                 });
             });
             
+            $('#submitNilaiNUS').click(function () {
+                var dataToUpdate = [];
+
+                $('#TableUpdateNUS tbody tr').each(function () {
+                    var row = $(this);
+                    var baris = row.index();
+                    dataToUpdate.push({ 
+                        Kd_calon: $('#kdCalon').val(), 
+                        mm: parseFloat($('#nus_mm').val()), 
+                        bing: parseFloat($('#nus_bing').val()),
+                        bindo: parseFloat($('#nus_bindo').val())
+                    });
+                });
+
+                $.ajax({
+                    url: '@Url.Action("UbahNilaiNUS", "CalonMhs")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToUpdate),
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
+
+            $('#submitNilaiRapot').click(function () {
+                var dataToUpdate = [];
+
+                $('#TableUpdateRapot tbody tr').each(function () {
+                    var row = $(this);
+                    var baris = row.index();
+                    var id = row.find('input[type="number"]').attr('id').replace("rapot_kkm_mm_", "");
+                    console.log(id);
+                    dataToUpdate.push({
+                        Kd_calon: $('#kdCalon').val(),
+                        id_prestasi: parseInt(id),
+                        mm: parseFloat($('#rapot_mm_' + id).val()),
+                        bing: parseFloat($('#rapot_bing_' + id).val()),
+                        bindo: parseFloat($('#rapot_bindo_' + id).val()),
+                        kkm_mm: parseFloat($('#rapot_kkm_mm_' + id).val()),
+                        kkm_bing: parseFloat($('#rapot_kkm_bing_' + id).val()),
+                        kkm_bindo: parseFloat($('#rapot_kkm_bindo_' + id).val()),
+                        rank: parseInt($('#rapot_rank_' + id).val())
+                    });
+                });
+                console.log(dataToUpdate);
+
+                $.ajax({
+                url: '@Url.Action("UbahNilaiRapot", "CalonMhs")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToUpdate),
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
         });
 
         function updateNilaiUTBK(data) {
@@ -1491,61 +1789,98 @@
             });
         }
 
+        function updateNilaiSMT5(data) {
+            var table = $('#TableUpdateSMT5');
+            $.each(data, function (index, item) {
+                var row = $("<tr>");
 
-        $(document).ready(function () {
-            $("#submitButton").click(function () {
-                var dataNilai = {
-                    kelas10: [],
-                    kelas11: []
-                };
-                for (var i = 1; i <= 2; i++) {
-                    dataNilai.kelas10.push({
-                        calonMhs: $("#kdCalon").val(),
-                        kelas: 1,
-                        semester: i,
-                        prestasi: parseInt($("#prestasi10_" + i).val()),
-                        kk_mm: parseFloat($("#kk_mm10_" + i).val()),
-                        mm: parseFloat($("#mm10_" + i).val()),
-                        kkm_bing: parseFloat($("#kkm_bing10_" + i).val()),
-                        bing: parseFloat($("#bing10_" + i).val()),
-                        kkm_id: parseFloat($("#kkm_id10_" + i).val()),
-                        id: parseFloat($("#id10_" + i).val()),
-                        rank: $("#rank10_" + i).val(),
-                    });
+                row.append($("<td>").text(item.No));
+                row.append($("<td>").text(item.kelas));
+                row.append($("<td>").text(item.semester));
 
-                    dataNilai.kelas11.push({
-                        calonMhs: $("#kdCalon").val(),
-                        kelas: 2,
-                        semester: i,
-                        prestasi: parseInt($("#prestasi11_" + i).val()),
-                        kk_mm: parseFloat($("#kk_mm11_" + i).val()),
-                        mm: parseFloat($("#mm11_" + i).val()),
-                        kkm_bing: parseFloat($("#kkm_bing11_" + i).val()),
-                        bing: parseFloat($("#bing11_" + i).val()),
-                        kkm_id: parseFloat($("#kkm_id11_" + i).val()),
-                        id: parseFloat($("#id11_" + i).val()),
-                        rank: $("#rank11_" + i).val(),
-                    });
-                }
+                var dataUbah1 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.matematika));
+                dataUbah1.attr("id", "smt5_mm");
+                row.append($("<td>").html(dataUbah1));
 
-                // Mengirim data ke controller menggunakan AJAX
-                $.ajax({
-                    url: '/CalonMhs/UbahNilaiCalonMhs', 
-                    type: 'POST',
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    data: JSON.stringify(dataNilai),
-                    success: function (result) {
-                        if (result.success){
-                            window.location.href = "CalonMhs/CalonMhs";
+                var dataUbah2 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bhs_inggris));
+                dataUbah2.attr("id", "smt5_bing");
+                row.append($("<td>").html(dataUbah2));
 
-                        }
-                    },
-                    error: function (error) {
-                        console.error(error);
-                    }
-                });
+                var dataUbah3 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bahasa));
+                dataUbah3.attr("id", "smt5_bindo");
+                row.append($("<td>").html(dataUbah3));
+
+                var dataUbah4 = $('<input type="number" class="form-control text-center">').val(parseFloat(item.rangking));
+                dataUbah4.attr("id", "smt5_rank");
+                row.append($("<td>").html(dataUbah4));
+
+                table.append(row);
             });
-        });
+        }
+
+        function updateNilaiNUS(data) {
+            var table = $('#TableUpdateNUS');
+            $.each(data, function (index, item) {
+                var row = $("<tr>");
+
+                row.append($("<td>").text(item.No));
+
+                 var dataUbah1 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.matematika));
+                dataUbah1.attr("id", "nus_mm");
+                row.append($("<td>").html(dataUbah1));
+
+                var dataUbah2 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bhs_inggris));
+                dataUbah2.attr("id", "nus_bing");
+                row.append($("<td>").html(dataUbah2));
+
+                var dataUbah3 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bahasa));
+                dataUbah3.attr("id", "nus_bindo");
+                row.append($("<td>").html(dataUbah3));
+                
+                table.append(row);
+            });
+        }
+
+        function updateNilaiRapot(data) {
+            var table = $('#TableUpdateRapot');
+            $.each(data, function (index, item) {
+                var row = $("<tr>");
+
+                row.append($("<td>").text(item.No));
+                row.append($("<td>").text(item.kelas));
+                row.append($("<td>").text(item.semester));
+
+
+                var dataUbahKKM1 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.kkm_matematika));
+                dataUbahKKM1.attr("id", "rapot_kkm_mm_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbahKKM1));
+
+                var dataUbah1 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.matematika));
+                dataUbah1.attr("id", "rapot_mm_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbah1));
+
+                var dataUbahKKM2 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.kkm_inggris));
+                dataUbahKKM2.attr("id", "rapot_kkm_bing_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbahKKM2));
+
+                var dataUbah2 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bhs_inggris));
+                dataUbah2.attr("id", "rapot_bing_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbah2));
+
+                 var dataUbahKKM3 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.kkm_indonesia));
+                dataUbahKKM3.attr("id", "rapot_kkm_bindo_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbahKKM3));
+
+                var dataUbah3 = $('<input type="number" class="form-control text-center" step="0.01">').val(parseFloat(item.bahasa));
+                dataUbah3.attr("id", "rapot_bindo_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbah3));
+
+                var dataUbah4 = $('<input type="number" class="form-control text-center">').val(parseFloat(item.rangking));
+                dataUbah4.attr("id", "rapot_rank_" + item.id_prestasi);
+                row.append($("<td>").html(dataUbah4));
+                
+                table.append(row);
+            });
+        }
     </script>
 

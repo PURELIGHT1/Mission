@@ -196,6 +196,24 @@ namespace PMB.Controllers
 
         }
 
+        public IActionResult GetNUSCalonMhs(string Kd_Calon)
+        {
+
+            List<dynamic> data = null;
+            data = dao.GetNilaiNUS(Kd_Calon);
+            return Json(data);
+
+        }
+
+        public IActionResult GetRapotCalonMhs(string Kd_Calon)
+        {
+
+            List<dynamic> data = null;
+            data = dao.GetNilaiRapot(Kd_Calon);
+            return Json(data);
+
+        }
+
         public IActionResult GetDetailPrestasiCalonMhs(int id)
         {
 
@@ -546,127 +564,6 @@ namespace PMB.Controllers
             }
         }
 
-        //public IActionResult UbahNilaiCalonMhs([FromBody] JsonObject data)
-        //{
-        //    try
-        //    {
-        //        List<Nilai> ubah = new List<Nilai>();
-
-        //        for (int i = 0; i < 2; i++)
-        //        {
-        //            string kd_calon = data["kelas10"][i]["calonMhs"].ToString();
-        //            string kelas = data["kelas10"][i]["kelas"].ToString();
-        //            string rangking = "";
-        //            if(data["kelas10"][i]["rank"] != null)
-        //            {
-        //                rangking = data["kelas10"][i]["rank"].ToString();
-        //            }
-        //            string semester = data["kelas10"][i]["semester"].ToString();
-        //            decimal matematika = 0;
-        //            decimal kkm_matematika = 0;
-        //            decimal bhs_inggris = 0;
-        //            decimal kkm_inggris = 0;
-        //            decimal bahasa = 0;
-        //            decimal kkm_indonesia = 0;
-        //            if (data["kelas10"][i]["mm"] != null)
-        //            {
-        //                matematika = (decimal)data["kelas10"][i]["mm"];
-        //            }
-        //            if (data["kelas10"][i]["kk_mm"] != null)
-        //            {
-        //                kkm_matematika = (decimal)data["kelas10"][i]["kk_mm"];
-        //            }
-        //            if (data["kelas10"][i]["bing"] != null)
-        //            {
-        //                bhs_inggris = (decimal)data["kelas10"][i]["bing"];
-        //            }
-        //            if (data["kelas10"][i]["kkm_bing"] != null)
-        //            {
-        //                kkm_inggris = (decimal)data["kelas10"][i]["kkm_bing"];
-        //            }
-        //            if (data["kelas10"][i]["id"] != null)
-        //            {
-        //                bahasa = (decimal)data["kelas10"][i]["id"];
-        //            }
-        //            if (data["kelas10"][i]["kkm_id"] != null)
-        //            {
-        //                kkm_indonesia = (decimal)data["kelas10"][i]["kkm_id"];
-        //            }
-        //            //decimal kkm_matematika = (decimal)data["kelas10"][i]["kk_mm"];
-        //            //decimal bhs_inggris = (decimal)data["kelas10"][i]["bing"];
-        //            //decimal kkm_inggris = (decimal)data["kelas10"][i]["kkm_bing"];
-        //            //decimal bahasa = (decimal)data["kelas10"][i]["id"];
-        //            //decimal kkm_indonesia = (decimal)data["kelas10"][i]["kkm_id"];
-        //            int id_prestasi = 0;
-        //            if ((int)data["kelas10"][i]["prestasi"] != 0 || (int)data["kelas10"][i]["prestasi"] != null)
-        //            {
-        //                id_prestasi = (int)data["kelas10"][i]["prestasi"];
-        //            }
-        //            Nilai dataNilai = new Nilai();
-        //            dataNilai.id_prestasi = id_prestasi;
-        //            dataNilai.kd_calon = kd_calon;
-        //            dataNilai.kelas = kelas;
-        //            dataNilai.rangking = rangking;
-        //            dataNilai.semester = semester;
-        //            dataNilai.matematika = matematika;
-        //            dataNilai.kkm_matematika = kkm_matematika;
-        //            dataNilai.bhs_inggris = bhs_inggris;
-        //            dataNilai.kkm_inggris = kkm_inggris;
-        //            dataNilai.bahasa = bahasa;
-        //            dataNilai.kkm_indonesia = kkm_indonesia;
-
-        //            ubah.Add(dataNilai);
-        //        }
-
-        //        for (int j = 0; j < 2; j++)
-        //        {
-        //            int id_prestasi = (int) data["kelas11"][j]["prestasi"];
-        //            string kd_calon = data["kelas11"][j]["calonMhs"].ToString();
-        //            string kelas = data["kelas11"][j]["kelas"].ToString();
-        //            string rangking = data["kelas11"][j]["rank"].ToString();
-        //            string semester = data["kelas11"][j]["semester"].ToString();
-        //            decimal matematika = (decimal)data["kelas11"][j]["mm"];
-        //            decimal kkm_matematika = (decimal)data["kelas11"][j]["kk_mm"];
-        //            decimal bhs_inggris = (decimal)data["kelas11"][j]["bing"];
-        //            decimal kkm_inggris = (decimal)data["kelas11"][j]["kkm_bing"];
-        //            decimal bahasa = (decimal)data["kelas11"][j]["id"];
-        //            decimal kkm_indonesia = (decimal)data["kelas11"][j]["kkm_id"];
-
-        //            Nilai dataNilai = new Nilai();
-        //            dataNilai.id_prestasi = id_prestasi;
-        //            dataNilai.kd_calon = kd_calon;
-        //            dataNilai.kelas = kelas;
-        //            dataNilai.rangking = rangking;
-        //            dataNilai.semester = semester;
-        //            dataNilai.matematika = matematika;
-        //            dataNilai.kkm_matematika = kkm_matematika;
-        //            dataNilai.bhs_inggris = bhs_inggris;
-        //            dataNilai.kkm_inggris = kkm_inggris;
-        //            dataNilai.bahasa = bahasa;
-        //            dataNilai.kkm_indonesia = kkm_indonesia;
-
-        //            ubah.Add(dataNilai);
-        //        }
-
-        //        if (dao.UbahNilaiCalonMhs(ubah))
-
-        //        {
-        //            TempData["success"] = "Berhasil mengubah data nilai mahasiswa!";
-        //        }
-        //        else
-        //        {
-        //            TempData["error"] = "Gagal mengubah data nilai mahasiswa!";
-        //        }
-
-        //        return Json(new { success = true });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = ex.Message });
-        //    }
-
-        //}
-
         [HttpPost]
         public IActionResult UbahNilaiUTBK([FromBody] List<UTBK> data)
         {
@@ -689,6 +586,76 @@ namespace PMB.Controllers
             }
 
         }
+
+        [HttpPost]
+        public IActionResult UbahNilaiSMT5([FromBody] List<SMT5> data)
+        {
+            try
+            {
+                if (dao.UbahSMT5CalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah data nilai!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah data nilai!";
+                }
+
+                return Json(new { success = true, kd_calon = data[0].Kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+
+        }
+
+        [HttpPost]
+        public IActionResult UbahNilaiNUS([FromBody] List<NUS> data)
+        {
+            try
+            {
+                if (dao.UbahNUSCalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah data nilai!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah data nilai!";
+                }
+
+                return Json(new { success = true, kd_calon = data[0].Kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+
+        }
+
+        [HttpPost]
+        public IActionResult UbahNilaiRapot([FromBody] List<Rapot> data)
+        {
+            try
+            {
+                if (dao.UbahRapotCalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah data nilai!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah data nilai!";
+                }
+
+                return Json(new { success = true, kd_calon = data[0].Kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+
+        }
+        
 
         public IActionResult GenerateAngsuran(AngsuranMhs angsuranMhs)
         {

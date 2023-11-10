@@ -107,6 +107,35 @@ namespace PMB.Models
         public float nilai { get; set; }
     }
 
+    public class SMT5
+    {
+        public string Kd_calon { get; set; }
+        public float mm { get; set; }
+        public float bing { get; set; }
+        public float bindo { get; set; }
+        public int rank { get; set; }
+    }
+
+    public class NUS
+    {
+        public string Kd_calon { get; set; }
+        public float mm { get; set; }
+        public float bing { get; set; }
+        public float bindo { get; set; }
+    }
+    public class Rapot
+    {
+        public string Kd_calon { get; set; }
+        public int id_prestasi { get; set; }
+        public float mm { get; set; }
+        public float bing { get; set; }
+        public float bindo { get; set; }
+        public float kkm_mm { get; set; }
+        public float kkm_bing { get; set; }
+        public float kkm_bindo { get; set; }
+        public int rank { get; set; }
+    }
+
     public class Nilai
     {
         public int id_prestasi { get; set; }
