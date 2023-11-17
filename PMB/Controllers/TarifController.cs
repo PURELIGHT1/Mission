@@ -23,8 +23,9 @@ namespace PMB.Controllers
             TarifView data = new TarifView();
             data.ListProdi = daoMaster.GetAllProdi();
 
-            List<string> tagihan = dao.GetAllTagihan();
-            int tahunsekarang = DateTime.Now.Year;
+            data.ListTagihan = dao.GetAllTagihan();
+
+            int tahunsekarang = DateTime.Now.Year + 1;
             for (int i = tahunsekarang+2; i >= tahunsekarang-7; i--)
             {
                 String tahun = i.ToString();

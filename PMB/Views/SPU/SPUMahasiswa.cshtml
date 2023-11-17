@@ -109,6 +109,11 @@
                     <select class="form-select text-center" id="prodi"></select>
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
                 </div>
+                <div class="form-group">
+                    <label>Potongan Konsesi</label>
+                    <input type="number" class="form-control text-center" id="jlh_konsesi" value="10000000" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi"></span>
+                </div>
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
@@ -150,6 +155,11 @@
                     <label>SPU</label>
                     <input type="number" id="spu_u" class="form-control">
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_spu_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Potongan Konsesi</label>
+                    <input type="number" class="form-control text-center" id="jlh_konsesi_u" value="10000000" />
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi_u"></span>
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
@@ -325,7 +335,8 @@
                     kd_jalur: $("#jalur").val(),
                     id_prodi: $("#prodi").val(),
                     username: $("#username").val(),
-                    spu: 0
+                    spu: 0,
+                    ptg_konsesi: $("#jlh_konsesi_u").val()
                 };
 
                 console.log(dataToSend);
@@ -385,32 +396,6 @@
             var id = $(this).data('id');
 
             window.location.href = "@Url.Action("CetakSKPUK","SKPUK")?kd_calon=" + id;
-            // $.ajax({
-            //     url: '@Url.Action("CetakSKPUK", "SKPUK")?kd_calon=' + id,
-            //     method: 'GET',
-            //     dataType: 'json',
-            //     success: function (data) {
-            //         console.log(data);
-            //         $('#kode_u').val(data.kd_calon);
-            //         $('#jalur_u').val(data.nama_jalur);
-            //         $('#prodi_u').val(data.prodi_diterima);
-
-            //         $('#spu_u').val(data.spu);
-            //         var formattedDatetime = moment(data.tgl_cetak, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DD HH:mm');
-            //         $('#tgl_cetak_u').val(formattedDatetime);
-
-            //         flatpickr("#tgl_cetak_u", {
-            //             enableTime: true,
-            //             dateFormat: "Y-m-d H:i",
-            //             defaultDate: formattedDatetime,
-            //         });
-
-            //         ValidateUbah();
-            //     },
-            //     error: function () {
-            //         console.error('Gagal mengambil data.');
-            //     }
-            // });
 
         });
 
@@ -423,7 +408,8 @@
                     kd_jalur: "",
                     id_prodi: "",
                     username: $("#username").val(),
-                    spu: $("#spu_u").val()
+                    spu: $("#spu_u").val(),
+                    ptg_konsesi: $("#jlh_konsesi_u").val()
                 };
 
                 console.log(dataToSend);

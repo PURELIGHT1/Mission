@@ -11,7 +11,7 @@ namespace PMB.Models
         public List<SelectListItem> getAllTahunAkademik()
         {
             List<SelectListItem> myList = new List<SelectListItem>();
-            for (int i = DateTime.Now.Year; i >= 2009; i--)
+            for (int i = DateTime.Now.Year + 1; i >= 2009; i--)
             {
                 String tahun = i + "/" + (i + 1);
                 var data = new SelectListItem

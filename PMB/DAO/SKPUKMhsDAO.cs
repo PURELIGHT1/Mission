@@ -294,7 +294,7 @@ namespace PMB.DAO
                                                 tgl_buka, 
                                                 batas_waktu 
                                             from angsuran_mhs
-                                            where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon;";
+                                            where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null;";
 
                             var data = conn.QueryFirstOrDefault<PembayaranSKPUK>(query, new { kd_calon = id });
 
@@ -337,12 +337,12 @@ namespace PMB.DAO
                             AngsuranSKPUK dataAngsuran = new AngsuranSKPUK();
                             dataAngsuran.angsuranke = angsuranKe[i];
                             string ket_angsuran = "";
-                            string query2 = @"select sum(jmluang) as total from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke";
+                            string query2 = @"select sum(jmluang) as total from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
 
                             var total = conn.QueryFirstOrDefault<int>(query2, new { kd_calon = id, angsuranke = angsuranKe[i] });
                             dataAngsuran.jmluang = total;
 
-                            string query3 = @"select ket_angsuran from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke";
+                            string query3 = @"select ket_angsuran from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
 
                             var dataKetAngsuran = conn.Query<string>(query3, new { kd_calon = id, angsuranke = angsuranKe[i] }).AsList();
 
@@ -363,7 +363,7 @@ namespace PMB.DAO
                             string query4 = @"select top(1) 
                                                 CONCAT(FORMAT(tgl_buka,'dd MMMM yyyy','id-id'),' - ',FORMAT(batas_waktu,'dd MMMM yyyy','id-id')) as batas_bayar
                                             from angsuran_mhs 
-                                            where kd_calon = @kd_calon and angsuranke = @angsuranke";
+                                            where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
                             var batas_bayar = conn.QueryFirstOrDefault<string>(query4, new { kd_calon = id, angsuranke = angsuranKe[i] });
 
                             dataAngsuran.batas_bayar = batas_bayar;

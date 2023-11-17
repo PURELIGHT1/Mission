@@ -136,11 +136,16 @@
                         <li class="nav-item">
                             <a class="nav-link" id="tab6-tab" href="#tab6" aria-selected="false">Dokumen</a>
                         </li>
-                         @if(jenjang == "Pasca Sarjana")
+                        @if(jenjang == "Pasca Sarjana")
                         {
                             <li class="nav-item">
                                 <a class="nav-link" id="tab9-tab" href="#tab9" aria-selected="false">Infomasi</a>
                             </li>  
+                        } @if(jenjang == "Sarjana")
+                        {
+                             <li class="nav-item">
+                            <a class="nav-link" id="tab10-tab" href="#tab10" aria-selected="false">Potongan</a>
+                        </li>                            
                         }
                     </ul>
 
@@ -503,14 +508,8 @@
                                 @if (Model.id_template_nilai == 0)
                                 {
                                     <div class="error-page">
-                                        <h2 class="headline text-warning"> 404</h2>
-
                                         <div class="error-content">
-                                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! Halaman nilai tidak ditemukan.</h3>
-
-                                            <p>
-                                                Program ini tidak memiliki template atau diluar dari template ketentuan!
-                                            </p>
+                                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Halaman nilai tidak tidak memiliki Template</h3>
                                         </div>
                                     </div>
                                 }
@@ -953,6 +952,47 @@
                                 <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
                             </div>
                         </div>
+
+                         <!-- Potongan -->
+                        <div class="tab-pane fade" id="tab10" aria-labelledby="tab10-tab">
+                            <!-- Konten Tab 1 -->
+                            <div class="text-right">
+                                <a href="UbahDataSMACalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Data Potongan</a>
+                            </div>
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                         <div class="form-group">
+                                            <div class="icheck-success d-inline">
+                                                <input type="checkbox" id="konsesi_checkbox">
+                                                <label for="konsesi_checkbox">
+                                                    Potongan Konsesi
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                             <div class="icheck-success d-inline">
+                                                <input type="checkbox" id="ptg_checkbox">
+                                                <label for="ptg_checkbox">
+                                                    Potongan Keluarga
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="namaCalon">Nomor Pokok Mahasiswa</label>
+                                            <input type="text" class="form-control" id="npm_potongan" placeholder="Masukkan NPM Keluarga">
+                                        </div>
+                                    </div>
+                                    <div class="text-left">
+                                        <button type="submit" class="btn btn-sm btn-success" id="submitPotongan"><i class="bi bi-save"></i> Simpan</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1013,6 +1053,15 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
+                    console.log(data);
+                    if(data.is_konsesi === 'YA'){
+                        $('#konsesi_checkbox').get(0).checked = true;
+                    }
+                    if(data.is_ptg_keluarga === 'YA'){
+                        $('#ptg_checkbox').get(0).checked = true;
+                    }
+                    $('#npm_potongan').val(data.npm_keluarga);
+                    
                     if (data.KD_CALON === null) {
                         data.KD_CALON = text;
                     }
@@ -1144,6 +1193,18 @@
                 }
             });
 
+
+            $.ajax({
+                url: '@Url.Action("GetDataDiri", "CalonMhs")?Kd_Calon=' + id,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                   
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
 
             // Propinsi dan Kabupaten
             function GetPropinsiName(id, idData) {
@@ -1609,11 +1670,36 @@
                 
                 $('#content').summernote('code', dataTemplate);
             });
+            
+            $('#submitPotongan').click(function () {
+                var content = $('#content').summernote('code');
+                var dataBerkasToSend = {
+                    kd_calon: $('#kdCalon').val(),
+                    konsesi: $('#konsesi_checkbox').get(0).checked,
+                    ptg_keluarga: $('#ptg_checkbox').get(0).checked,
+                    npm_ptg: $('#npm_potongan').val()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveKonsesiUbah", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataBerkasToSend),
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
 
             $('#btnSubmitBerkas').click(function () {
                 var content = $('#content').summernote('code');
                 var dataBerkasToSend = {
-                kd_calon: $('#kdCalon').val(),
+                    kd_calon: $('#kdCalon').val(),
                     content: content
                 }
                 $.ajax({

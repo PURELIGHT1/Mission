@@ -399,6 +399,7 @@ namespace PMB.DAO
                                         a.EMAIL,
                                         b.nama_jalur,
                                         b.id_template_nilai,
+                                        a.is_konsesi,
 										CASE 
 											WHEN a.is_lengkap_berkas = 1 THEN 'Berkas Lengkap'
 											ELSE 'Berkas Tidak Lengkap'
@@ -432,6 +433,15 @@ namespace PMB.DAO
                     string query = @"SELECT TOP(1)
                                         a.KD_CALON,
                                         a.nisn,
+                                        case 
+		                                    when is_konsesi = 1 Then 'YA'
+		                                    else 'TIDAK'
+	                                    end as is_konsesi,
+                                        case 
+                                            when (select count(*) from dt_potongan_keluarga where kd_calon = a.KD_CALON and status = '1') > 0 THEN 'YA'
+		                                    else 'TIDAK'
+                                        end as is_ptg_keluarga,
+                                        (select npm_keluarga from dt_potongan_keluarga where kd_calon = a.KD_CALON) as npm_keluarga,
 	                                    d.nama_jalur,
                                         d.jenjang,
                                         a.EMAIL,
@@ -958,6 +968,56 @@ namespace PMB.DAO
             }
         }
 
+        public bool UbahPotonganCalonMhs(PotonganCalon Mhs)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"UPDATE MHS_PENDAFTAR SET
+                                 [IS_KONSESI] = @is_konsesi 
+                                WHERE [KD_CALON] = @Kd_Calon;";
+
+                    string query2 = @"UPDATE dt_potongan_keluarga SET
+                                 npm_keluarga = @npm,
+                                 status = @status
+                                WHERE [KD_CALON] = @Kd_Calon;";
+
+                    string query3 = @"INSERT INTO dt_potongan_keluarga
+                                     ([kd_calon], [npm_keluarga], [status])
+                             VALUES (@Kd_Calon, @npm, @status);";
+
+                    string cek_ptg= @"select count(*) FROM dt_potongan_keluarga where kd_calon = @id";
+                    var param = new 
+                    {
+                        is_konsesi = Mhs.konsesi,
+                        Kd_Calon = Mhs.kd_calon,
+                        npm = Mhs.npm_ptg,
+                        status = Mhs.ptg_keluarga
+                    };
+
+                    var data = conn.Execute(query, param);
+                    int cek = conn.QueryFirstOrDefault<int>(cek_ptg, new { id = Mhs.kd_calon });
+                    if (cek > 0)
+                    {
+                        var data2 = conn.Execute(query2, param);
+                    }
+                    else
+                    {
+                        var data2 = conn.Execute(query3, param);
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
         public bool UbahCalonMhs(DataDiri ubah)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))

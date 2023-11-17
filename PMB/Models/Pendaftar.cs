@@ -52,6 +52,7 @@ namespace PMB.Models
         public string email { get; set; }
         public string nama_jalur { get; set; }
         public int id_template_nilai { get; set; }
+        public int is_konsesi { get; set; }
         public string berkas { get; set; }
     }
 
@@ -197,4 +198,13 @@ namespace PMB.Models
         public string kd_calon { get; set; }
         public string content { get; set; }
     }
+
+    public class PotonganCalon
+    {
+        public string kd_calon { get; set; }
+        public bool konsesi { get; set; }
+        public bool ptg_keluarga { get; set; }
+        public string npm_ptg { get; set; }
+    }
+
 }

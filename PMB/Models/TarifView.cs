@@ -5,5 +5,6 @@
         public List<dynamic> ListProdi { get; set; } = new List<dynamic>();
 
         public List<dynamic> ListTahun { get; set; } = new List<dynamic>();
+        public List<string> ListTagihan{ get; set; } = new List<string>();
     }
 }

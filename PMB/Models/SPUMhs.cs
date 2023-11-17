@@ -38,6 +38,7 @@ namespace PMB.Models
         public string id_prodi { get; set; }
         public string username { get; set; }
         public int spu { get; set; }
+        public int ptg_konsesi { get; set; }
     }
 
     public class DetailRmsAgs
@@ -53,8 +54,9 @@ namespace PMB.Models
 
     public class DetailRmsPtg
     {
-        public int id_tagihan { get; set; }
         public int nominal { get; set; }
+        public string keterangan { get; set; }
+        public int id_tagihan { get; set; }
     }
 
     public class AngsuranMhs2
@@ -63,5 +65,6 @@ namespace PMB.Models
         public int angsuranke { get; set; }
         public string ket_angsuran { get; set; }
         public int potongan { get; set; }
+        public int jumlah { get; set; }
     }
 }

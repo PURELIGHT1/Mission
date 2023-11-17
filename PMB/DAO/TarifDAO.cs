@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using PMB.Models;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 
 namespace PMB.DAO
 {
@@ -51,8 +52,7 @@ namespace PMB.DAO
 		                                    a.thmasuk, 
 		                                    c.nama_tagihan,
 		                                    CASE
-											    WHEN a.id_tagihan = '3' THEN a.biaya * a.jumlah_pengali
-					                            WHEN a.id_tagihan = '10' THEN a.biaya * a.jumlah_pengali
+											    WHEN (select nama_tagihan from ref_tagihan where id_tagihan = a.id_tagihan) LIKE '%SPP Variabel%' THEN a.biaya * a.jumlah_pengali
 											    ELSE biaya
 											END AS biaya,
                                             a.iscurrent
@@ -155,11 +155,14 @@ namespace PMB.DAO
                                             ([thmasuk], [semester], [id_prodi], [id_tagihan], [biaya], [jumlah_pengali], [iscurrent])
                                         VALUES(@tahun, @semester, @prodi, @tagihan, @biaya, @pengali, 1);";
 
+
                     string queryUbah = @"UPDATE tr_tarif SET 
                                             biaya = @biaya,
                                             jumlah_pengali = @pengali,
                                             iscurrent = 1
                                         WHERE id_tarif = @id_tarif";
+
+                    string queryCekTagihan = @"SELECT nama_tagihan FROM ref_tagihan WHERE id_tagihan = @id";
 
                     int pengali = 1;
                     if (listTarif.Count() == 0)
@@ -168,7 +171,9 @@ namespace PMB.DAO
 
                         for (int i = 0; i < tarif.biaya.Count(); i++)
                         {
-                            if (tarif.tagihan[i].Equals("3") || tarif.tagihan[i].Equals("10"))
+                            string nm_tagihan = conn.QueryFirstOrDefault<string>(queryCekTagihan, new { id = tarif.tagihan[i] });
+
+                            if (Regex.IsMatch(nm_tagihan, @"SPP Variabel"))
                             {
                                 pengali = tarif.pengali;
                             }
@@ -199,10 +204,13 @@ namespace PMB.DAO
                             {
                                 if (listTarif[i].id_tagihan.Equals(tarif.tagihan[j]))
                                 {
-                                    if (tarif.tagihan[j].Equals("3") || tarif.tagihan[j].Equals("10"))
+                                    string nm_tagihan = conn.QueryFirstOrDefault<string>(queryCekTagihan, new { id = tarif.tagihan[i] });
+
+                                    if (Regex.IsMatch(nm_tagihan, @"SPP Variabel"))
                                     {
                                         pengali = tarif.pengali;
                                     }
+
                                     string tagihan = tarif.tagihan[j];
                                     id_tarif = listTarif[i].id_tarif;
                                     biaya = tarif.biaya[j];
@@ -225,7 +233,9 @@ namespace PMB.DAO
                             string tambah = queryTambah;
                             for (int i = 0; i < tarif.biaya.Count(); i++)
                             {
-                                if (tarif.tagihan[i].Equals("3") || tarif.tagihan[i].Equals("10"))
+                                string nm_tagihan = conn.QueryFirstOrDefault<string>(queryCekTagihan, new { id = tarif.tagihan[i] });
+
+                                if (Regex.IsMatch(nm_tagihan, @"SPP Variabel"))
                                 {
                                     pengali = tarif.pengali;
                                 }
@@ -271,26 +281,22 @@ namespace PMB.DAO
 
                     string queryUbah = @"UPDATE tr_tarif SET 
                                             biaya = @biaya,
-                                            jumlah_pengali = @pengali,
+                                            jumlah_pengali = case when nama_tagihan like '%variabel%' then @pengali else 1 end,
                                             iscurrent = 1
+                                        from dbo.tr_tarif inner join dbo.ref_tagihan on tr_tarif.id_tagihan = ref_tagihan.id_tagihan
                                         WHERE id_tarif = @id_tarif";
-                 
+
                     string ubah = queryUbah;
 
                     int id_tarif = 0;
                     int biaya = 0;
-                    int pengali = 1;
+                    int pengali = tarif.pengali;
                     for (int i = 0; i < listTarif.Count(); i++)
                     {
                         for (int j = 0; j < tarif.tagihan.Count(); j++)
                         {
                             if (listTarif[i].id_tagihan.Equals(tarif.tagihan[j]))
                             {
-                                if (tarif.tagihan[j].Equals("3") || tarif.tagihan[j].Equals("10"))
-                                {
-                                    pengali = tarif.pengali;
-                                }
-
                                 string tagihan = tarif.tagihan[j];
                                 id_tarif = listTarif[i].id_tarif;
                                 biaya = tarif.biaya[j];

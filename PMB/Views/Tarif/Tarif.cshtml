@@ -136,8 +136,13 @@
             <div class="form-group">
                 <label>Pilih kolom yang ingin ditampilkan:</label>
                 <select id="columnSelect" class="select2 freeze-column" multiple="multiple" data-placeholder="Kolom Akan Terlihat saat dipilih" style="width: 100%;">
+
                     <option value="all">ALL</option>
-                    <option value="3">SPP Tetap</option>
+                    @foreach (var item in Model.ListTagihan)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                    @* <option value="3">SPP Tetap</option>
                     <option value="4">SPP Variabel</option>
                     <option value="5">Jaket</option>
                     <option value="6">Buku</option>
@@ -150,7 +155,7 @@
                     <option value="13">SPU Bersubsidi</option>
                     <option value="14">SPU Normal</option>
                     <option value="15">SPU Registrasi 3</option>
-                    <option value="16">SPU Registrasi 4</option>
+                    <option value="16">SPU Registrasi 4</option> *@
                 </select>
             </div>
         </div>
@@ -175,6 +180,8 @@
                         <th>SPU N</th>
                         <th>SPU R 3</th>
                         <th>SPU R 4</th>
+                        @* <th>SPP T S2</th>
+                        <th>SPP V S2</th> *@
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -321,23 +328,30 @@
             tarif.append(row);
         });
 
-        var row = $("<tr>");
+        var regex = /\bSPP Variabel\b/;
+        $.each(data, function (index, item) {
+            if (regex.test(item.nama_tagihan)) {
+                var row = $("<tr>");
 
-        var dataTampil = $("<td>");
-        dataTampil.attr("class", "tarif-tagihan");
-        dataTampil.text("SKS");
-        var dataInputSKS = $('<input type="text" class="form-control text-center">');
+                var dataTampil = $("<td>");
+                dataTampil.attr("class", "tarif-tagihan");
+                dataTampil.text("SKS");
+                var dataInputSKS = $('<input type="text" class="form-control text-center">');
 
-        if (id_tarif === "tarifTagihanUbah") {
-            dataInputSKS.attr('id', 'dataSKS_U');
-        } else {
-            dataInputSKS.attr('id', 'dataSKS');
-            dataInputSKS.val(1);
-        }
+                if (id_tarif === "tarifTagihanUbah") {
+                    dataInputSKS.attr('id', 'dataSKS_U');
+                } else {
+                    dataInputSKS.attr('id', 'dataSKS');
+                    dataInputSKS.val(1);
+                }
 
-        row.append(dataTampil);
-        row.append($("<td>").html(dataInputSKS));
-        tarif.append(row);
+                row.append(dataTampil);
+                row.append($("<td>").html(dataInputSKS));
+                tarif.append(row);
+                return false;
+            }
+        });
+       
     }
 
     function SetBiayaTagihan(data, tarif) {
@@ -347,61 +361,61 @@
 
             $("#dataSKS_U").val(tarif["SKS"]);
 
-            if (item.nama_tagihan === "SPP Tetap") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPP Tetap"]);
-            }
+            // if (item.nama_tagihan === "SPP Tetap") {
+                $('#dataU_' + item.id_tagihan).val(tarif[item.nama_tagihan]);
+            // }
 
-            if (item.nama_tagihan === "SPP Variabel") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel"]);
-            }
+            // if (item.nama_tagihan === "SPP Variabel") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel"]);
+            // }
 
-            if (item.nama_tagihan === "Jaket") {
-                $('#dataU_' + item.id_tagihan).val(tarif.Jaket);
-            }
+            // if (item.nama_tagihan === "Jaket") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif.Jaket);
+            // }
 
-            if (item.nama_tagihan === "Buku") {
-                $('#dataU_' + item.id_tagihan).val(tarif.Buku);
-            }
+            // if (item.nama_tagihan === "Buku") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif.Buku);
+            // }
 
-            if (item.nama_tagihan === "Courseware") {
-                $('#dataU_' + item.id_tagihan).val(tarif.Courseware);
-            }
+            // if (item.nama_tagihan === "Courseware") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif.Courseware);
+            // }
 
-            if (item.nama_tagihan === "Matrikulasi") {
-                $('#dataU_' + item.id_tagihan).val(tarif.Matrikulasi);
-            }
+            // if (item.nama_tagihan === "Matrikulasi") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif.Matrikulasi);
+            // }
 
-            if (item.nama_tagihan === "Biaya Herregistrasi") {
-                $('#dataU_' + item.id_tagihan).val(tarif["Biaya Herregistrasi"]);
-            }
+            // if (item.nama_tagihan === "Biaya Herregistrasi") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["Biaya Herregistrasi"]);
+            // }
 
-            if (item.nama_tagihan === "SPP Variabel Inter") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel Inter"]);
-            }
+            // if (item.nama_tagihan === "SPP Variabel Inter") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel Inter"]);
+            // }
 
-            if (item.nama_tagihan === "Kemahasiswaan") {
-                $('#dataU_' + item.id_tagihan).val(tarif.Kemahasiswaan);
-            }
+            // if (item.nama_tagihan === "Kemahasiswaan") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif.Kemahasiswaan);
+            // }
 
-            if (item.nama_tagihan === "Uang Kuliah Tetap") {
-                $('#dataU_' + item.id_tagihan).val(tarif["Uang Kuliah Tetap"]);
-            }
+            // if (item.nama_tagihan === "Uang Kuliah Tetap") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["Uang Kuliah Tetap"]);
+            // }
 
-            if (item.nama_tagihan === "SPU Bersubsidi") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPU Bersubsidi"]);
-            }
+            // if (item.nama_tagihan === "SPU Bersubsidi") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Bersubsidi"]);
+            // }
 
-            if (item.nama_tagihan === "SPU Normal") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPU Normal"]);
-            }
+            // if (item.nama_tagihan === "SPU Normal") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Normal"]);
+            // }
 
-            if (item.nama_tagihan === "SPU Registrasi 3") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 3"]);
-            }
+            // if (item.nama_tagihan === "SPU Registrasi 3") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 3"]);
+            // }
 
-            if (item.nama_tagihan === "SPU Registrasi 4") {
-                $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 4"]);
-            }
+            // if (item.nama_tagihan === "SPU Registrasi 4") {
+            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 4"]);
+            // }
         });
     }
 
@@ -493,6 +507,8 @@
                 { "data": "SPU Normal" },
                 { "data": "SPU Registrasi 3" },
                 { "data": "SPU Registrasi 4" },
+                // { "data": "SPP Tetap S2" },
+                // { "data": "SPP Variabel S2" },
                 {
                     "data": null,
                     "render": function (data, type, row) {

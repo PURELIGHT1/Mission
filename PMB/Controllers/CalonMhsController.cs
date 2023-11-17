@@ -133,6 +133,12 @@ namespace PMB.Controllers
             return View(data);
         }
 
+        //public IActionResult DetailCalonMhs(string Kd_Calon)
+        //{
+        //    StorePendaftar2 data = dao.DetailCalonMhs2(Kd_Calon);
+        //    return View(data);
+        //}
+
         public IActionResult GetDataDiri(string Kd_Calon)
         {
             dynamic data = null;
@@ -289,6 +295,28 @@ namespace PMB.Controllers
         {
             StorePendaftar2 data = dao.DetailCalonMhs2(Kd_Calon);
             return View(data);
+        }
+
+        [HttpPost]
+        public IActionResult SaveKonsesiUbah([FromBody] PotonganCalon data)
+        {
+            try
+            {
+                if (dao.UbahPotonganCalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah potongan!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah potongan!";
+                }
+
+                return Json(new { success = true, kd_calon = data.kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
         }
 
         [HttpPost]
