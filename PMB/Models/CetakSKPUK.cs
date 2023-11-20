@@ -25,6 +25,7 @@
         public int jml_sebelum_potongan { get; set; }
         public int jml_potongan { get; set; }
         public int jml_setelah_potongan { get; set; }
+        public string terbilangJmlStlhPotongan { get; set; }
         public int jml_angsuran { get; set; }
     }
 

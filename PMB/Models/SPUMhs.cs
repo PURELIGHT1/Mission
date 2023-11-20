@@ -59,6 +59,12 @@ namespace PMB.Models
         public int id_tagihan { get; set; }
     }
 
+    public class DetailPtg
+    {
+        public string jenis { get; set; }
+        public int jlh_total { get; set; }
+    }
+
     public class AngsuranMhs2
     {
         public string kd_calon { get; set; }

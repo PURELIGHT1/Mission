@@ -146,6 +146,9 @@ namespace PMB.Controllers
             }
             data.DataMhs.jml_angsuran = jml;
 
+            string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_angsuran);
+            data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
+
             return new ViewAsPdf(halaman, data)
             {
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,

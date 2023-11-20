@@ -168,10 +168,12 @@
 
         @{
             string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
-            string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+            // string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+            string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
+
         }
 
-        <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah</strong> (<strong>@* @Model.DataMhs.terbilangJmlStlhPotongan *@</strong>), dengan perincian sebagai berikut:</p>
+        <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>), dengan perincian sebagai berikut:</p>
         <br />
 
         <table id="tblJenisBayar" width="49%" style="float: left;">
