@@ -184,7 +184,7 @@ namespace PMB.DAO
                                             --select @is_konsesi = is_konsesi, @pot_spu=0 from dbo.mhs_pendaftar a where kd_calon = @kdcalon
                                                 PRINT 'potongan unggulan'
 		                                            INSERT INTO POTONGAN(KD_CALON,JNS_POTONGAN,JLH_TOTAL, JENIS)
-		                                            SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN ,'SPU'
+		                                            SELECT distinct kd_calon, KETERANGAN ,JUMLAHPOTONGAN ,'SPU'
 		                                            FROM  MHS_PENDAFTAR INNER JOIN
                                                     REF_POTONGAN ON MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN.id_jalur
 		                                            where  th_masuk between tahun_masuk_awal and tahun_masuk_akhir
@@ -238,11 +238,11 @@ namespace PMB.DAO
 	                                                if(@is_konsesi = 'true')
 	                                                begin
 	 
-		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                select @kdCalon,'SPU',@pot_spu, 'SPU'
+		                                                --INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
+		                                                --select @kdCalon,'SPU',@pot_spu, 'SPU'
 		
 		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                SELECT TOP (1) MHS_PENDAFTAR.KD_CALON, 'konsesi' AS Expr1, SKPU_detail.JUMLAH, 'Spp Tetap'
+		                                                SELECT TOP (1) MHS_PENDAFTAR.KD_CALON, 'Konsesi' AS Expr1, SKPU_detail.JUMLAH, 'Spp Tetap'
 		                                                FROM SKPU_detail INNER JOIN
 		                                                    MHS_PENDAFTAR ON SKPU_detail.ID_PRODI = MHS_PENDAFTAR.MASUK AND SKPU_detail.THNAKADEMIK = MHS_PENDAFTAR.THNAKADEMIK
 		                                                WHERE (SKPU_detail.Jenis = 'Spp Tetap') AND (MHS_PENDAFTAR.KD_CALON = @kdCalon)
@@ -459,7 +459,7 @@ namespace PMB.DAO
                                                             END as is_konsesi 
                                                         from mhs_pendaftar where kd_calon = @kdCalon;";
                                 var is_konsesi = conn.QueryFirstOrDefault<string>(getKonsesiCalon, new { kdCalon = kd_calon_mhs });
-                                var dataPotongan = conn.Execute(procedurePtgSPU, new { kdCalon = kd_calon_mhs, pot_spu = simpan.ptg_konsesi, is_konsesi = is_konsesi });
+                                var dataPotongan = conn.Execute(procedurePtgSPU, new { kdCalon = kd_calon_mhs, is_konsesi = is_konsesi });
 
                                 // Insert Detail Rumus Potongan 
                                 string queryPtgMhs = @"SELECT nominal, keterangan, id_tagihan

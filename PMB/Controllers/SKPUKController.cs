@@ -133,6 +133,7 @@ namespace PMB.Controllers
 
             int total = 0;
             int jml = 0;
+            int jmlPotongan = 0;
             for (int i = 0;  i < data.JenisPembayaran.Count; i++)
             {
                 total = total + data.JenisPembayaran[i].jumlah;
@@ -145,6 +146,14 @@ namespace PMB.Controllers
                 jml = jml + data.ListAngsuranMhs[j].jmluang;
             }
             data.DataMhs.jml_angsuran = jml;
+
+
+            data.Potongan = dao.GetPotonganSKPUK(kd_calon);
+            for (int k = 0; k < data.Potongan.Count; k++)
+            {
+                jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
+            }
+            data.DataMhs.jml_potongan = jmlPotongan;
 
             string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_angsuran);
             data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;

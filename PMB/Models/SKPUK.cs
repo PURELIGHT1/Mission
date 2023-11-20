@@ -41,7 +41,9 @@ namespace PMB.Models
 
     public class PotonganSKPUK
     {
-
+        public string jns_potongan { get; set; }
+        public string jenis_potongan { get; set; }
+        public int jlh_total { get; set; }
     }
 
     public class MhsPendaftar2

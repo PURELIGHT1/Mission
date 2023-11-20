@@ -168,7 +168,6 @@
 
         @{
             string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
-            // string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
             string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
 
         }
@@ -218,6 +217,25 @@
                 </tr>
             </thead>
             <tbody>
+                @foreach (var item in Model.Potongan)
+                {
+                    string namaPotongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jns_potongan);
+                    string jenisPotongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jenis_potongan);
+                    string totalPotongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jlh_total);
+
+                    <tr>
+                        <td id="isiJenisPotongan">@namaPotongan (@jenisPotongan)</td>
+                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@totalPotongan</td>
+                    </tr> 
+                }
+                <tr>
+                    <td id="potSPU">Jumlah potongan</td>
+                    <td id="jmlPotongan"><span style="float:left">Rp.</span>@jml_potongan</td>
+                </tr>
+                <tr>
+                    <td id="ketSetelah">Jumlah setelah potongan</td>
+                    <td id="jmlSetelah"><span style="float:left">Rp.</span>@jml_setelah</td>
+                </tr>
               @*   <tr>
                     <td id="isiJenisPotongan">Unggulan (Potongan SPU)</td>
                     @if (Model.DataMhs.potUnggulan != 0)

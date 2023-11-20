@@ -391,8 +391,17 @@ namespace PMB.DAO
             {
                 try
                 {
-                    List<PotonganSKPUK> dataSKPUK = new List<PotonganSKPUK>();
-                    return dataSKPUK;
+                    string query = @"SELECT 
+                                        a.jns_potongan, 
+                                        CASE	
+	                                        WHEN a.id_tagihan is not null THEN (select nama_tagihan from ref_tagihan where id_tagihan = a.id_tagihan)
+	                                        ELSE a.jenis
+                                        END as jenis_potongan,
+                                        a.jlh_total
+                                    FROM potongan a
+                                    WHERE kd_calon = @kd_calon";
+                    var data = conn.Query<PotonganSKPUK>(query, new { kd_calon = kd_calon }).AsList();
+                    return data;
 
                 }
                 catch (Exception ex)

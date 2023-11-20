@@ -109,11 +109,11 @@
                     <select class="form-select text-center" id="prodi"></select>
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
                 </div>
-                <div class="form-group">
+                @* <div class="form-group">
                     <label>Potongan Konsesi</label>
                     <input type="number" class="form-control text-center" id="jlh_konsesi" value="10000000" />
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi"></span>
-                </div>
+                </div> *@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
@@ -336,7 +336,7 @@
                     id_prodi: $("#prodi").val(),
                     username: $("#username").val(),
                     spu: 0,
-                    ptg_konsesi: $("#jlh_konsesi_u").val()
+                    ptg_konsesi: 0
                 };
 
                 console.log(dataToSend);
