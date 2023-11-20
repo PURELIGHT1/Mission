@@ -47,8 +47,9 @@ namespace PMB.DAO
                                       a.kd_calon,
                                       a.thnakademik,
                                       b.nama_jalur,
+                                      a.nm_calon,
                                       d.nm_fakultas,
-                                      a.nm_calon
+                                      c.nm_prodi
                                     FROM mhs_pendaftar a  
                                     left outer join ref_jalur b ON a.kd_jalur = b.kd_jalur
                                     left outer join ref_prodi c ON a.masuk = c.id_prodi
@@ -368,7 +369,10 @@ namespace PMB.DAO
 
                             dataAngsuran.batas_bayar = batas_bayar;
 
-                            data.Add(dataAngsuran);
+                            if(dataAngsuran != null)
+                            {
+                                data.Add(dataAngsuran);
+                            }
                         }
                     }
                     return data;

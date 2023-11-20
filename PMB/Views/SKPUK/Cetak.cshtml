@@ -50,6 +50,12 @@
 
         #tblJenisBayar td, #tblTotalBayar td, #tblAngsuran td {
             padding: 5px;
+            border: 1px solid black;
+        }
+
+        #tblJenisBayar tr, #tblTotalBayar tr, #tr td {
+            padding: 5px;
+            border: 1px solid black;
         }
 
         #isiJenisBayar {
@@ -180,7 +186,7 @@
                 <tr>
                     <th>Jenis Pembayaran</th>
                     <th>Jumlah</th>
-                    </tr>
+                </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.JenisPembayaran)
@@ -193,7 +199,7 @@
 
                     <tr>
                         <td id="isiJenisBayar">@jenis</td>
-                        <td id="isiJmlJenisBayar"><span style="float:left">Rp.</span>@jumlah</td>
+                        <td id="isiJmlJenisBayar"><span style="float:left;">Rp.</span>@jumlah</td>
                     </tr> 
                 }
                 <tr></tr>
@@ -202,7 +208,7 @@
                     string jml_sebelum = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_sebelum_potongan);
                     <tr>
                         <td id="ketSebelum">Jumlah sebelum potongan</td>
-                        <td id="jmlSebelum"><span style="float:left">Rp.</span>@jml_sebelum</td>
+                        <td id="jmlSebelum"><span style="float:left;">Rp.</span>@jml_sebelum</td>
                     </tr>
                 }
                 
@@ -315,23 +321,26 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var itemAngsuran in Model.ListAngsuranMhs)
+                @if (Model.ListAngsuranMhs != null)
                 {
-                    string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
+                    foreach (var itemAngsuran in Model.ListAngsuranMhs)
+                    {
+                        string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
 
-                    <tr>
-                       @*  @if (item.AngsuranKe == "Uang Jaminan")
-                        {
-                            <td style="text-align:center;"><span class="badge bg-danger text-center">@item.AngsuranKe</span></td>
-                        }
-                        else
-                        { *@
-                        <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
-                        @* } *@
-                        <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
-                        <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
-                        <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
-                    </tr>
+                        <tr>
+                            @*  @if (item.AngsuranKe == "Uang Jaminan")
+                    {
+                    <td style="text-align:center;"><span class="badge bg-danger text-center">@item.AngsuranKe</span></td>
+                    }
+                    else
+                    { *@
+                            <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
+                            @* } *@
+                            <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
+                            <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
+                            <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
+                        </tr>
+                    }
                 }
                 @{
                     string jml_angsuran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
