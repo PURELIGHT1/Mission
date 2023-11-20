@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using PMB.Models;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PMB.DAO
@@ -568,7 +569,7 @@ namespace PMB.DAO
 
                                             string[] parts = TA.Split(new char[] { '/' });
                                             thnmasuk = parts[0];
-                                            if (dataAgs[j].id_tagihan == 10|| dataAgs[j].id_tagihan == 3)
+                                            if (Regex.IsMatch(dataAgs[j].nama_tagihan, @"SPP Variabel"))
                                             {
                                                 string GetSks = querySKS;
                                                 var data_Sks = conn.QueryFirstOrDefault<int>(GetSks, new { id_prodi = simpan.id_prodi, id_tagihan = dataAgs[j].id_tagihan, thn_masuk = int.Parse(thnmasuk) });
@@ -578,9 +579,10 @@ namespace PMB.DAO
                                             var data_Biaya = conn.QueryFirstOrDefault<int>(GetBiaya, new { id_prodi = simpan.id_prodi, id_tagihan = dataAgs[j].id_tagihan, thn_masuk = int.Parse(thnmasuk) });
 
                                             total = data_Biaya;
-                                            if (dataAgs[j].id_tagihan == 3 || dataAgs[j].id_tagihan == 10)
+                                            if (Regex.IsMatch(dataAgs[j].nama_tagihan, @"SPP Variabel"))
                                             {                                          
                                                 total = total * sks;
+                                                data_Biaya = total;
                                             }
                                             string GetAllPtg = @"SELECT TOP(1) nominal 
                                                                 FROM detail_rumus_potongan 
