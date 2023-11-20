@@ -287,10 +287,7 @@ namespace PMB.DAO
                         for(int i = 0; i < data3.Count(); i++)
                         {
                             string query = @"select 
-                                                CASE 
-                                                    WHEN ket_angsuran LIKE '%SPP Variabel%' THEN jumlah * sks
-                                                    ELSE jumlah * 1
-                                                END as jumlah,
+                                                jumlah,
                                                 ket_angsuran, 
                                                 tgl_buka, 
                                                 batas_waktu 
