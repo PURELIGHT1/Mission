@@ -25,6 +25,7 @@ namespace PMB.Models
 
     public class PembayaranSKPUK
     {
+        public bool is_jaminan { get; set; }
         public int jumlah { get; set; }
         public string ket_angsuran { get; set; }
         public string tgl_buka { get; set; }

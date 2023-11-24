@@ -66,6 +66,27 @@ namespace PMB.Controllers
         }
 
         [HttpPost]
+        public IActionResult CekProdiTarifSPU([FromBody] CekProdiSPUMhs data)
+        {
+            try
+            {
+                List<string> ListProdi = dao.CekProdiTarifSPU(data);
+                if(ListProdi.Count() > 0)
+                {
+                    return Json(new { success = true, message = ListProdi });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Prodi Lengkap" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+        }
+
+        [HttpPost]
         public IActionResult SaveDataSPU([FromBody] StoreSPUMhs data)
         {
             try

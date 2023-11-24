@@ -130,14 +130,27 @@ namespace PMB.Controllers
 
             data.JenisPembayaran = dao.GetBayarSKPUK(kd_calon);
             data.DataMhs = dao.GetMahasiswaCetakSKPUK(kd_calon);
-
+            data.Pejabat = dao.GetTTDRektor();
             int total = 0;
             int jml = 0;
             int jmlPotongan = 0;
             for (int i = 0;  i < data.JenisPembayaran.Count(); i++)
             {
                 total = total + data.JenisPembayaran[i].jumlah;
+                
             }
+
+            int uang_angsuran1 = 0;
+            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
+            {
+                if (data.JenisPembayaran[i].ket_angsuran.Contains("SPU"))
+                {
+                    data.DataMhs.jaminan = data.JenisPembayaran[i].is_jaminan;
+                    data.DataMhs.tanggal_jaminan = data.JenisPembayaran[i].batas_waktu;
+                    break;
+                }
+            }
+            
             data.DataMhs.jml_sebelum_potongan = total;
 
             data.Potongan = dao.GetPotonganSKPUK(kd_calon);
@@ -146,20 +159,35 @@ namespace PMB.Controllers
                 jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
             }
             data.DataMhs.jml_potongan = jmlPotongan;
-
+            data.DataMhs.jml_setelah_potongan = total - jmlPotongan;
             data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
-
             if(data.ListAngsuranMhs != null)
             {
                 for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
                 {
                     jml = jml + data.ListAngsuranMhs[j].jmluang;
                 }
-            }
-           
-            data.DataMhs.jml_angsuran = jml;
 
-            string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_angsuran);
+                if (data.DataMhs.jaminan)
+                {
+
+                    uang_angsuran1 = uang_angsuran1 + data.ListAngsuranMhs[0].jmluang;
+                    foreach(var item in data.ListAngsuranMhs)
+                    {
+                        item.angsuranke = item.angsuranke - 1;
+                    }
+                    data.ListAngsuranMhs.RemoveAt(0);
+                }
+            }
+
+            data.DataMhs.uang_jaminan = uang_angsuran1;
+            data.DataMhs.jml_angsuran = jml;
+            if (data.DataMhs.jaminan)
+            {
+                data.DataMhs.jml_angsuran = jml - uang_angsuran1;
+            }
+
+            string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_setelah_potongan);
             data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
 
             return new ViewAsPdf(halaman, data)
@@ -172,7 +200,7 @@ namespace PMB.Controllers
                          Top = 15,
                          Bottom = 10
                  },
-                FileName = $"Surat Ketetapan Uang Kuliah {data.DataMhs.nm_calon}.pdf"
+                //FileName = $"Surat Ketetapan Uang Kuliah {data.DataMhs.nm_calon}.pdf"
             };
         }
 

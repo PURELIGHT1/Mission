@@ -117,569 +117,518 @@ namespace PMB.DAO
             }
         }
 
+        public List<string> CekProdiTarifSPU(CekProdiSPUMhs cekProdiSPUMhs)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    List<string> list = new List<string>();
+
+                    string queryProdiAda = @"SELECT DISTINCT b.id_prodi
+                                            FROM mhs_pendaftar a
+                                            INNER JOIN ref_prodi b ON a.masuk = b.id_prodi
+                                            INNER JOIN tr_tarif c ON a.masuk = c.id_prodi
+                                            AND a.th_masuk = c.thmasuk
+                                            WHERE kd_calon BETWEEN @calon1 AND @calon2
+                                            AND b.id_prodi NOT IN ('', 00)";
+
+                    string queryProdiTidakAda = @"SELECT DISTINCT CONCAT(UPPER(b.jenjang),' - ' , b.nm_prodi) as prodi
+                                                FROM mhs_pendaftar a
+                                                INNER JOIN ref_prodi b ON a.masuk = b.id_prodi
+                                                LEFT OUTER JOIN tr_tarif c ON a.masuk = c.id_prodi AND a.th_masuk = c.thmasuk
+                                                WHERE kd_calon BETWEEN '22200375' AND '22200654' AND b.id_prodi NOT IN ('', 00)
+                                                AND NOT EXISTS (
+                                                    SELECT 1
+                                                    FROM tr_tarif d
+                                                    WHERE a.masuk = d.id_prodi AND a.th_masuk = d.thmasuk
+                                                )";
+                    var param = new { calon1 = cekProdiSPUMhs.kode_calon_awal, calon2 = cekProdiSPUMhs .kode_calon_akhir};
+
+                    var ListProdiTidakAda = conn.Query<string>(queryProdiTidakAda, param).AsList();
+                    var ListProdiAda = conn.Query<string>(queryProdiAda, param).AsList();
+                    return ListProdiTidakAda;
+                }
+                catch(Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public bool SimpanDataSPU(StoreSPUMhs simpan)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
-                    string queryTambah = @"INSERT INTO [dbo].[SPU]
-	                                    ([KD_CALON]
-	                                    ,[SPU]
-	                                    ,[USERNAME]
-	                                    ,[TANGGAL]
-                                        ,[TGL_CETAK]
-	                                    ,[IS_MATRIKULASI])
-                                    VALUES
-                                        (@kd_calon, @spu, @username, GETDATE(), @tgl_cetak, NULL)";
+                    //string queryTambah = @"INSERT INTO [dbo].[SPU]
+                    //                 ([KD_CALON]
+                    //                 ,[SPU]
+                    //                 ,[USERNAME]
+                    //                 ,[TANGGAL]
+                    //                    ,[TGL_CETAK]
+                    //                 ,[IS_MATRIKULASI])
+                    //                VALUES
+                    //                    (@kd_calon, @spu, @username, GETDATE(), @tgl_cetak, NULL)";
 
-                    string queryUbah = @"UPDATE [dbo].[SPU] SET 
-                                            SPU = @spu,
-                                            USERNAME = @username,
-                                            TANGGAL = GETDATE(),
-                                            TGL_CETAK = @tgl_cetak
-                                        WHERE KD_CALON = @kd_calon";
+                    
+                    string procedurePtgSPU = @"--declare @kdCalon varchar(10), @is_konsesi varchar(10)
+                                            --set @kdCalon = '22200375'
+                                            --set @is_konsesi = 'true'
+                                            PRINT 'potongan unggulan'
+	                                            INSERT INTO POTONGAN(KD_CALON, JNS_POTONGAN, JLH_TOTAL, JENIS, ID_TAGIHAN)
+	                                            SELECT distinct a.kd_calon, b.KETERANGAN, JUMLAHPOTONGAN, 'SPU', d.id_tagihan
+	                                            FROM  MHS_PENDAFTAR a
+                                                INNER JOIN REF_POTONGAN b ON a.KD_JALUR = b.id_jalur
+                                                INNER JOIN MST_ANGSURAN c ON a.KD_JALUR = c.KD_JALUR AND a.THNAKADEMIK = c.THNAKADEMIK 
+                                                INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+	                                            WHERE th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+	                                            and kd_calon = @kdCalon
+	                                            and iscurrent = 1 and JNS_POTONGAN not in ('PI','PN','PL')
+                                                and e.nama_tagihan LIKE '%SPU%'
 
-                    string queryTambah2 = @"INSERT INTO [dbo].[angsuran_mhs]
-	                                    ([kd_calon]
-	                                    ,[angsuranke]
-	                                    ,[jmluang]
-                                        ,[tgl_buka]
-                                        ,[batas_waktu]
-                                        ,[ket_angsuran]
-                                        ,[status]
-                                        ,[is_jaminan]
-                                        ,[jumlah]
-                                        ,[potongan]
-                                        ,[sks])
-                                    VALUES
-                                        (@kode_calon, @angsuran_ke, @jmlUang, @tgl_buka, @batas_waktu, @ket_ags, 0, @is_jaminan, @jumlah, @ptg, @sks)";
+                                            PRINT 'potongan prestasi'
+	                                            IF exists (
+		                                            SELECT KD_CALON 
+		                                            FROM DT_PRESTASI 
+		                                            where DT_PRESTASI.KD_CALON = @kdCalon
+		                                            and DT_PRESTASI.TINGKAT = 'Internasional'
+	                                            )
+		                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, id_tagihan)
+		                                            select distinct a.kd_calon, b.KETERANGAN, JUMLAHPOTONGAN, 'SPU', d.id_tagihan
+		                                            FROM MHS_PENDAFTAR a
+		                                            INNER JOIN REF_POTONGAN b ON a.KD_JALUR = b.id_jalur_new
+                                                    INNER JOIN MST_ANGSURAN c ON a.KD_JALUR = c.KD_JALUR AND a.THNAKADEMIK = c.THNAKADEMIK 
+                                                    INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                    INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+		                                            and kd_calon = @kdCalon
+		                                            and JNS_POTONGAN='PI' and iscurrent = 1
+                                                    and e.nama_tagihan LIKE '%SPU%'
 
-                    string queryUbah2 = @"UPDATE [dbo].[angsuran_mhs] SET
-                                            angsuranke = @angsuran_ke,
-                                            jmluang = @jmlUang,
-                                            tgl_buka = @tgl_buka,
-                                            batas_waktu = @batas_waktu,
-                                            ket_angsuran = @ket_ags,
-                                            status = 1,
-                                            is_jaminan = @is_jaminan,
-                                            jumlah = @jumlah,
-                                            potongan = @ptg,
-                                            sks = @sks,
-                                        WHERE kd_calon = @kode_calon";
+	                                            else if exists (
+		                                            SELECT KD_CALON 
+		                                            FROM DT_PRESTASI 
+		                                            where DT_PRESTASI.KD_CALON = @kdCalon
+		                                            and DT_PRESTASI.TINGKAT = 'Nasional'
+	                                            )
+		                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, id_tagihan)
+		                                            select distinct a.kd_calon, b.KETERANGAN, JUMLAHPOTONGAN, 'SPU', d.id_tagihan
+		                                            FROM MHS_PENDAFTAR a 
+                                                    INNER JOIN REF_POTONGAN b ON a.KD_JALUR = b.id_jalur_new
+                                                    INNER JOIN MST_ANGSURAN c ON a.KD_JALUR = c.KD_JALUR AND a.THNAKADEMIK = c.THNAKADEMIK 
+                                                    INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                    INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+		                                            and kd_calon = @kdCalon
+		                                            and JNS_POTONGAN='PN' and iscurrent = 1
+                                                    and e.nama_tagihan LIKE '%SPU%'
 
-                    string queryInsertRmsPtg = @"INSERT INTO [dbo].[potongan]
-                                                    ([kd_calon]
-                                                    ,[jns_potongan]
-                                                    ,[jlh_total]
-                                                    ,[id_tagihan])
-                                                VALUES
-                                                    (@kode_calon, @jns_ptg, @jmlUang, @tagihan)";
+	                                            else if exists (
+		                                            SELECT KD_CALON 
+		                                            FROM DT_PRESTASI 
+		                                            where DT_PRESTASI.KD_CALON = @kdCalon
+		                                            and DT_PRESTASI.TINGKAT = 'Lokal'
+	                                            )
+		                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, id_tagihan)
+		                                            select distinct a.kd_calon, b.KETERANGAN, JUMLAHPOTONGAN, 'SPU', d.id_tagihan
+		                                            FROM MHS_PENDAFTAR a
+                                                    INNER JOIN REF_POTONGAN b ON a.KD_JALUR = b.id_jalur_new
+                                                    INNER JOIN MST_ANGSURAN c ON a.KD_JALUR = c.KD_JALUR AND a.THNAKADEMIK = c.THNAKADEMIK 
+                                                    INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                    INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+		                                            and kd_calon = @kdCalon
+		                                            and JNS_POTONGAN='PL' and iscurrent = 1
+                                                    and e.nama_tagihan LIKE '%SPU%'
 
-                    string queryAgsSPU = @"SELECT kd_calon, angsuranke, ket_angsuran, potongan, jumlah
-                                        FROM angsuran_mhs WHERE ket_angsuran like '%SPU%' and kd_calon = @kd_calon_mhs and status = '0'";
+                                            PRINT 'potongan keluarga'
+                                                IF exists (
+		                                            SELECT KD_CALON 
+		                                            FROM DT_POTONGAN_KELUARGA 
+		                                            where DT_POTONGAN_KELUARGA.KD_CALON = @kdCalon
+	                                            )
+		                                            begin
+			                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, id_tagihan)
+			                                            select distinct @kdCalon, b.KETERANGAN, JUMLAHPOTONGAN, 'SPU', d.id_tagihan
+			                                            FROM MHS_PENDAFTAR a
+                                                        INNER JOIN MST_ANGSURAN c ON a.KD_JALUR = c.KD_JALUR AND a.THNAKADEMIK = c.THNAKADEMIK 
+                                                        INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                        INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+                                                        LEFT OUTER JOIN dbo.REF_POTONGAN b ON a.KD_JALUR = b.id_jalur_new
+			                                            where JNS_POTONGAN='SORTU' and iscurrent = 1
+                                                        and e.nama_tagihan LIKE '%SPU%'
 
-                    string procedurePtgSPU = @"--Declare @id_tagihan int
-                                            --@is_konsesi varchar(10)
-                                            --set @kdCalon = '22100097'
-                                            --select @is_konsesi = is_konsesi, @pot_spu=0 from dbo.mhs_pendaftar a where kd_calon = @kdcalon
-                                                PRINT 'potongan unggulan'
-		                                            INSERT INTO POTONGAN(KD_CALON,JNS_POTONGAN,JLH_TOTAL, JENIS)
-		                                            SELECT distinct kd_calon, KETERANGAN ,JUMLAHPOTONGAN ,'SPU'
-		                                            FROM  MHS_PENDAFTAR INNER JOIN
-                                                    REF_POTONGAN ON MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN.id_jalur
-		                                            where  th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-		                                             and kd_calon = @kdCalon  
-		                                            and iscurrent = 1 and JNS_POTONGAN not in ('PI','PN','PL')
+			                                            update DT_POTONGAN_KELUARGA
+			                                            set status = 'true'
+			                                            where kd_calon = @kdCalon
+		                                            end		
 
-		                                        PRINT 'potongan prestasi'
-	                                                IF exists (SELECT KD_CALON FROM DT_PRESTASI where DT_PRESTASI.KD_CALON = @kdCalon and 
-	                                                DT_PRESTASI.TINGKAT = 'Internasional')
-		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                select distinct kd_Calon,JNS_POTONGAN,JUMLAHPOTONGAN, 'SPU'
-		                                                FROM  MHS_PENDAFTAR INNER JOIN
-                                                     REF_POTONGAN ON MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN.id_jalur_new
-		                                                where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-		                                                and kd_calon = @kdCalon  and  JNS_POTONGAN='PI' and iscurrent = 1
-
-	                                                else if exists (SELECT KD_CALON FROM DT_PRESTASI 
-		                                                where DT_PRESTASI.KD_CALON = @kdCalon and 
-		                                                DT_PRESTASI.TINGKAT = 'Nasional')
-		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                select distinct kd_Calon,JNS_POTONGAN,JUMLAHPOTONGAN, 'SPU'
-		                                                FROM  MHS_PENDAFTAR INNER JOIN
-                                                     REF_POTONGAN ON MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN.id_jalur_new
-		                                                where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-		                                                and kd_calon = @kdCalon  and JNS_POTONGAN='PN' and iscurrent = 1
-
-	                                                else if exists (SELECT KD_CALON FROM DT_PRESTASI 
-	                                                where DT_PRESTASI.KD_CALON = @kdCalon and 
-	                                                DT_PRESTASI.TINGKAT = 'Lokal')
-		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                select distinct kd_Calon,JNS_POTONGAN,JUMLAHPOTONGAN , 'SPU'
-		                                                FROM  MHS_PENDAFTAR INNER JOIN
-                                                     REF_POTONGAN ON MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN.id_jalur_new
-		                                                where th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-		                                                and kd_calon = @kdCalon  and JNS_POTONGAN='PL' and iscurrent = 1
-
-                                                PRINT 'potongan keluarga'
-                                                    IF exists (SELECT KD_CALON FROM DT_POTONGAN_KELUARGA 
-	                                                    where DT_POTONGAN_KELUARGA.KD_CALON = @kdCalon)
-	                                                    begin
-		                                                    INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                    select distinct @kdCalon,JNS_POTONGAN,JUMLAHPOTONGAN, 'SPU' 
-		                                                    from dbo.REF_POTONGAN where JNS_POTONGAN='SORTU' and iscurrent = 1
-
-		                                                    update DT_POTONGAN_KELUARGA
-		                                                    set status = 'true'
-		                                                    where kd_calon = @kdCalon
-	                                                    end		
-
-	                                            PRINT 'cek konsesi/anak karyawan uajy!!'
-	                                                if(@is_konsesi = 'true')
-	                                                begin
-	 
-		                                                --INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                --select @kdCalon,'SPU',@pot_spu, 'SPU'
+	                                            
+                                            PRINT 'cek konsesi/anak karyawan uajy!!'
+	                                            if(
+		                                            @is_konsesi = 'true'
+	                                            )
+		                                            begin
+			                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, id_tagihan)
+			                                            SELECT TOP (1) b.KD_CALON, 'Konsesi' AS Expr1, a.JUMLAH, 'SPP Tetap', d.id_tagihan 
+			                                            FROM SKPU_detail a
+			                                            INNER JOIN MHS_PENDAFTAR b ON a.ID_PRODI = b.MASUK 
+			                                            AND a.THNAKADEMIK = b.THNAKADEMIK
+                                                        INNER JOIN MST_ANGSURAN c ON b.KD_JALUR = c.KD_JALUR AND b.THNAKADEMIK = c.THNAKADEMIK 
+                                                        INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                        INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+			                                            WHERE (a.Jenis = 'Spp Tetap') AND (b.KD_CALON = @kdCalon)
+                                                        and e.nama_tagihan LIKE '%SPP Tetap%'
 		
-		                                                INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis)
-		                                                SELECT TOP (1) MHS_PENDAFTAR.KD_CALON, 'Konsesi' AS Expr1, SKPU_detail.JUMLAH, 'Spp Tetap'
-		                                                FROM SKPU_detail INNER JOIN
-		                                                    MHS_PENDAFTAR ON SKPU_detail.ID_PRODI = MHS_PENDAFTAR.MASUK AND SKPU_detail.THNAKADEMIK = MHS_PENDAFTAR.THNAKADEMIK
-		                                                WHERE (SKPU_detail.Jenis = 'Spp Tetap') AND (MHS_PENDAFTAR.KD_CALON = @kdCalon)
-		
-		                                                update dbo.MHS_PENDAFTAR 
-		                                                set IS_KONSESI  = 'true'
-		                                                where kd_calon = @kdCalon
+			                                            update dbo.MHS_PENDAFTAR 
+			                                            set IS_KONSESI  = 'true'
+			                                            where kd_calon = @kdCalon
 
-		                                                delete from potongan where KD_CALON= @kdcalon and JNS_POTONGAN in ('RAPORT','RANGKING')
-
-	                                                end	
+			                                            delete from potongan where KD_CALON= @kdcalon and JNS_POTONGAN in ('RAPORT','RANGKING')
+		                                            end	
 
 	
-                                                IF exists (select MHS_PENDAFTAR.MASUK from MHS_PENDAFTAR 
-	                                                where masuk < 90 and KD_CALON = @kdCalon)
-	                                                begin
-                                                print 'INSERT POTONGAN PASCASARJANA '
+                                            IF exists (
+	                                            select MHS_PENDAFTAR.MASUK 
+	                                            from MHS_PENDAFTAR 
+	                                            where masuk < 90 and KD_CALON = @kdCalon
+                                            )
+                                            begin
+                                            print 'INSERT POTONGAN PASCASARJANA'
+	                                            if not exists (
+		                                            select id_jalur 
+		                                            from MHS_PENDAFTAR a
+		                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni  
+		                                            and a.KD_JALUR = b.id_jalur 
+		                                            where  a.KD_CALON = @kdCalon
+	                                            )
+		                                            begin
+			                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
+			                                            SELECT a.KD_CALON,'IPK' JNS_POTONGAN, coalesce(SPU,0)* potongan /100 potongan
+			                                            FROM MHS_PENDAFTAR a
+			                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni 
+			                                            left outer JOIN SPU c ON a.KD_CALON = c.KD_CALON
+			                                            WHERE (a.KD_CALON = @kdCalon) 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX 
+			                                            and iscurrent = 1
+			                                            and coalesce(SPU,0) > 0
+			                                            and id_jalur is null
+				                                            union all
+			                                            --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
+			                                            SELECT a.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
+			                                            coalesce(JUMLAH,0)* b.SPP_TETAP /100 potongan
+			                                            FROM MHS_PENDAFTAR a 
+			                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni  
+			                                            left outer JOIN MST_ANGSURAN c ON a.THNAKADEMIK = c.THNAKADEMIK 
+			                                            AND a.periode = c.PERIODE 
+			                                            and a.KD_JALUR = c.KD_JALUR  
+			                                            --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
+			                                            left outer JOIN SKPU_detail d ON a.MASUK = d.ID_PRODI 
+			                                            AND a.THNAKADEMIK = d.THNAKADEMIK 
+			                                            --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
+			                                            WHERE  (a.KD_CALON = @kdCalon) 
+			                                            and d.Jenis ='SPP Tetap' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX 
+			                                            and iscurrent = 1  and id_jalur is null
+				                                            union all
+                                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
+                                                        SELECT a.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
+                                                        coalesce(JUMLAH*pct/100,0)* b.BIAYA_REGIS /100 potongan
+                                                        FROM MHS_PENDAFTAR a 
+			                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni  
+                                                        left outer JOIN MST_ANGSURAN c ON a.THNAKADEMIK = c.THNAKADEMIK 
+                                                        AND a.periode = c.PERIODE  and a.KD_JALUR = c.KD_JALUR  
+                                                        left outer JOIN RUMUS_ANGSURAN_detail d ON c.ID_RUMUS = d.ID_RUMUS 
+			                                            and jenis ='Biaya Herregistrasi'
+                                                        left outer JOIN SKPU_detail e ON a.MASUK = e.ID_PRODI 
+                                                        AND a.THNAKADEMIK = e.THNAKADEMIK 
+                                                        --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
+                                                        WHERE  (a.KD_CALON = @kdCalon) 
+			                                            and e.Jenis ='Biaya Herregistrasi'
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX
+			                                            and iscurrent = 1 and id_jalur is null
+				                                            union 
+                                                        SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
+                                                        FROM REF_POTONGAN a 
+			                                            INNER JOIN MHS_PENDAFTAR b ON a.id_prodi = b.MASUK
+                                                        and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+                                                        where kd_calon = @kdCalon  
+			                                            and iscurrent = 1 
+			                                            and id_jalur is null 
+		                                            end
+	                                            else
+		                                            begin
+                                                        INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
+                                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
+                                                        SELECT a.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
+                                                        coalesce(JUMLAH,0)* b.SPP_TETAP /100 potongan
+                                                        FROM MHS_PENDAFTAR a 
+			                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni 
+			                                            and a.KD_JALUR = b.id_jalur 
+                                                        left outer JOIN MST_ANGSURAN c ON a.THNAKADEMIK = c.THNAKADEMIK 
+                                                        AND a.periode = c.PERIODE
+			                                            and a.KD_JALUR = c.KD_JALUR  
+                                                        --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
+                                                        left outer JOIN SKPU_detail d ON a.MASUK = d.ID_PRODI 
+                                                        AND a.THNAKADEMIK = d.THNAKADEMIK 
+                                                        --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
+                                                        WHERE  (a.KD_CALON = @kdCalon)
+			                                            and d.Jenis ='SPP Tetap' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX 
+			                                            and iscurrent = 1  and id_jalur is not null
+				                                            union all
+			                                            --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
+			                                            SELECT a.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
+			                                            coalesce(JUMLAH*pct/100,0)* b.BIAYA_REGIS /100 potongan
+			                                            FROM MHS_PENDAFTAR a 
+			                                            INNER JOIN REF_POTONGAN_BY_IPK b ON coalesce(a.IS_ALUMNI,0) = b.isAlumni
+			                                            and a.KD_JALUR = b.id_jalur 
+			                                            left outer JOIN MST_ANGSURAN c ON a.THNAKADEMIK = c.THNAKADEMIK 
+			                                            AND a.periode = c.PERIODE
+			                                            and a.KD_JALUR = c.KD_JALUR  
+			                                            left outer JOIN RUMUS_ANGSURAN_detail d ON c.ID_RUMUS = d.ID_RUMUS 
+			                                            and jenis ='Biaya Herregistrasi'
+			                                            left outer JOIN SKPU_detail e ON a.MASUK = e.ID_PRODI 
+			                                            AND a.THNAKADEMIK = e.THNAKADEMIK  
+			                                            WHERE (a.KD_CALON = @kdCalon) 
+			                                            and e.Jenis ='Biaya Herregistrasi' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX 
+			                                            and iscurrent = 1 and id_jalur is not null 
+				                                            union 
+                                                        SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
+                                                        FROM REF_POTONGAN a 
+			                                            INNER JOIN MHS_PENDAFTAR b ON a.id_prodi = b.MASUK
+                                                        and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+                                                        where kd_calon = @kdCalon  and iscurrent = 1 and id_jalur is null 
+		                                            end
+                                                end";
 
-                                                    if not  exists (select id_jalur from MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                                       and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                                     where  MHS_PENDAFTAR.KD_CALON = @kdCalon)
-                                                     begin
-                                                    INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
-                                                    SELECT MHS_PENDAFTAR.KD_CALON,'IPK' JNS_POTONGAN, coalesce(SPU,0)* potongan /100 potongan
-                                                    FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni 
-                                                    left outer JOIN SPU ON MHS_PENDAFTAR.KD_CALON = SPU.KD_CALON
-                                                    WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) AND IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1
-                                                    and  coalesce(SPU,0) >0 and id_jalur is null
-                                                    union all
-                                                    --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                                    SELECT MHS_PENDAFTAR.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
-                                                    coalesce(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan
-                                                    FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                                    left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                                    AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                                    --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
-                                                    left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                                    AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                                    --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                                    WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='SPP Tetap' AND 
-                                                    IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1  and id_jalur is null
-                                                    union all
-                                                    --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                                    SELECT MHS_PENDAFTAR.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
-                                                    coalesce(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan
-                                                    FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                                    left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                                    AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                                     left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS and jenis ='Biaya Herregistrasi'
-                                                    left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                                    AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                                    --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                                    WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='Biaya Herregistrasi' AND 
-                                                    IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1 and id_jalur is null
-                                                    union 
-                                                     SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
-                                                     FROM REF_POTONGAN INNER JOIN
-                                                     MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
-                                                     and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-                                                     where kd_calon = @kdCalon  and iscurrent = 1 and id_jalur is null 
- 
-                                                     end
-                                                     else
-                                                     begin
-                                                    INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
-                                                    --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                                    SELECT MHS_PENDAFTAR.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
-                                                    coalesce(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan
-                                                    FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni     and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                                    left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                                    AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                                    --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
-                                                    left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                                    AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                                    --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                                    WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='SPP Tetap' AND 
-                                                    IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1  and id_jalur is not null
-                                                    union all
-                                                    --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                                    SELECT MHS_PENDAFTAR.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
-                                                    coalesce(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan
-                                                    FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                                    left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                                    AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                                     left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS and jenis ='Biaya Herregistrasi'
-                                                    left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                                    AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK  
-                                                    WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='Biaya Herregistrasi' AND 
-                                                    IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1 and id_jalur is not null 
-                                                    union 
-                                                     SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
-                                                     FROM REF_POTONGAN INNER JOIN
-                                                     MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
-                                                     and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-                                                     where kd_calon = @kdCalon  and iscurrent = 1 and id_jalur is null 
-                                                     end
-                                                 end";
+                    string procedureInsertRmsPtg = @"INSERT INTO potongan([KD_CALON],[JNS_POTONGAN],[JLH_TOTAL],[JENIS],[id_tagihan])
+                                                    SELECT mhs.KD_CALON, ptg.keterangan, ptg.nominal, tgh.nama_tagihan, tgh.id_tagihan
+                                                    FROM detail_rumus_potongan ptg 
+                                                    INNER JOIN MHS_PENDAFTAR mhs ON ptg.kd_jalur = mhs.KD_JALUR AND ptg.id_prodi = mhs.MASUK 
+                                                    INNER JOIN MST_ANGSURAN ags ON ptg.id_rumus = ags.ID_RUMUS AND mhs.KD_JALUR = ags.KD_JALUR AND mhs.THNAKADEMIK = ags.THNAKADEMIK 
+                                                    INNER JOIN ref_tagihan tgh ON ptg.id_tagihan = tgh.id_tagihan
+                                                    WHERE mhs.KD_CALON between @kode_calon_awal and @kode_calon_akhir and mhs.KD_JALUR = @kd_jalur ";
 
+                    string procedureInsertSPU = @"IF EXISTS (SELECT 1 FROM [dbo].[spu] WHERE kd_calon = @kdCalon)
+                                                    BEGIN
+                                                        -- Update existing data
+                                                        PRINT 'update spu'
+                                                        UPDATE [dbo].[spu]
+                                                        SET
+		                                                    username = @username,
+                                                            spu = tr.biaya,
+                                                            tanggal = GETDATE(),
+                                                            tgl_cetak = @tgl_cetak
+                                                        FROM
+                                                            mhs_pendaftar mhs
+                                                            INNER JOIN tr_tarif tr ON mhs.masuk = tr.id_prodi AND mhs.th_masuk = tr.thmasuk 
+                                                            INNER JOIN ref_tagihan tgh ON tr.id_tagihan = tgh.id_tagihan 
+                                                            INNER JOIN mst_angsuran ags ON mhs.kd_jalur = ags.kd_jalur AND mhs.thnakademik = ags.thnakademik 
+                                                            INNER JOIN detail_rumus_angsuran d_ags ON tgh.id_tagihan = d_ags.id_tagihan AND ags.id_rumus = d_ags.id_rumus
+                                                        WHERE
+                                                            mhs.KD_JALUR = @kd_jalur AND
+                                                            tgh.nama_tagihan LIKE '%spu%' AND
+                                                            mhs.kd_calon = @kdCalon;
+                                                    END
+                                                ELSE
+                                                    BEGIN
+                                                        -- Insert new data
+                                                        PRINT 'insert spu'
+                                                        INSERT INTO [dbo].[spu] (kd_calon, username, spu, tanggal, tgl_cetak)
+                                                        SELECT
+                                                            mhs.kd_calon,
+                                                            @username,
+                                                            tr.biaya,
+                                                            GETDATE(),
+                                                            @tgl_cetak
+                                                        FROM
+                                                            mhs_pendaftar mhs
+                                                            INNER JOIN tr_tarif tr ON mhs.masuk = tr.id_prodi AND mhs.th_masuk = tr.thmasuk 
+                                                            INNER JOIN ref_tagihan tgh ON tr.id_tagihan = tgh.id_tagihan 
+                                                            INNER JOIN mst_angsuran ags ON mhs.kd_jalur = ags.kd_jalur AND mhs.thnakademik = ags.thnakademik 
+                                                            INNER JOIN detail_rumus_angsuran d_ags ON tgh.id_tagihan = d_ags.id_tagihan AND ags.id_rumus = d_ags.id_rumus
+                                                        WHERE
+                                                            mhs.KD_JALUR = @kd_jalur AND
+                                                            tgh.nama_tagihan LIKE '%spu%' AND
+                                                            mhs.kd_calon = @kdCalon
+                                                        GROUP BY
+                                                            mhs.kd_calon,
+                                                            tr.biaya,
+                                                            tr.id_tagihan,
+                                                            mhs.th_masuk
+                                                        ORDER BY
+                                                            mhs.th_masuk DESC,
+                                                            mhs.kd_calon;
+                                                    END";
 
-                    string queryTagihan = @"SELECT TOP(1) biaya FROM tr_tarif WHERE id_prodi = @id_prodi and id_tagihan = @id_tagihan and thmasuk = @thn_masuk and iscurrent = '1'";
+                    string procedureInsertAngsuran = @"insert into [dbo].[ANGSURAN_MHS]([KD_CALON],[ANGSURANKE],[TGL_BUKA],[BATAS_WAKTU],
+                                                        [IS_JAMINAN],[ID_REF_TAGIHAN],[SKS],[JUMLAH],[JMLUANG],[POTONGAN],[KET_ANGSURAN], [status])
+                                                        SELECT mhs.KD_CALON , d_ags.angsuran_ke, d_ags.tgl_buka, d_ags.tgl_tutup, 
+                                                        d_ags.is_jaminan, tgh.id_tagihan, trf.jumlah_pengali AS sks, 
+                                                        d_ags.prosentase * trf.jumlah_pengali * trf.biaya/100 jmlh,
+                                                        case when coalesce(JLH_Potongan,0)= 0 then
+                                                        d_ags.prosentase * trf.jumlah_pengali * trf.biaya/100
+                                                        else
+                                                        d_ags.prosentase * ((trf.jumlah_pengali * trf.biaya) - coalesce(JLH_Potongan,0)) /100
+                                                        end AS jumlah_uang, 
+                                                        d_ags.prosentase *   coalesce(JLH_Potongan,0) /100 potongan,
+                                                        cast(prosentase as varchar(5))+'% '+nama_tagihan keterangan,
+                                                        '0'
 
-                    string querySKS = @"SELECT TOP(1) jumlah_pengali FROM tr_tarif WHERE id_prodi = @id_prodi and id_tagihan = @id_tagihan and thmasuk = @thn_masuk and iscurrent = '1'";
+                                                        FROM MHS_PENDAFTAR mhs 
+                                                        INNER JOIN MST_ANGSURAN ags ON mhs.KD_JALUR = ags.KD_JALUR AND mhs.THNAKADEMIK = ags.THNAKADEMIK 
+                                                        INNER JOIN detail_rumus_angsuran d_ags ON ags.ID_RUMUS = d_ags.id_rumus 
+                                                        INNER JOIN ref_tagihan tgh ON d_ags.id_tagihan = tgh.id_tagihan 
+                                                        INNER JOIN tr_tarif trf ON mhs.MASUK = trf.id_prodi AND mhs.TH_MASUK = trf.thmasuk AND tgh.id_tagihan = trf.id_tagihan
+                                                        LEFT OUTER JOIN (select KD_CALON, id_tagihan, sum(JLH_TOTAL) JLH_Potongan from dbo.POTONGAN group by KD_CALON,id_tagihan) POTONGAN   
+                                                        ON POTONGAN.KD_CALON = mhs.KD_CALON AND tgh.id_tagihan = POTONGAN.id_tagihan
+                                                        WHERE mhs.KD_CALON between @calon1 and @calon2
+                                                        AND mhs.KD_JALUR = @kd_jalur ";
+
+                    string queryProdiAda = @"SELECT DISTINCT b.id_prodi
+                                            FROM mhs_pendaftar a
+                                            INNER JOIN ref_prodi b ON a.masuk = b.id_prodi
+                                            INNER JOIN tr_tarif c ON a.masuk = c.id_prodi
+                                            AND a.th_masuk = c.thmasuk
+                                            WHERE kd_calon BETWEEN @calon1 AND @calon2
+                                            AND b.id_prodi NOT IN ('', 00)";
+
+                    string deletePotongan = @"DELETE FROM potongan WHERE KD_CALON = @kdCalon";
+                    string deleteRmsAgs = @"DELETE FROM angsuran_mhs WHERE KD_CALON = @kdCalon";
 
                     if (simpan.kode_calon_akhir.Equals("ubah"))
                     {
-                        string query = queryUbah;
-                        var param = new
+                        var insertSPU = conn.Execute(procedureInsertSPU, new
                         {
-                            kd_calon = simpan.kode_calon_awal,
-                            spu = simpan.spu,
+                            kdCalon = simpan.kode_calon_awal,
                             username = simpan.username,
-                            tgl_cetak = simpan.tgl_cetak
-                        };
-
-                        var data = conn.Execute(query, param);
-
-                        string query2 = queryAgsSPU;
-
-                        var dataAgsMhs2 = conn.Query<AngsuranMhs2>(query2, new { kd_calon_mhs = simpan.kode_calon_awal }).AsList();
-                        int total = simpan.spu;
-                        if (dataAgsMhs2.Count() > 0)
-                        {
-                            for (int i = 0; i < dataAgsMhs2.Count(); i++)
-                            {
-                                total = total - dataAgsMhs2[i].potongan;
-                                string persenHilang = new string(dataAgsMhs2[i].ket_angsuran.Where(char.IsDigit).ToArray());
-                                int nilaiPersen;
-                                if (int.TryParse(persenHilang, out nilaiPersen))
-                                {
-                                    total = (total * nilaiPersen) / 100;
-                                }
-                                string ubahAngsuranTidakAktif = @"UPDATE angsuran_mhs SET
-                                                                    jmluang = @total_uang,
-                                                                    jumlah = @jumlah
-                                                                WHERE kd_calon = @kd_calon_mhs and angsuranke = @angsuranke and ket_angsuran = @ket_angsuran";
-                                var paramTidakAktif = new
-                                {
-                                    total_uang = total,
-                                    jumlah = simpan.spu,
-                                    kd_calon_mhs = simpan.kode_calon_awal,
-                                    angsuranke = dataAgsMhs2[i].angsuranke,
-                                    ket_angsuran = dataAgsMhs2[i].ket_angsuran,
-                                };
-                                var ubahAngsuranMhs = conn.Execute(ubahAngsuranTidakAktif, paramTidakAktif);
-                                total = simpan.spu;
-                                continue;
-                            }
-                        }
+                            tgl_cetak = simpan.tgl_cetak,
+                            kd_jalur = simpan.kd_jalur
+                        });
                         return true;
                     }
                     else
                     {
-                        int SPU = 0;
-                        string kd_calon_mhs = "";
-                        string thnmasuk = "";
-                        int id_rumus = 0;
-                        int id_tagihan_mhs = 0;
-
-                        string GetKdCalon = @"SELECT kd_calon FROM mhs_pendaftar WHERE masuk = @id_prodi and kd_jalur = @jalur and kd_calon BETWEEN @kd_awal AND @kd_akhir ORDER BY kd_calon ASC";
-
-                        var KdCalon = conn.Query<string>(GetKdCalon, new { id_prodi = simpan.id_prodi, jalur = simpan.kd_jalur, kd_awal = simpan.kode_calon_awal, kd_akhir = simpan.kode_calon_akhir,  }).AsList();
-
-                        if (KdCalon.Count() > 0)
+                        if (simpan.id_prodi.Equals("All"))
                         {
-                            for (int i = 0; i < KdCalon.Count(); i++)
+                            var param = new { calon1 = simpan.kode_calon_awal, calon2 = simpan.kode_calon_akhir };
+                            var ListProdiAda = conn.Query<string>(queryProdiAda, param).AsList();
+
+                            string cariKdCalon = @"select kd_calon,
+                                                    case 
+	                                                    when is_konsesi = '1' then 'true'
+	                                                    else 'false'
+                                                    end as konsesi
+                                                    from mhs_pendaftar 
+                                                    where kd_calon between @calon1 AND @calon2 
+                                                    and kd_jalur = @kd_jalur
+                                                    and masuk in @listProdi";
+                            var kdCalon = conn.Query<dynamic>(cariKdCalon, new
                             {
-                                kd_calon_mhs = KdCalon[i];
+                                calon1 = simpan.kode_calon_awal,
+                                calon2 = simpan.kode_calon_akhir,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = ListProdiAda
+                            }).AsList();
 
-                                string GetTA = @"SELECT TOP(1) thnakademik FROM mhs_pendaftar WHERE kd_calon = @kd_calon_mhs"; 
+                            foreach (var items in kdCalon)
+                            {
+                                var deleteAllPtg = conn.Execute(deletePotongan, new { kdCalon = items.kd_calon });
+                                var deleteAgs = conn.Execute(deleteRmsAgs, new { kdCalon = items.kd_calon });
+                                var insertPtgSPU = conn.Execute(procedurePtgSPU, new { kdCalon = items.kd_calon, is_konsesi = items.konsesi });
+                            }
 
-                                var TA = conn.QueryFirstOrDefault<string>(GetTA, new { kd_calon_mhs = kd_calon_mhs });
+                            procedureInsertRmsPtg = procedureInsertRmsPtg + @" and mhs.masuk in @listProdi";
+                            var insertRmsPtg = conn.Execute(procedureInsertRmsPtg, new
+                            {
+                                kode_calon_awal = simpan.kode_calon_awal,
+                                kode_calon_akhir = simpan.kode_calon_akhir,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = ListProdiAda
+                            });
 
-                                if (!String.IsNullOrEmpty(TA))
-                                {
-                                    string GetRmsAgs = @"SELECT TOP(1) id_rumus FROM mst_angsuran WHERE kd_jalur = @kd_jalur and thnakademik = @ta";
-
-                                    var IdRumus = conn.QueryFirstOrDefault<int>(GetRmsAgs, new { kd_jalur = simpan.kd_jalur, ta = TA });
-
-                                    if (IdRumus > 0)
-                                    {
-                                        id_rumus = IdRumus;
-                                        string GetIdTagihan = @"SELECT TOP(1) a.id_tagihan 
-                                                                FROM detail_rumus_angsuran a 
-                                                                JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan 
-                                                                WHERE id_rumus = @id_rumus and b.nama_tagihan like '%SPU%'";
-
-                                        var IdTagihan = conn.QueryFirstOrDefault<int>(GetIdTagihan, new { id_rumus = IdRumus });
-
-                                        if (IdTagihan > 0)
-                                        {
-                                            id_tagihan_mhs = IdTagihan;
-                                            string GetSPU = queryTagihan;
-
-                                            string[] parts = TA.Split(new char[] { '/' });
-                                            thnmasuk = parts[0];
-                                            var data_SPU = conn.QueryFirstOrDefault<int>(GetSPU, new { id_prodi = simpan.id_prodi, id_tagihan = IdTagihan, thn_masuk = int.Parse(thnmasuk) });
-
-                                            SPU = data_SPU;
-                                        }
-                                    }
-                                }
-
-
-
-                                // Delete Potongan
-                                string deletePotongan = @"DELETE FROM potongan where kd_calon = @kdCalon;";
-                                var deleteAllPtg = conn.Execute(deletePotongan, new { kdCalon = kd_calon_mhs });
-
-                                // Insert Potongan SPU
-                                string getKonsesiCalon = @"select 
-                                                            CASE
-                                                                WHEN is_konsesi = 1 THEN 'true'
-                                                                ELSE 'false'
-                                                            END as is_konsesi 
-                                                        from mhs_pendaftar where kd_calon = @kdCalon;";
-                                var is_konsesi = conn.QueryFirstOrDefault<string>(getKonsesiCalon, new { kdCalon = kd_calon_mhs });
-                                var dataPotongan = conn.Execute(procedurePtgSPU, new { kdCalon = kd_calon_mhs, is_konsesi = is_konsesi });
-
-                                // Insert Detail Rumus Potongan 
-                                string queryPtgMhs = @"SELECT nominal, keterangan, id_tagihan
-                                                            FROM detail_rumus_potongan 
-                                                            WHERE id_rumus = @id_rumus and id_prodi = @prodi and kd_jalur = @jalur";
-
-                                var dataRmsPtg = conn.Query<DetailRmsPtg>(queryPtgMhs, new { id_rumus = id_rumus, prodi = simpan.id_prodi, jalur = simpan.kd_jalur }).AsList();
-
-                                if (dataRmsPtg.Count() > 0)
-                                {
-
-                                    string insertRmsPtg = queryInsertRmsPtg;
-                                    for (int m = 0; m < dataRmsPtg.Count(); m++)
-                                    {
-                                        var paramPtg = new
-                                        {
-                                            kode_calon = kd_calon_mhs,
-                                            jns_ptg = dataRmsPtg[m].keterangan,
-                                            jmlUang = dataRmsPtg[m].nominal,
-                                            tagihan = dataRmsPtg[m].id_tagihan
-                                        };
-
-                                        var data2 = conn.Execute(insertRmsPtg, paramPtg);
-                                        continue;
-                                    }
-                                }
-
-
-                                //Insert SPU
-                                string queryCekCalon = @"SELECT * FROM SPU WHERE kd_calon = @kd_calon_mhs";
-
-                                var CalonMhs = conn.Query<dynamic>(queryCekCalon, new { kd_calon_mhs = kd_calon_mhs }).AsList();
-
-                                string query = @"";
-                                if (CalonMhs.Count > 0)
-                                {
-                                    query = query + queryUbah;
-                                }
-                                else
-                                {
-                                    query = query + queryTambah;
-                                }
-
-                                var param = new
-                                {
-                                    kd_calon = kd_calon_mhs,
-                                    spu = SPU,
+                            procedureInsertAngsuran = procedureInsertAngsuran + @" and mhs.masuk in @listProdi";
+                            var insertAgs = conn.Execute(procedureInsertAngsuran, new { 
+                                calon1 = simpan.kode_calon_awal, 
+                                calon2 = simpan.kode_calon_akhir ,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = ListProdiAda
+                            });
+                            foreach (var items in kdCalon)
+                            {
+                                var insertSPU = conn.Execute(procedureInsertSPU, new {
+                                    kdCalon = items.kd_calon,
                                     username = simpan.username,
-                                    tgl_cetak = simpan.tgl_cetak
-                                };
+                                    tgl_cetak = simpan.tgl_cetak,
+                                    kd_jalur = simpan.kd_jalur
+                                });
+                            }
+                            return true;
+                        }
+                        else
+                        {
+                            var param = new { calon1 = simpan.kode_calon_awal, calon2 = simpan.kode_calon_akhir };
+                            var ListProdiAda = conn.Query<string>(queryProdiAda, param).AsList();
 
-                                var data = conn.Execute(query, param);
+                            string cariKdCalon = @"select kd_calon,
+                                                    case 
+	                                                    when is_konsesi = '1' then 'true'
+	                                                    else 'false'
+                                                    end as konsesi
+                                                    from mhs_pendaftar 
+                                                    where kd_calon between @calon1 AND @calon2 
+                                                    and kd_jalur = @kd_jalur
+                                                    and masuk = @listProdi";
+                            var kdCalon = conn.Query<dynamic>(cariKdCalon, new
+                            {
+                                calon1 = simpan.kode_calon_awal,
+                                calon2 = simpan.kode_calon_akhir,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = simpan.id_prodi
+                            }).AsList();
 
-                                //Insert Angsuran Mhs
-                                string GetAllAgs = @"SELECT 
-                                                        a.id_tagihan,
-                                                        b.nama_tagihan,
-                                                        angsuran_ke, 
-                                                        CAST(prosentase as int) presentase, 
-                                                        tgl_buka, 
-                                                        tgl_tutup, 
-                                                        is_jaminan 
-                                                    FROM detail_rumus_angsuran a
-                                                    JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
-                                                    WHERE id_rumus = @id_rumus
-                                                    ORDER BY id_tagihan asc";
+                            foreach (var items in kdCalon)
+                            {
+                                var deleteAllPtg = conn.Execute(deletePotongan, new { kdCalon = items.kd_calon });
+                                var deleteAgs = conn.Execute(deleteRmsAgs, new { kdCalon = items.kd_calon });
+                                var insertPtgSPU = conn.Execute(procedurePtgSPU, new { kdCalon = items.kd_calon, is_konsesi = items.konsesi });
+                            }
 
-                                var dataAgs = conn.Query<DetailRmsAgs>(GetAllAgs, new { id_rumus = id_rumus }).AsList();
-                               
+                            procedureInsertRmsPtg = procedureInsertRmsPtg + @" and mhs.masuk = @listProdi";
+                            var insertRmsPtg = conn.Execute(procedureInsertRmsPtg, new
+                            {
+                                kode_calon_awal = simpan.kode_calon_awal,
+                                kode_calon_akhir = simpan.kode_calon_akhir,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = simpan.id_prodi
+                            });
 
-                                string queryAngsuranMhs2 = @"SELECT kd_calon, angsuranke, ket_angsuran, potongan FROM angsuran_mhs WHERE kd_calon = @kd_calon_mhs and status = '0'";
-
-                                var dataAgsMhs2 = conn.Query<AngsuranMhs2>(queryAngsuranMhs2, new { kd_calon_mhs = kd_calon_mhs }).AsList();
-
-                                if(dataAgsMhs2.Count() > 0)
+                            procedureInsertAngsuran = procedureInsertAngsuran + @" and mhs.masuk = @listProdi";
+                            var insertAgs = conn.Execute(procedureInsertAngsuran, new
+                            {
+                                calon1 = simpan.kode_calon_awal,
+                                calon2 = simpan.kode_calon_akhir,
+                                kd_jalur = simpan.kd_jalur,
+                                listProdi = simpan.id_prodi
+                            });
+                            foreach (var items in kdCalon)
+                            {
+                                var insertSPU = conn.Execute(procedureInsertSPU, new
                                 {
-                                    for(int l = 0; l < dataAgsMhs2.Count(); l++)
-                                    {
-                                        string ubahAngsuranTidakAktif = @"DELETE FROM angsuran_mhs
-                                                                        WHERE kd_calon = @kd_calon_mhs and angsuranke = @angsuranke and ket_angsuran = @ket_angsuran";
-                                        var paramTidakAktif = new
-                                        {
-                                            kd_calon_mhs = kd_calon_mhs,
-                                            angsuranke = dataAgsMhs2[l].angsuranke,
-                                            ket_angsuran = dataAgsMhs2[l].ket_angsuran,
-                                        };
-                                        var ubahAngsuranMhs = conn.Execute(ubahAngsuranTidakAktif, paramTidakAktif);
-                                        continue;
-                                    }
-                                }
-
-                                string queryAngsuranMhs = @"SELECT * FROM angsuran_mhs WHERE kd_calon = @kd_calon_mhs and status = '1'";
-
-                                var dataAgsMhs = conn.Query<dynamic>(queryAngsuranMhs, new { kd_calon_mhs = kd_calon_mhs }).AsList();
-
-                                // Foreacch Insert Angsuran Mhs
-                                if (dataAgsMhs.Count() < 1)
-                                {
-                                    if (dataAgs.Count > 0)
-                                    {
-                                        for (int j = 0; j < dataAgs.Count(); j++)
-                                        {
-                                            int total = 0;
-                                            int sks = 0;
-                                            string GetBiaya = queryTagihan;
-
-                                            string[] parts = TA.Split(new char[] { '/' });
-                                            thnmasuk = parts[0];
-                                            if (Regex.IsMatch(dataAgs[j].nama_tagihan, @"SPP Variabel"))
-                                            {
-                                                string GetSks = querySKS;
-                                                var data_Sks = conn.QueryFirstOrDefault<int>(GetSks, new { id_prodi = simpan.id_prodi, id_tagihan = dataAgs[j].id_tagihan, thn_masuk = int.Parse(thnmasuk) });
-                                                sks = data_Sks;
-
-                                            }
-                                            var data_Biaya = conn.QueryFirstOrDefault<int>(GetBiaya, new { id_prodi = simpan.id_prodi, id_tagihan = dataAgs[j].id_tagihan, thn_masuk = int.Parse(thnmasuk) });
-
-                                            total = data_Biaya;
-                                            if (Regex.IsMatch(dataAgs[j].nama_tagihan, @"SPP Variabel"))
-                                            {                                          
-                                                total = total * sks;
-                                                data_Biaya = total;
-                                            }
-                                            string GetAllPtg = @"SELECT TOP(1) nominal 
-                                                                FROM detail_rumus_potongan 
-                                                                WHERE id_rumus = @id_rumus and id_prodi = @id_prodi and id_tagihan = @id_tagihan";
-                                            var data_Ptg = conn.QueryFirstOrDefault<int>(GetAllPtg, new { id_rumus = id_rumus, id_prodi = simpan.id_prodi, id_tagihan = dataAgs[j].id_tagihan });
-                                            total = total - data_Ptg;
-                                            if (dataAgs[j].presentase == 100)
-                                            {
-                                                total = total * 1;
-                                            }
-                                            else
-                                            {
-                                                total = (total * dataAgs[j].presentase)/ 100;
-                                            }
-                                            var param2 = new
-                                            {
-                                                kode_calon = kd_calon_mhs,
-                                                angsuran_ke = dataAgs[j].angsuran_ke,
-                                                jmlUang = total,
-                                                tgl_buka = dataAgs[j].tgl_buka,
-                                                batas_waktu = dataAgs[j].tgl_tutup,
-                                                ket_ags = dataAgs[j].presentase + "% " + dataAgs[j].nama_tagihan,
-                                                is_jaminan = dataAgs[j].is_jaminan,
-                                                jumlah = data_Biaya,
-                                                ptg = data_Ptg,
-                                                sks = sks,
-                                            };
-
-                                            var data2 = conn.Execute(queryTambah2, param2);
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                // ubah angsuran_mhs sesuai tabel potongan
-                                string queryCekPotongan = @"SELECT jenis, jlh_total FROM potongan WHERE kd_calon = @kd_calon_mhs and id_tagihan is null";
-
-                                var dataSPUPtg = conn.Query<DetailPtg>(queryCekPotongan, new { kd_calon_mhs = kd_calon_mhs }).AsList();
-
-                                if(dataSPUPtg.Count > 0)
-                                {
-                                    for(int n = 0; n < dataSPUPtg.Count(); n++)
-                                    {
-
-                                        string jenisPotongan = dataSPUPtg[n].jenis;
-
-                                        string queryPtgSPU = @"SELECT kd_calon, angsuranke, ket_angsuran, potongan, jumlah
-                                                              FROM angsuran_mhs 
-                                                              WHERE ket_angsuran LIKE '%' + @jenisPotongan + '%'
-                                                              AND kd_calon = @kd_calon_mhs 
-                                                              AND status = '0'";
-
-                                        int ptgSPU = dataSPUPtg[n].jlh_total;
-
-                                        var dataAgsMhsSPU = conn.Query<AngsuranMhs2>(queryPtgSPU, new { kd_calon_mhs = kd_calon_mhs, jenisPotongan }).AsList();
-
-                                        for (int p = 0; p < dataAgsMhsSPU.Count; p++)
-                                        {
-                                            int biayaPotong = (dataAgsMhsSPU[p].potongan > 0) ? (dataAgsMhsSPU[p].potongan + ptgSPU) : ptgSPU;
-                                            int totalUang = dataAgsMhsSPU[p].jumlah - ptgSPU;
-                                            int jumlah = totalUang;
-                                            string persenHilang = new string(dataAgsMhsSPU[p].ket_angsuran.Where(char.IsDigit).ToArray());
-                                            int nilaiPersen;
-                                            if (int.TryParse(persenHilang, out nilaiPersen))
-                                            {
-                                                totalUang = (totalUang * nilaiPersen) / 100;
-                                            }
-                                            string ubahAngsuranSPU = @"UPDATE angsuran_mhs SET
-                                                                    jmluang = @total_uang,
-                                                                    potongan = @pot_uang
-                                                                WHERE kd_calon = @kd_calon_mhs and angsuranke = @angsuranke and ket_angsuran = @ket_angsuran";
-                                            var paramSPU = new
-                                            {
-                                                total_uang = totalUang,
-                                                jumlah = jumlah,
-                                                kd_calon_mhs = kd_calon_mhs,
-                                                angsuranke = dataAgsMhsSPU[p].angsuranke,
-                                                ket_angsuran = dataAgsMhsSPU[p].ket_angsuran,
-                                                pot_uang = biayaPotong
-                                            };
-                                            var ubahAngsuranMhs = conn.Execute(ubahAngsuranSPU, paramSPU);
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                // ubah SPU sesuai nilai angsuran
-                                //string queryJlhAgsTerbaru = @"SELECT jumlah FROM angsuran_mhs WHERE kd_calon = @kd_calon_mhs and ket_angsuran LIKE '%SPU%'";
-
-                                //var jlhAgsTerbaru = conn.QueryFirstOrDefault<int>(queryJlhAgsTerbaru, new { kd_calon_mhs = kd_calon_mhs });
-
-
-                                //string ubahJlhSPUTerbaru = @"UPDATE spu SET
-                                //                        spu = @jlh
-                                //                        WHERE kd_calon = @kd_calon_mhs";
-                                //var ubahjlhAgsTerbaru = conn.Execute(ubahJlhSPUTerbaru, new { jlh = jlhAgsTerbaru, kd_calon_mhs = kd_calon_mhs });
-
+                                    kdCalon = items.kd_calon,
+                                    username = simpan.username,
+                                    tgl_cetak = simpan.tgl_cetak,
+                                    kd_jalur = simpan.kd_jalur
+                                });
                             }
 
                             return true;

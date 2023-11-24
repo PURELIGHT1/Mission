@@ -52,7 +52,7 @@ namespace PMB.DAO
             }
         }
 
-        public List<dynamic> GetAllFilterCalonMhs()
+        public List<dynamic> GetAllFilterCalonMhs(string ta, string jenjang, string jalur)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
@@ -85,26 +85,20 @@ namespace PMB.DAO
 									  LEFT OUTER JOIN [dbo].[REF_PRODI] PRD_3 ON MHS.[PILIHAN_3] = PRD_3.[ID_PRODI]
 									  LEFT OUTER JOIN [dbo].[REF_PRODI] MSK ON MHS.[MASUK] = MSK.[ID_PRODI]
                                       LEFT OUTER JOIN [dbo].[REF_JALUR] JLR ON MHS.[KD_JALUR] = JLR.[KD_JALUR]
-									  LEFT OUTER JOIN [Mst_Referensi].[dbo].[REF_SMA] SMA ON MHS.[ID_SMA] = SMA.[ID_SMA]";
-                                      //WHERE " ;
-                    //if (String.IsNullOrEmpty(search))
-                    //{
-                    //    query = query + @"([THNAKADEMIK] = @thnAkademik)";
-                    //}
-                    //else if (String.IsNullOrEmpty(ta))
-                    //{
-                    //    query = query + @"([KD_CALON] LIKE '%"+HttpUtility.UrlEncode(search)+ "%' OR " +
-                    //        "[NM_CALON] LIKE '%"+HttpUtility.UrlEncode(search)+"%')";
-                    //} 
-                    //else
-                    //{
-                    //    query = query + @"([THNAKADEMIK] = @thnAkademik and [KD_CALON] LIKE '%" + HttpUtility.UrlEncode(search) + "%' OR " +
-                    //       "[NM_CALON] LIKE '%" + HttpUtility.UrlEncode(search) + "%')";
-                    //}
-                    query = query + @"ORDER BY CONVERT(INT, [KD_CALON]) DESC;";
+									  LEFT OUTER JOIN [Mst_Referensi].[dbo].[REF_SMA] SMA ON MHS.[ID_SMA] = SMA.[ID_SMA]
+									  WHERE MHS.thnakademik = @ta and JLR.jenjang = @jenjang ";
+                    if (jalur != "All")
+                    {
+                        query = query + @"and MHS.kd_jalur = @jalur";
+                    }
+                    query = query + @" ORDER BY CONVERT(INT, [KD_CALON]) DESC;";
 
-                    //WHERE [KD_CALON] = '22334455'";
-                    var data = conn.Query<dynamic>(query).AsList();
+                    var data = conn.Query<dynamic>(query, new
+                    {
+                        ta = ta,
+                        jenjang = jenjang,
+                        jalur = jalur
+                    }).AsList();
 
                     return data;
                 }
@@ -125,7 +119,7 @@ namespace PMB.DAO
             {
                 try
                 {
-                    string query = @"SELECT a.kd_calon
+                    string query = @"SELECT a.kd_calon,
                                            nm_calon,
 	                                       c.nama_jalur,
 	                                       b.alamat,

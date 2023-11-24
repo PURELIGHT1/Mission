@@ -46,15 +46,21 @@ namespace PMB.DAO
                     string query = @"SELECT TOP(1)
                                       a.kd_calon,
                                       a.thnakademik,
+                                      a.kd_jalur,
                                       b.nama_jalur,
                                       a.nm_calon,
                                       d.nm_fakultas,
-                                      c.nm_prodi
+                                      c.nm_prodi,
+									  a.kwrganegaraan,
+                                      FORMAT(e.registrasi_selesai,'dd MMMM yyyy','id-id') as ket_tgl_regis,
+									  FORMAT(f.tgl_cetak,'dd MMMM yyyy','id-id') as tgl_cetak
                                     FROM mhs_pendaftar a  
                                     left outer join ref_jalur b ON a.kd_jalur = b.kd_jalur
                                     left outer join ref_prodi c ON a.masuk = c.id_prodi
                                     left outer join ref_fakultas d ON c.id_fakultas = d.id_fakultas
-                                    WHERE kd_calon = @kd_calon";
+                                    inner join tbl_jadwal_jalur e ON a.kd_jalur = e.kd_jalur
+                                    left outer join spu f ON a.kd_calon = f.kd_calon
+                                    WHERE a.kd_calon = @kd_calon";
 
                     var data = conn.QueryFirstOrDefault<CetakSKPUKMhs>(query, new { kd_calon = id });
 
@@ -260,6 +266,27 @@ namespace PMB.DAO
             }
         }
 
+        public dynamic GetTTDRektor()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"select top(1) nama, foto, jabatan from ref_pejabat;";
+                    var data = conn.QueryFirstOrDefault<dynamic>(query);
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<PembayaranSKPUK> GetBayarSKPUK(string id)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
@@ -286,11 +313,12 @@ namespace PMB.DAO
                     {
                         for(int i = 0; i < data3.Count(); i++)
                         {
-                            string query = @"select 
+                            string query = @"select top(1)
+                                                is_jaminan,
                                                 jumlah,
                                                 ket_angsuran, 
                                                 tgl_buka, 
-                                                batas_waktu 
+                                                FORMAT(batas_waktu,'dd MMMM yyyy','id-id') batas_waktu
                                             from angsuran_mhs
                                             where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null;";
 

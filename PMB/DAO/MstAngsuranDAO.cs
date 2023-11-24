@@ -233,7 +233,7 @@ namespace PMB.DAO
             {
                 try
                 {
-                    string query = @"SELECT * FROM dbo.REF_JALUR";
+                    string query = @"SELECT * FROM dbo.REF_JALUR ORDER BY nama_jalur ASC";
 
                     var data = conn.Query<Jalur>(query).AsList();
 

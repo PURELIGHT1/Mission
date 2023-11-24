@@ -101,24 +101,24 @@
 
             <div class="customRow">
                 <div style="display: flex;">
-                    <select id="customFilter" class="form-select" style="width: 200px; margin-right: 10px;">
-                        <option value="S1">Sarjana</option>
-                        <option value="S2">Pasca Sarjana</option>
+                    <select id="jenjangFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                        <option value="s1">Sarjana</option>
+                        <option value="s2">Pasca Sarjana</option>
                     </select>
 
-                    <select id="customFilter2" class="form-select" style="width: 200px; margin-right: 10px;">
-                    <option value="All" selected>Semua</option>
+                    <select id="tahunFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                    @* <option value="All" selected>Semua</option> *@
                         @foreach (var item in Model.AllTahunAkademik)
                         {
                             <option value="@item.Value">@item.Text</option>
                         }
                     </select>
 
-                    <select id="customFilter3" class="form-select" style="width: 200px; margin-right: 10px;">
+                    <select id="jalurFilter" class="form-select" style="width: 200px; margin-right: 10px;">
                     <option value="All" selected>Semua</option>
                     @foreach (var item in Model.JalurList)
                         {
-                        <option value="@item.nama_jalur">@item.nama_jalur</option>
+                        <option value="@item.kd_jalur">@item.nama_jalur</option>
                         }
                     </select>
                 </div>
@@ -170,7 +170,7 @@
 <script>
     $(document).ready(function () {
         var table = $('#TabelCalonMhs').DataTable({
-            // "data": data, // Menggunakan data yang diterima dari AJAX
+            // "data": result,
             "columns": [
                 { "data": "KD_CALON" },
                 { "data": "NM_CALON" },
@@ -178,7 +178,7 @@
                 { "data": "PILIHAN_1" },
                 { "data": "PILIHAN_2" },
                 { "data": "PILIHAN_3" },
-                { 
+                {
                     "data": "MASUK",
                     "render": function (data, type, row) {
                         if (type === 'display') {
@@ -213,7 +213,7 @@
             ],
             "columnDefs": [
                 {
-                    "targets": [9,10,11],
+                    "targets": [9, 10, 11],
                     "visible": false,
                 }
             ],
@@ -221,75 +221,71 @@
             "searching": true
         });
 
-        $.ajax({
-            url: '@Url.Action("GetAllCalonMhs", "CalonMhs")',// Ganti dengan URL controller Anda
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                console.log(data);
-                table.rows.add(data).draw();
-                table.column(9).search('S1').draw();
-                table.column(10).search('').draw();
-                table.column(2).search('').draw();
 
-            },
-            error: function () {
-                console.error('Gagal mengambil data referensi.');
-            }
-        });
+        function SetTabelCalonMhs(result) {
+            table.clear();
+            table.rows.add(result).draw();
+        }
 
-        $('#customFilter').on('change', function () {
+
+        var thnAkademik = $("#tahunFilter").val();
+        var jenjang = $("#jenjangFilter").val();
+        var jalur = $("#jalurFilter").val();
+
+        function getDataAndInitializeTable() {
+            $.ajax({
+                url: '@Url.Action("GetAllCalonMhs", "CalonMhs")',
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    SetTabelCalonMhs(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data referensi.');
+                }
+            });
+        }
+
+        getDataAndInitializeTable();
+
+        $('#jenjangFilter').on('change', function () {
             var filterValue = $(this).val();
-            if (filterValue === '') {
-                table.columns().search('').draw();
-            } else {
-                table.column(9).search(filterValue).draw();
-            }
+            jenjang = filterValue;
+            handleFilterChange();
         });
 
-        $('#customFilter2').on('change', function () {
+        $('#tahunFilter').on('change', function () {
             var filterValue = $(this).val();
-            if (filterValue === 'All') {
-                table.columns().search('').draw();
-            } else {
-                table.column(10).search(filterValue).draw(); 
-            }
+            thnAkademik = filterValue;
+            handleFilterChange();
         });
 
-        $('#customFilter3').on('change', function () {
+        $('#jalurFilter').on('change', function () {
             var filterValue = $(this).val();
-            console.log(filterValue);
-            if (filterValue === 'All') {
-                table.columns().search('').draw();
-            } else {
-                table.column(2).search(filterValue).draw();
-            }
+            jalur = filterValue;
+            handleFilterChange();
         });
-
-        // $('#customFilter4').on('change', function () {
-        //     var filterValue = $(this).get(0).checked;
-        //     console.log(filterValue);
-
-        //     var rows = table.rows().nodes();
-
-        //     rows.each(function (row) {
-        //         var cellValue = table.cell(row, 6).data();
-        //         var showRow = filterValue ? cellValue === '-' : cellValue !== '-';
-
-        //         if (showRow) {
-        //             $(row).removeClass('d-none');
-        //         } else {
-        //             $(row).addClass('d-none');
-        //         }
-        //     });
-        // });
-
         
+        function handleFilterChange() {
+            $.ajax({
+                url: '@Url.Action("GetAllCalonMhs", "CalonMhs")?ta=' + thnAkademik + '&jenjang=' + jenjang + '&jalur=' + jalur,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    SetTabelCalonMhs(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data referensi.');
+                }
+            });
+        }
         $('#ExportExcelCalon').on('click', function () {
-            var ta = "2022/2023";
-            var jenjang = "S1";
-            var taFilter = $("#customFilter2").val()
-            var jenjangFilter = $("#customFilter").val();
+            var ta = "2023/2024";
+            var jenjang = "s1";
+            var taFilter = $("#tahunFilter").val()
+            var jenjangFilter = $("#jenjangFilter").val();
             if (jenjangFilter !== "") {
                 jenjang = jenjangFilter;
             }

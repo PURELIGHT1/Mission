@@ -124,12 +124,27 @@
             width: 108%;
         }
 
+        .floatLeftText {
+            text-align: justify;
+            float: left;
+            width: 108%;
+        }
+
         #keterangan {
             text-align: justify-center;
             float: left;
             width: 108%;
         }
+        
+        /* .gambar-styled {
+            max-width: 1000px;
+            height: auto;
+        } */
 
+        .pdf-styled {
+            width: 100%;
+            height: 600px;
+        }
     </style>
 </head>
 
@@ -174,11 +189,13 @@
 
         @{
             string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
-            string jml_setelah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
+            string jml_setelah_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+            string uang_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.uang_jaminan);
+            string tanggal_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.tanggal_jaminan);
 
         }
 
-        <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>), dengan perincian sebagai berikut:</p>
+        <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah_potongan</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>), dengan perincian sebagai berikut:</p>
         <br />
 
         <table id="tblJenisBayar" width="49%" style="float: left;">
@@ -206,10 +223,10 @@
                 @{
 
                     string jml_sebelum = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_sebelum_potongan);
-                    <tr>
-                        <td id="ketSebelum">Jumlah sebelum potongan</td>
-                        <td id="jmlSebelum"><span style="float:left;">Rp.</span>@jml_sebelum</td>
-                    </tr>
+                        <tr>
+                            <td id="ketSebelum">Jumlah sebelum potongan</td>
+                            <td id="jmlSebelum"><span style="float:left;">Rp.</span>@jml_sebelum</td>
+                        </tr>
                 }
                 
             </tbody>
@@ -240,129 +257,125 @@
                 </tr>
                 <tr>
                     <td id="ketSetelah">Jumlah setelah potongan</td>
-                    <td id="jmlSetelah"><span style="float:left">Rp.</span>@jml_setelah</td>
+                    <td id="jmlSetelah"><span style="float:left">Rp.</span>@jml_setelah_potongan</td>
                 </tr>
-              @*   <tr>
-                    <td id="isiJenisPotongan">Unggulan (Potongan SPU)</td>
-                    @if (Model.DataMhs.potUnggulan != 0)
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potUnggulan</td>
-                    }
-                    else{
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
-                    }
-                </tr>
-                <tr>
-                    <td id="isiJenisPotongan">Keluarga (Potongan SPU)</td>
-                    @if (Model.DataMhs.potKeluarga != 0)
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKeluarga</td>
-                    }
-                    else
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
-                    }
-                </tr>
-                <tr>
-                    <td id="isiJenisPotongan">Prestasi (Potongan SPU)</td>
-                    @if (Model.DataMhs.potPrestasi != 0)
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potPrestasi</td>
-                    }
-                    else
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
-                    }
-                </tr>
-                <tr>
-                    <td id="isiJenisPotongan">Keringanan SPU</td>
-                    @if (Model.DataMhs.potKeringananSPU != 0)
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKeringananSPU</td>
-                    }
-                    else
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
-                    }
-                </tr>
-                <tr>
-                    <td id="isiJenisPotongan">Konsesi (Potongan SPP)</td>
-                    @if (Model.DataMhs.potKonsesi != 0)
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>@potKonsesi</td>
-                    }
-                    else
-                    {
-                        <td id="isiTotalBayar"><span style="float:left">Rp.</span>0</td>
-                    }
-                </tr>
-                <tr></tr>
-                <tr>
-                    <td id="potSPU">Jumlah potongan</td>
-                    <td id="jmlPotongan"><span style="float:left">Rp.</span>@jml_potongan</td>
-                </tr>
-                <tr>
-                    <td id="ketSetelah">Jumlah setelah potongan</td>
-                    <td id="jmlSetelah"><span style="float:left">Rp.</span>@jml_setelah</td>
-                </tr> *@
             </tbody>
         </table>
-
-        <p id="ketBerkeberatan">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya sesuai tanggal angsuran 1 atau apabila berkeberatan dapat diangsur dengan jadwal pembayaran sebagai berikut:</p>
-        <br />
-
-        <table id="tblAngsuran" style="width: 100%; border-collapse:collapse;">
-            <thead>
-                <tr>
-                    <th>Angsuran</th>
-                    <th>Batas Waktu Pembayaran</th>
-                    <th>Keterangan Angsuran</th>
-                    <th>Jumlah</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.ListAngsuranMhs != null)
-                {
-                    foreach (var itemAngsuran in Model.ListAngsuranMhs)
-                    {
-                        string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
-
-                        <tr>
-                            @*  @if (item.AngsuranKe == "Uang Jaminan")
-                    {
-                    <td style="text-align:center;"><span class="badge bg-danger text-center">@item.AngsuranKe</span></td>
-                    }
-                    else
-                    { *@
-                            <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
-                            @* } *@
-                            <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
-                            <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
-                            <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
-                        </tr>
-                    }
-                }
-                @{
-                    string jml_angsuran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
-
-                    <tr>
-                        <td colspan="3" style="text-align: center;">Jumlah</td>
-                        <td id="jmlAngsuran"><span style="float:left">Rp.</span>@jml_angsuran</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <br /> <br /> <br />
-        <p style="text-align: justify; width: 100%;">Mohon perhatian, membayar angsuran belum berarti Saudara/i sudah tercatat sebagai mahasiswa baru. Selanjutnya Saudara/i <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @* @Model.DataMhs.keterangan *@</strong></p>
-
-        @* @if (Model.DataMhs.banyak_angsuran != 0)
+        @if (Model.DataMhs.kwrganegaraan == "WNA")
         {
+            <br />
+
+            <br />
+            <p class="floatLeftText">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya tanggal</p>
+            <p class="floatLeftText">
+                Mohon perhatian, membayar biaya kuliah belum berarti Saudara sudah tercatat sebagai
+                mahasiswa baru, selanjutnya Saudara <strong>
+                    wajib melakukan Daftar Ulang / Registrasi
+                    (tidak dapat diwakilkan) pada tanggal @Model.DataMhs.ket_tgl_regis melalui web sikaa.uajy.ac.id
+                </strong>
+            </p>
+            <p class="floatLeftText">
+                Apabila <strong>Saudara tidak dapat melakukan registrasi pada tanggal tersebut,</strong> maka Saudara <strong>wajib</strong> mengisi
+                <strong> Surat Permohonan Susulan Registrasi </strong>dilengkapi dokumen yang diperlukan (terlampir).
+            </p><br />
+            <p class="floatLeftText">
+                Surat permohonan harus sudah kami terima <strong>selambatnya.</strong>
+            </p> 
+            <div style="float:right">
+                <p>Yogyakarta, @Model.DataMhs.tgl_cetak</p>
+                <p>@Model.Pejabat.jabatan</p>
+                <img src="data:image/jpeg;base64,@Model.Pejabat.foto" width="100%" height="100%"/>
+                <p>@Model.Pejabat.nama</p>
+            </div> 
+            <p class="floatLeftText">
+                <strong>CATATAN :</strong>
+            </p>
+            <p class="floatLeftText">
+                Calon mahasiswa baru yang diterima melalui program Reguler Periode II, apabila mengajukan
+                pengunduran diri maka seluruh uang yang sudah dibayarkan tidak dapat ditarik kembali dengan
+                alasan apapun.
+            </p>
+            
         }
-        else {
-            <br /> <br /> <br />
-            <p id="keterangan" style="">Mohon perhatian, selanjutnya Saudara/i <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @Model.DataMhs.keterangan</strong></p>
-        } *@
+        @if (Model.DataMhs.kwrganegaraan == "WNI")
+        {
+            if (Model.DataMhs.jaminan == false)
+            {
+                <p id="ketBerkeberatan">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya sesuai tanggal angsuran 1 atau apabila berkeberatan dapat diangsur dengan jadwal pembayaran sebagai berikut:</p>
+            }
+            else
+            {
+                <p id="ketBerkeberatan">
+                    Sejumlah uang jaminan <strong>Rp. @uang_jaminan</strong> wajib dibayar dengan batas waktu pembayaran <strong>@tanggal_jaminan</strong>.
+                    <strong> Tidak melakukan pembayaran uang jaminan dianggap mengundurkan diri</strong> sebagai calon mahasiswa UAJY dan sisanya dapat diangsur dengan jadwal pembayaran sebagai berikut:
+                </p>
+            }
+            <br />
+
+            <table id="tblAngsuran" style="width: 100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th>Angsuran</th>
+                        <th>Batas Waktu Pembayaran</th>
+                        <th>Keterangan Angsuran</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ListAngsuranMhs != null)
+                    {
+                        foreach (var itemAngsuran in Model.ListAngsuranMhs)
+                        {
+                            string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
+
+                            <tr>
+                                <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
+                                <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
+                                <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
+                                <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
+                            </tr>
+                        }
+                    }
+                    @{
+                        string jml_angsuran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
+
+                            <tr>
+                                <td colspan="3" style="text-align: center;">Jumlah</td>
+                                <td id="jmlAngsuran"><span style="float:left">Rp.</span>@jml_angsuran</td>
+                            </tr>
+                    }
+                </tbody>
+            </table> <br /><br />
+            if (Model.DataMhs.jaminan == false)
+            {
+                <p style="text-align: justify; width: 100%;">Mohon perhatian, membayar angsuran belum berarti Saudara/i sudah tercatat sebagai mahasiswa baru.
+                    Selanjutnya Saudara/i <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @Model.DataMhs.ket_tgl_regis melalui web sikaa.uajy.ac.id</strong>
+                </p>
+                <div style="float:right">
+                    <p>Yogyakarta, @Model.DataMhs.tgl_cetak</p>
+                    <p>@Model.Pejabat.jabatan</p>
+                    <img src="data:image/jpeg;base64,@Model.Pejabat.foto" width="100%" height="100%" /> 
+                    <p>@Model.Pejabat.nama</p>
+                </div>
+            }
+            else
+            {
+                <p style="text-align: justify; width: 100%;">
+                    Pembayaran uang jaminan yang tidak diikuti dengan pembayaran angsuran 1 sesuai jadwal, 
+                    dianggap mengundurkan diri dan uang jaminan yang sudah dibayarkan tidak dapat ditarik 
+                    kembali. Mohon perhatian, membayar angsuran belum berarti Saudara/i sudah tercatat sebagai mahasiswa baru. Selanjutnya Saudara/i
+                    <strong>&nbsp;wajib melakukan Daftar ulang/Registrasi (tidak dapat diwakilkan) pada @Model.DataMhs.ket_tgl_regis melalui web sikaa.uajy.ac.id</strong>
+                </p>
+
+                <div style="float:right">
+                    <p>Yogyakarta, @Model.DataMhs.tgl_cetak</p>
+                    <p>@Model.Pejabat.jabatan</p>
+                    <img src="data:image/jpeg;base64,@Model.Pejabat.foto" width="100%" height="100%" /> 
+                    <p>@Model.Pejabat.nama</p>
+                </div>
+            }
+           
+        }
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
@@ -371,7 +384,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"
             integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK"
             crossorigin="anonymous"></script>
-    
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+            crossorigin="anonymous"></script>
     <!-- jQuery UI 1.11.4 -->
     <script src="/Assets/plugins/jquery-ui/jquery-ui.min.js"></script>
     <!-- Bootstrap 4 -->

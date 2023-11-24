@@ -29,6 +29,13 @@ namespace PMB.Models
         public string periode { get; set; }
     }
 
+    public class CekProdiSPUMhs
+    {
+        public string kode_calon_awal { get; set; }
+        public string kode_calon_akhir { get; set; }
+        public string id_prodi { get; set; }
+    }
+
     public class StoreSPUMhs
     {
         public string tgl_cetak { get; set; }

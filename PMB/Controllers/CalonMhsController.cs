@@ -31,11 +31,24 @@ namespace PMB.Controllers
         }
 
 
-        public IActionResult GetAllCalonMhs()
+        public IActionResult GetAllCalonMhs(string ta, string jenjang, string jalur = null)
         {
-            List<dynamic> data = null;
 
-            data = dao.GetAllFilterCalonMhs();
+            List<dynamic> data = null;
+            if (String.IsNullOrEmpty(ta))
+            {
+                String tahun = DateTime.Now.Year + "/" + (DateTime.Now.Year + 1);
+                ta = tahun;
+            }
+            if (String.IsNullOrEmpty(jenjang))
+            {
+                jenjang = "s1";
+            }
+            if (String.IsNullOrEmpty(jalur))
+            {
+                jalur = "All";
+            }
+            data = dao.GetAllFilterCalonMhs(ta, jenjang, jalur);
 
             return Json(data);
         }
