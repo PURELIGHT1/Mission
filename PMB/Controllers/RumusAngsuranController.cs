@@ -93,15 +93,18 @@ namespace PMB.Controllers
                         TempData["error"] = "Gagal mengubah data rumus angsuran, Total Persentase melebihi 100%!";
                     }
                 }
-                else if(!dataTagihan.Equals(dataTagihanStore))
+                else if(dataTagihan != "a")
                 {
-                    if (data.id_detail < 1)
+                    if (!dataTagihanStore.Equals(dataTagihan))
                     {
-                        TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
-                    }
-                    else
-                    {
-                        TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                        if (data.id_detail < 1)
+                        {
+                            TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                        }
+                        else
+                        {
+                            TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                        }
                     }
                 }
                 else

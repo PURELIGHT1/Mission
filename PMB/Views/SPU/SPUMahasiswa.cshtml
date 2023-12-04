@@ -349,8 +349,7 @@
                     kode_calon_akhir: $("#kodeAkhir").val(),
                     id_prodi: $("#prodi").val()
                 };
-
-                console.log(dataToSend);
+                
                 $.ajax({
                     url: '@Url.Action("CekProdiTarifSPU", "SPU")',
                     type: 'POST',
@@ -361,23 +360,64 @@
                         console.log(response);
                         if (response.success) {
                             var arrayProdi = response.message;
-                            if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
-                                $.ajax({
-                                    url: '@Url.Action("SaveDataSPU", "SPU")',
-                                    type: 'POST',
-                                    dataType: 'json',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify(dataToSend),
-                                    success: function (response) {
-                                        console.log(response);
-                                        if (response.success) {
-                                            window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                            console.log(arrayProdi);
+                            if ($("#jalur").val() === "All") {
+                                if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
+                                    $.ajax({
+                                        url: '@Url.Action("SaveDataSPU", "SPU")',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify(dataToSend),
+                                        success: function (response) {
+                                            console.log(response);
+                                            if (response.success) {
+                                                window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                                            }
+                                        },
+                                        error: function (error) {
+                                            console.error('Terjadi kesalahan:', error);
                                         }
-                                    },
-                                    error: function (error) {
-                                        console.error('Terjadi kesalahan:', error);
+                                    });
+                                }
+                            } else { 
+                                if (arrayProdi[0] != "Lengkap") {
+                                    if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa? ' + arrayProdi.join(', '))) {
+                                        $.ajax({
+                                            url: '@Url.Action("SaveDataSPU", "SPU")',
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            contentType: 'application/json',
+                                            data: JSON.stringify(dataToSend),
+                                            success: function (response) {
+                                                console.log(response);
+                                                if (response.success) {
+                                                    window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                                                }
+                                            },
+                                            error: function (error) {
+                                                console.error('Terjadi kesalahan:', error);
+                                            }
+                                        });
                                     }
-                                });
+                                } else {
+                                    $.ajax({
+                                        url: '@Url.Action("SaveDataSPU", "SPU")',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify(dataToSend),
+                                        success: function (response) {
+                                            console.log(response);
+                                            if (response.success) {
+                                                window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                                            }
+                                        },
+                                        error: function (error) {
+                                            console.error('Terjadi kesalahan:', error);
+                                        }
+                                    });
+                                }
                             }
                         }
                     },

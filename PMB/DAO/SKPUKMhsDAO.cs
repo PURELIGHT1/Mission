@@ -315,7 +315,10 @@ namespace PMB.DAO
                         {
                             string query = @"select top(1)
                                                 is_jaminan,
-                                                jumlah,
+                                                case 
+	                                                when ket_angsuran like '%SPU%' then (select sum(jumlah) from angsuran_mhs where kd_calon = @kd_calon and ket_angsuran like '%SPU%')
+	                                                else jumlah
+	                                            end as jumlah, 
                                                 ket_angsuran, 
                                                 tgl_buka, 
                                                 FORMAT(batas_waktu,'dd MMMM yyyy','id-id') batas_waktu
