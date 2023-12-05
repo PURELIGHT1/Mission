@@ -70,16 +70,19 @@ namespace PMB.Controllers
                 }
 
                 List<string> tagihan = dao.CekTagihanRumus(data.id_rumus.ToString());
-
-                for(int  i = 0; i < tagihan.Count; i++)
+                if(tagihan.Count > 0)
                 {
-                    if (tagihan[i].Contains("SPU"))
+                    for (int i = 0; i < tagihan.Count; i++)
                     {
-                        dataTagihan = tagihan[i];
-                        break;
+                        if (tagihan[i].Contains("SPU"))
+                        {
+                            dataTagihanStore = tagihan[i];
+                            break;
+                        }
                     }
                 }
-                dataTagihanStore = dao.CekNamaTagihan(data.id_tagihan);
+
+                dataTagihan = dao.CekNamaTagihan(data.id_tagihan);
 
                 if (total > 101)
                 {
@@ -93,17 +96,17 @@ namespace PMB.Controllers
                         TempData["error"] = "Gagal mengubah data rumus angsuran, Total Persentase melebihi 100%!";
                     }
                 }
-                else if(dataTagihan != "a")
+                else if(dataTagihan.Contains("SPU") && dataTagihanStore.Contains("SPU"))
                 {
                     if (!dataTagihanStore.Equals(dataTagihan))
                     {
                         if (data.id_detail < 1)
                         {
-                            TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                            TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
                         }
                         else
                         {
-                            TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihan + "!";
+                            TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
                         }
                     }
                 }
