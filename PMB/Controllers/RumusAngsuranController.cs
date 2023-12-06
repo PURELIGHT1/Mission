@@ -96,42 +96,70 @@ namespace PMB.Controllers
                         TempData["error"] = "Gagal mengubah data rumus angsuran, Total Persentase melebihi 100%!";
                     }
                 }
-                else if(dataTagihan.Contains("SPU") && dataTagihanStore.Contains("SPU"))
-                {
-                    if (!dataTagihanStore.Equals(dataTagihan))
-                    {
-                        if (data.id_detail < 1)
-                        {
-                            TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
-                        }
-                        else
-                        {
-                            TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
-                        }
-                    }
-                }
                 else
                 {
-                    if (dao.SimpanRumus(data))
+                    if (dataTagihan.Contains("SPU") && dataTagihanStore.Contains("SPU"))
                     {
-                        if (data.id_detail < 1)
+                        if (!dataTagihanStore.Equals(dataTagihan))
                         {
-                            TempData["success"] = "Berhasil menambah data rumus angsuran!";
+                            if (data.id_detail < 1)
+                            {
+                                TempData["error"] = "Gagal menambah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
+                            }
+                            else
+                            {
+                                TempData["error"] = "Gagal mengubah data rumus angsuran, SPU yang digunakan hanya " + dataTagihanStore + "!";
+                            }
                         }
                         else
                         {
-                            TempData["success"] = "Berhasil mengubah data rumus angsuran!";
+                            if (dao.SimpanRumus(data))
+                            {
+                                if (data.id_detail < 1)
+                                {
+                                    TempData["success"] = "Berhasil menambah data rumus angsuran!";
+                                }
+                                else
+                                {
+                                    TempData["success"] = "Berhasil mengubah data rumus angsuran!";
+                                }
+                            }
+                            else
+                            {
+                                if (data.id_detail < 1)
+                                {
+                                    TempData["error"] = "Gagal menambah data rumus angsuran!";
+                                }
+                                else
+                                {
+                                    TempData["error"] = "Gagal mengubah data rumus angsuran!";
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        if (data.id_detail < 1)
+                        if (dao.SimpanRumus(data))
                         {
-                            TempData["error"] = "Gagal menambah data rumus angsuran!";
+                            if (data.id_detail < 1)
+                            {
+                                TempData["success"] = "Berhasil menambah data rumus angsuran!";
+                            }
+                            else
+                            {
+                                TempData["success"] = "Berhasil mengubah data rumus angsuran!";
+                            }
                         }
                         else
                         {
-                            TempData["error"] = "Gagal mengubah data rumus angsuran!";
+                            if (data.id_detail < 1)
+                            {
+                                TempData["error"] = "Gagal menambah data rumus angsuran!";
+                            }
+                            else
+                            {
+                                TempData["error"] = "Gagal mengubah data rumus angsuran!";
+                            }
                         }
                     }
                 }
