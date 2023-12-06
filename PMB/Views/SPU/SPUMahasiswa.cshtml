@@ -45,6 +45,10 @@
             padding: 0 10px;
             align-self: center;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 
     <!--custom date picker-->
@@ -117,7 +121,11 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" id="modalSimpan">Simpan</button>
+                <button type="button" class="btn btn-warning" id="downloadSKPUK">Download SKPUK</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">
+                    <span id="btnTextSimpan">Simpan</span>
+                    <span id="btnSpinnerSimpan" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -164,13 +172,36 @@
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" id="modalUbah">Simpan</button>
+                <button type="button" class="btn btn-success" id="modalUbah">
+                    <span id="btnTextUbah">Simpan</span>
+                    <span id="btnSpinnerUbah" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
             </div>
         </div>
     </div>
 </div>
 <script>
     $(document).ready(function () {
+        function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+            const byteCharacters = atob(b64Data);
+            const byteArrays = [];
+
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                const slice = byteCharacters.slice(offset, offset + sliceSize);
+                const byteNumbers = new Array(slice.length);
+
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+
+            const blob = new Blob(byteArrays, { type: contentType });
+            return blob;
+        }
+
         function ValidateInput() {
             var awal = $("#kodeAwal").val();
             var akhir = $("#kodeAkhir").val();
@@ -331,8 +362,50 @@
             }
         });
 
+        $("#downloadSKPUK").on('click', function () {
+            var dataToSend = {
+                tgl_cetak: $('#tgl_cetak').val(),
+                kode_calon_awal: $("#kodeAwal").val(),
+                kode_calon_akhir: $("#kodeAkhir").val(),
+                kd_jalur: $("#jalur").val(),
+                id_prodi: $("#prodi").val(),
+                username: $("#username").val(),
+                spu: 0,
+                ptg_konsesi: 0
+            };
+
+            $.ajax({
+                url: '@Url.Action("CetakBatchSKPUK", "SKPUK")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    if (response.success) {
+                        // Decode the base64 string and create a Blob
+                        var blob = b64toBlob(response.fileContent);
+
+                        // Create a link element and trigger a download
+                        var link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = response.filename;
+                        link.click();
+                    } else {
+                        console.error('Terjadi kesalahan:', response.error);
+                    }
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        
         $("#modalSimpan").on('click', function () {
             if (ValidateInput()) {
+
+                $(".loading-spinner-container").show();
+
                 var dataToSend = {
                     tgl_cetak: $('#tgl_cetak').val(),
                     kode_calon_awal: $("#kodeAwal").val(),
@@ -349,6 +422,7 @@
                     kode_calon_akhir: $("#kodeAkhir").val(),
                     id_prodi: $("#prodi").val()
                 };
+                var cekProdi = $("#prodi").val();
                 
                 $.ajax({
                     url: '@Url.Action("CekProdiTarifSPU", "SPU")',
@@ -361,8 +435,9 @@
                         if (response.success) {
                             var arrayProdi = response.message;
                             console.log(arrayProdi);
-                            if ($("#jalur").val() === "All") {
+                            if (cekProdi === "All") {
                                 if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
+                                    
                                     $.ajax({
                                         url: '@Url.Action("SaveDataSPU", "SPU")',
                                         type: 'POST',
@@ -464,7 +539,7 @@
         $('#TabelSPU').on('click', '.cetak-button', function () {
             var id = $(this).data('id');
             window.open("/SKPUK/CetakSKPUK?kd_calon=" + id, "_blank");
-            // window.location.href = "@Url.Action("CetakSKPUK","SKPUK")?kd_calon=" + id;
+            // window.location.href = "@Url.Action("CetakSKPUK","SKPUK")?kd_calon=" + id + "&download=false";
 
         });
 
@@ -504,6 +579,7 @@
 </script>
 
 @section Scripts{
+
     <!--Custom date time picker-->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.2/dist/flatpickr.min.js"></script>
 

@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.Build.Framework;
 using PMB.DAO;
 using PMB.Models;
 using Rotativa.AspNetCore;
 using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using System.Dynamic;
+using System.IO;
+using System.IO.Compression;
 
 namespace PMB.Controllers
 {
@@ -14,11 +14,13 @@ namespace PMB.Controllers
     {
         private readonly ILogger<SKPUKController> _logger;
         SKPUKMhsDAO dao;
-        
+        MstAngsuranDAO daoAngsuran;
+
         public SKPUKController(ILogger<SKPUKController> logger)
         {
             _logger = logger;
             dao = new SKPUKMhsDAO();
+            daoAngsuran = new MstAngsuranDAO();
         }
 
         //SKPUK
@@ -121,9 +123,10 @@ namespace PMB.Controllers
             return RedirectToAction("SKPUK");
         }
 
-        public IActionResult CetakSKPUK(string kd_calon)
+        public ViewAsPdf CetakSKPUK(string kd_calon, bool download = false)
         {
-            string halaman = "Cetak";
+            string halamanS1 = "Cetak";
+            string halamanS2 = "CetakS2";
 
             //List<AngsuranSKPUK> ListDataAngsuran = dao.GetAngsuranSKPUK(kd_calon);
             CetakSKPUKView data = new CetakSKPUKView();
@@ -134,10 +137,10 @@ namespace PMB.Controllers
             int total = 0;
             int jml = 0;
             int jmlPotongan = 0;
-            for (int i = 0;  i < data.JenisPembayaran.Count(); i++)
+            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
             {
                 total = total + data.JenisPembayaran[i].jumlah;
-                
+
             }
 
             int uang_angsuran1 = 0;
@@ -150,7 +153,7 @@ namespace PMB.Controllers
                     break;
                 }
             }
-            
+
             data.DataMhs.jml_sebelum_potongan = total;
 
             data.Potongan = dao.GetPotonganSKPUK(kd_calon);
@@ -161,7 +164,7 @@ namespace PMB.Controllers
             data.DataMhs.jml_potongan = jmlPotongan;
             data.DataMhs.jml_setelah_potongan = total - jmlPotongan;
             data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
-            if(data.ListAngsuranMhs != null)
+            if (data.ListAngsuranMhs != null)
             {
                 for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
                 {
@@ -172,7 +175,7 @@ namespace PMB.Controllers
                 {
 
                     uang_angsuran1 = uang_angsuran1 + data.ListAngsuranMhs[0].jmluang;
-                    foreach(var item in data.ListAngsuranMhs)
+                    foreach (var item in data.ListAngsuranMhs)
                     {
                         item.angsuranke = item.angsuranke - 1;
                     }
@@ -190,18 +193,166 @@ namespace PMB.Controllers
             string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_setelah_potongan);
             data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
 
-            return new ViewAsPdf(halaman, data)
+            string halaman = data.DataMhs.jenjang.Equals("S1") ? halamanS1 : halamanS2;
+
+            if (download)
+            {
+                return new ViewAsPdf(halaman, data)
+                {
+                    PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                    PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                    PageMargins = {
+                        Left = 20,
+                        Right = 20,
+                        Top = 15,
+                        Bottom = 10
+                    },
+                    FileName = $"{data.DataMhs.kd_calon}.pdf"
+                };
+            }
+            else
+            {
+                return new ViewAsPdf(halaman, data)
+                {
+                    PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+                    PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                    PageMargins = {
+                        Left = 20,
+                        Right = 20,
+                        Top = 15,
+                        Bottom = 10
+                    }
+                };
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CetakBatchSKPUK([FromBody] StoreSPUMhs data)
+        {
+            List<string> kdCalon = dao.GetKodeCalonSKPUK(data);
+            try
+            {
+                if (kdCalon.Count > 0)
+                {
+                    using (var zipMemoryStream = new MemoryStream())
+                    {
+                        using (var zipArchive = new ZipArchive(zipMemoryStream, ZipArchiveMode.Create, true))
+                        {
+                            foreach (string item in kdCalon)
+                            {
+                                byte[] pdfBytes = GenerateSKPUKReport(item);
+
+                                var entry = zipArchive.CreateEntry($"{item}.pdf");
+                                using (var entryStream = entry.Open())
+                                {
+                                    entryStream.Write(pdfBytes, 0, pdfBytes.Length);
+                                }
+                            }
+                        }
+                        zipMemoryStream.Seek(0, SeekOrigin.Begin);
+
+                        var base64String = Convert.ToBase64String(zipMemoryStream.ToArray());
+
+                        string jalur = daoAngsuran.GetNamaJalur(data.kd_jalur);
+                        return Json(new { success = true, fileContent = base64String, filename= $"SKPUK_{data.kode_calon_awal}-{data.kode_calon_akhir}_{jalur}.zip" });
+                    }
+                }
+                else
+                {
+                    return Json(new { success = false, error = "No data to process." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+
+        }
+
+        public byte[] GenerateSKPUKReport(string kd_calon)
+        {
+            CetakSKPUKView data = new CetakSKPUKView();
+
+            data.JenisPembayaran = dao.GetBayarSKPUK(kd_calon);
+            data.DataMhs = dao.GetMahasiswaCetakSKPUK(kd_calon);
+            data.Pejabat = dao.GetTTDRektor();
+            int total = 0;
+            int jml = 0;
+            int jmlPotongan = 0;
+            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
+            {
+                total = total + data.JenisPembayaran[i].jumlah;
+
+            }
+
+            int uang_angsuran1 = 0;
+            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
+            {
+                if (data.JenisPembayaran[i].ket_angsuran.Contains("SPU"))
+                {
+                    data.DataMhs.jaminan = data.JenisPembayaran[i].is_jaminan;
+                    data.DataMhs.tanggal_jaminan = data.JenisPembayaran[i].batas_waktu;
+                    break;
+                }
+            }
+
+            data.DataMhs.jml_sebelum_potongan = total;
+
+            data.Potongan = dao.GetPotonganSKPUK(kd_calon);
+            for (int k = 0; k < data.Potongan.Count(); k++)
+            {
+                jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
+            }
+            data.DataMhs.jml_potongan = jmlPotongan;
+            data.DataMhs.jml_setelah_potongan = total - jmlPotongan;
+            data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
+            if (data.ListAngsuranMhs != null)
+            {
+                for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
+                {
+                    jml = jml + data.ListAngsuranMhs[j].jmluang;
+                }
+
+                if (data.DataMhs.jaminan)
+                {
+
+                    uang_angsuran1 = uang_angsuran1 + data.ListAngsuranMhs[0].jmluang;
+                    foreach (var item in data.ListAngsuranMhs)
+                    {
+                        item.angsuranke = item.angsuranke - 1;
+                    }
+                    data.ListAngsuranMhs.RemoveAt(0);
+                }
+            }
+
+            data.DataMhs.uang_jaminan = uang_angsuran1;
+            data.DataMhs.jml_angsuran = jml;
+            if (data.DataMhs.jaminan)
+            {
+                data.DataMhs.jml_angsuran = jml - uang_angsuran1;
+            }
+
+            string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_setelah_potongan);
+            data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
+
+            string halaman = data.DataMhs.jenjang.Equals("S1") ? "Cetak" : "CetakS2";
+            var pdfResult = new ViewAsPdf(halaman, data)
             {
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
                 PageSize = Rotativa.AspNetCore.Options.Size.A4,
                 PageMargins = {
-                         Left = 20,
-                         Right = 20,
-                         Top = 15,
-                         Bottom = 10
-                 },
-                //FileName = $"Surat Ketetapan Uang Kuliah {data.DataMhs.nm_calon}.pdf"
-            };
+                    Left = 20,
+                    Right = 20,
+                    Top = 15,
+                    Bottom = 10
+                },
+                FileName = $"{data.DataMhs.kd_calon}.pdf"
+            }.BuildFile(ControllerContext);
+
+
+            byte[] pdfBytes = pdfResult.GetAwaiter().GetResult();
+
+            return pdfBytes;
         }
 
         public IActionResult Privacy()

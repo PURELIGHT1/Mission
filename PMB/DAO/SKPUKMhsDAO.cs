@@ -45,6 +45,7 @@ namespace PMB.DAO
                 {
                     string query = @"SELECT TOP(1)
                                       a.kd_calon,
+									  b.jenjang,
                                       a.thnakademik,
                                       a.kd_jalur,
                                       b.nama_jalur,
@@ -435,6 +436,39 @@ namespace PMB.DAO
                     var data = conn.Query<PotonganSKPUK>(query, new { kd_calon = kd_calon }).AsList();
                     return data;
 
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<string> GetKodeCalonSKPUK(StoreSPUMhs mhs)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT distinct mhs.kd_calon
+                                    FROM mhs_pendaftar mhs
+                                    INNER JOIN angsuran_mhs ags ON mhs.kd_calon = ags.kd_calon
+                                    INNER JOIN tr_tarif trf ON mhs.masuk = trf.id_prodi AND mhs.th_masuk = trf.thmasuk
+                                    WHERE (ags.kd_calon between @calon1 and @calon2)
+                                    AND kd_jalur = @kd_jalur AND masuk not in ('', 00) AND trf.iscurrent = '1' ";
+
+                    var data = conn.Query<string>(query, new
+                    {
+                        calon1 = mhs.kode_calon_awal,
+                        calon2 = mhs.kode_calon_akhir,
+                        kd_jalur = mhs.kd_jalur
+                    }).AsList();
+
+                    return data;
                 }
                 catch (Exception ex)
                 {

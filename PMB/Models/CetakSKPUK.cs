@@ -17,6 +17,7 @@
     public class CetakSKPUKMhs
     {
         public string kd_calon { get; set; }
+        public string jenjang { get; set; }
         public string thnakademik { get; set; }
         public string kd_jalur { get; set; }
         public string nama_jalur { get; set; }
