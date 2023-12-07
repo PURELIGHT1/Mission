@@ -13,6 +13,7 @@ namespace PMB.Controllers
         private readonly ILogger<SPUController> _logger;
         SPUMhsDAO dao;
         MstAngsuranDAO daoAngsuran;
+        PendaftarDAO pendaftarDAO = new PendaftarDAO();
 
         public SPUController(ILogger<SPUController> logger)
         {
@@ -30,18 +31,38 @@ namespace PMB.Controllers
         //SPU
         public IActionResult SPUMahasiswa()
         {
+            PendaftarView pendaftar = new PendaftarView();
             SPUMhsView objek = new SPUMhsView();
-            //objek.SPUMhsList = dao.GetAllSPU();
-
+            objek.AllTahunAkademik = pendaftar.getAllTahunAkademik();
+            objek.JalurList = pendaftarDAO.GetAllJalur();
             return View(objek);
         }
 
-        public IActionResult GetSPUMahasiswa()
+        public IActionResult GetSPUMahasiswa(string ta, string jenjang, string jalur = null)
         {
             List<SPUMhs2> data = null;
-            data = dao.GetAllSPU();
+
+            if (String.IsNullOrEmpty(ta))
+            {
+                String tahun = DateTime.Now.Year + "/" + (DateTime.Now.Year + 1);
+                ta = tahun;
+                if (DateTime.Now.Month > 7)
+                {
+                    ta = DateTime.Now.Year + 1 + "/" + (DateTime.Now.Year + 2);
+                }
+            }
+            if (String.IsNullOrEmpty(jenjang))
+            {
+                jenjang = "s1";
+            }
+            if (String.IsNullOrEmpty(jalur))
+            {
+                jalur = "All";
+            }
+            data = dao.GetAllSPU(ta, jenjang, jalur);
             return Json(data);
         }
+
 
         public IActionResult GetDetailSPUMahasiswa(string kd_calon)
         {

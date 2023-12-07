@@ -55,14 +55,38 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.2/dist/flatpickr.min.css">
 }
 
+    <div class="customRow">
+        <div style="display: flex;">
+            <select id="jenjangFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                <option value="All" selected>Semua</option>
+                <option value="s1">Sarjana</option>
+                <option value="s2">Pasca Sarjana</option>
+            </select>
+
+            <select id="tahunFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+                @* <option value="All" selected>Semua</option> *@
+            @foreach (var item in Model.AllTahunAkademik)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+
+        <select id="jalurFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+            <option value="All" selected>Semua</option>
+            @foreach (var item in Model.JalurList)
+            {
+                <option value="@item.kd_jalur">@item.nama_jalur</option>
+            }
+        </select>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-12">
         <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah SPU</a>
         <div class="table-container">
             <table id="TabelSPU" class="table table-responsive-lg table-bordered table-striped display compact text-center">
                 <thead style="background-color: #284387; color: white;">
-                    <tr>
-                        <th>No</th>
+                    <tr> 
                         <th>Kode Calon</th>
                         <th>Nama Calon</th>
                         <th>Prodi diterima</th>
@@ -217,7 +241,7 @@
 
             if (awal === "" || akhir === "") {
                 error1.text("Kedua inputan untuk kode Calon harus berisi!"); isValid = false;
-            } 
+            }
             else if (akhir < awal) {
                 error1.text("Kode calon harus dari kecil ke besar!"); isValid = false;
             }
@@ -265,7 +289,6 @@
 
         var table = $('#TabelSPU').DataTable({
             "columns": [
-                { "data": "No" },
                 { "data": "kd_calon" },
                 { "data": "nm_calon" },
                 { "data": "prodi_diterima" },
@@ -279,7 +302,7 @@
                                 '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-warning mb-2 mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
                                 // '<a data-id="' + data.id_dtl_potongan + '" data-jalur="' + data.nama_jalur + '" class="btn btn-sm btn-danger hapus-button mb-2 mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
                                 '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-primary cetak-button mb-2 mr-2 ml-2"> <i class="bi bi-file-earmark-pdf-fill"></i> Cetak</a >' +
-                                   '</div>';
+                                '</div>';
                         }
                         return data;
 
@@ -290,21 +313,56 @@
             "searching": true
         });
 
-        $.ajax({
-            url: '@Url.Action("GetSPUMahasiswa", "SPU")',
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    data[i].No = i + 1;
-                }
-                console.log(data);
-                table.rows.add(data).draw();
-            },
-            error: function () {
-                console.error('Gagal mengambil data');
-            }
+        var thnAkademik = $("#tahunFilter").val();
+        var jenjang = $("#jenjangFilter").val();
+        var jalur = $("#jalurFilter").val();
+
+        function getDataAndInitializeTable() {
+            handleFilterChange();
+        }
+
+        getDataAndInitializeTable();
+
+        $('#jenjangFilter').on('change', function () {
+            var filterValue = $(this).val();
+            jenjang = filterValue;
+            handleFilterChange();
         });
+
+        $('#tahunFilter').on('change', function () {
+            var filterValue = $(this).val();
+            thnAkademik = filterValue;
+            handleFilterChange();
+        });
+
+        $('#jalurFilter').on('change', function () {
+            var filterValue = $(this).val();
+            jalur = filterValue;
+            handleFilterChange();
+        });
+
+        function SetTabelCalonMhs(result) {
+            table.clear();
+            table.rows.add(result).draw();
+        }
+        function handleFilterChange() {
+            $.ajax({
+                url: '@Url.Action("GetSPUMahasiswa", "SPU")?ta=' + thnAkademik + '&jenjang=' + jenjang + '&jalur=' + jalur,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    // console.log(data);
+                    //for (var i = 0; i < data.length; i++) {
+                    //    data[i].No = i + 1;
+                    //}
+                    SetTabelCalonMhs(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data referensi.');
+                }
+            });
+        }
+
 
         $.ajax({
             url: '@Url.Action("GetProdiList", "CalonMhs")',
@@ -400,7 +458,7 @@
             });
         });
 
-        
+
         $("#modalSimpan").on('click', function () {
             if (ValidateInput()) {
 
@@ -423,7 +481,7 @@
                     id_prodi: $("#prodi").val()
                 };
                 var cekProdi = $("#prodi").val();
-                
+
                 $.ajax({
                     url: '@Url.Action("CekProdiTarifSPU", "SPU")',
                     type: 'POST',
@@ -437,7 +495,7 @@
                             console.log(arrayProdi);
                             if (cekProdi === "All") {
                                 if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
-                                    
+
                                     $.ajax({
                                         url: '@Url.Action("SaveDataSPU", "SPU")',
                                         type: 'POST',
@@ -455,7 +513,7 @@
                                         }
                                     });
                                 }
-                            } else { 
+                            } else {
                                 if (arrayProdi[0] != "Lengkap") {
                                     if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa? ' + arrayProdi.join(', '))) {
                                         $.ajax({
