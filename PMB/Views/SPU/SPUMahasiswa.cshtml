@@ -218,7 +218,7 @@
             if (awal === "" || akhir === "") {
                 error1.text("Kedua inputan untuk kode Calon harus berisi!"); isValid = false;
             } 
-            else if (akhir <= awal) {
+            else if (akhir < awal) {
                 error1.text("Kode calon harus dari kecil ke besar!"); isValid = false;
             }
             else {
@@ -246,7 +246,7 @@
 
             var isValid = true;
 
-            if (spu <= 0) {
+            if (spu < 0) {
                 error1.text("SPU harus lebih dari atau sama dengan 0!"); isValid = false;
             }
             else {
