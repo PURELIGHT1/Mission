@@ -160,5 +160,145 @@ namespace PMB.DAO
                 }
             }
         }
+
+        //potongan
+        public dynamic GetPotonganMandiri()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT
+	                                    id_potongan, 
+	                                    kd_calon, 
+	                                    jns_potongan, 
+	                                    jlh_total, 
+	                                    jenis, 
+	                                    a.id_tagihan, 
+	                                    nama_tagihan
+                                    FROM Potongan a
+                                    JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
+                                    ORDER BY id_potongan, kd_calon DESC";
+
+                    var data = conn.Query<dynamic>(query);
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool CekKodeCalon(string id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT COUNT(*) FROM mhs_pendaftar
+                                    WHERE kd_calon = @id";
+
+                    int data = conn.QueryFirstOrDefault<int>(query, new { id = id});
+                    if(data < 1)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool SaveDataPotongan(PotonganMhs mhs)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+
+                    string queryTambah = @"INSERT INTO potongan(kd_calon, jns_potongan, jlh_total, jenis, id_tagihan)
+                                  SELECT TOP(1) @kd_calon, @keterangan, @nominal, b.nama_tagihan, @id_tagihan
+                                  FROM potongan a
+                                  INNER JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
+                                  WHERE kd_calon = @kd_calon";
+
+                    string queryUbah = @"UPDATE potongan
+                                      SET jns_potongan = @keterangan,
+                                      jlh_total = @nominal,
+                                      jenis = b.nama_tagihan,
+                                      id_tagihan = @id_tagihan
+                                      FROM ref_tagihan b 
+                                      WHERE id_potongan = @id_potongan and b.id_tagihan = @id_tagihan";
+
+                    if(mhs.id_potongan < 1)
+                    {
+                        var data = conn.Execute(queryTambah, mhs);
+                        if (data == 1)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        var data = conn.Execute(queryUbah, mhs);
+                        if (data == 1)
+                        {
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool HapusPotongan(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"DELETE FROM potongan WHERE id_potongan = @id";
+
+                    var data = conn.Execute(query, new { id = id });
+                    if (data == 1)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+        
     }
 }

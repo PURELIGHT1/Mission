@@ -207,4 +207,11 @@ namespace PMB.Models
         public string npm_ptg { get; set; }
     }
 
+    public class MatAlCalon
+    {
+        public string kd_calon { get; set; }
+        public bool is_alumni { get; set; }
+        public bool is_matrikulasi { get; set; }
+    }
+    
 }

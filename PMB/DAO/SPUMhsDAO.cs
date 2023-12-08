@@ -291,93 +291,202 @@ namespace PMB.DAO
 
 		                                        delete from potongan where KD_CALON= @kdcalon and JNS_POTONGAN in ('RAPORT','RANGKING')
 
-	                                        end	
+	                                        end
+                                            IF EXISTS (
+                                                SELECT MHS_PENDAFTAR.MASUK
+                                                FROM MHS_PENDAFTAR
+                                                WHERE masuk < 90 AND KD_CALON = @kdcalon
+                                            )
+                                            BEGIN
+                                                PRINT 'INSERT POTONGAN PASCASARJANA'
 
-	
-                                        IF exists (select MHS_PENDAFTAR.MASUK from MHS_PENDAFTAR 
-	                                        where masuk < 90 and KD_CALON = @kdcalon)
-	                                        begin
-                                        print 'INSERT POTONGAN PASCASARJANA '
+                                                IF NOT EXISTS (
+                                                    SELECT id_jalur
+                                                    FROM MHS_PENDAFTAR
+                                                    INNER JOIN REF_POTONGAN_BY_IPK ON COALESCE(MHS_PENDAFTAR.IS_ALUMNI, 0) = REF_POTONGAN_BY_IPK.isAlumni
+                                                        AND MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
+                                                    WHERE MHS_PENDAFTAR.KD_CALON = @kdcalon
+                                                )
+                                                BEGIN
+                                                    INSERT INTO POTONGAN (KD_CALON, JNS_POTONGAN, JLH_TOTAL, jenis, ID_TAGIHAN)
+                                                    SELECT
+                                                        MHS_PENDAFTAR.KD_CALON,
+                                                        'IPK' AS JNS_POTONGAN,
+                                                        COALESCE(SPU, 0) * potongan / 100 AS potongan,
+                                                        e.nama_tagihan,
+                                                        e.id_tagihan
+                                                    FROM
+                                                        MHS_PENDAFTAR
+                                                    INNER JOIN REF_POTONGAN_BY_IPK ON COALESCE(MHS_PENDAFTAR.IS_ALUMNI, 0) = REF_POTONGAN_BY_IPK.isAlumni 
+                                                    LEFT OUTER JOIN SPU ON MHS_PENDAFTAR.KD_CALON = SPU.KD_CALON
+                                                    INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+                                                    INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+                                                    INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+                                                    WHERE
+                                                        MHS_PENDAFTAR.KD_CALON = @kdCalon
+                                                        AND IPK BETWEEN BATAS_MIN AND BATAS_MAX
+                                                        AND ISCURRENT = 1
+                                                        AND COALESCE(SPU, 0) > 0
+                                                        AND id_jalur IS NULL
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+		                                            UNION ALL
+		                                            SELECT 
+			                                            MHS_PENDAFTAR.KD_CALON,
+			                                            'SPP Tetap' JNS_POTONGAN,
+			                                            COALESCE(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan,
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            MHS_PENDAFTAR 
+		                                            INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
+		                                            LEFT OUTER JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
+			                                            AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE 
+			                                            AND MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
+		                                            LEFT OUTER JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            WHERE 
+			                                            (MHS_PENDAFTAR.KD_CALON = @kdCalon) 
+			                                            AND SKPU_detail.Jenis ='SPP Tetap' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is null
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+		                                            UNION ALL
+		                                            --begin  ( potongan heregistrasi + Spp T pasca)
+		                                            SELECT 
+			                                            MHS_PENDAFTAR.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
+			                                            COALESCE(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan, 
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            MHS_PENDAFTAR 
+		                                            INNER JOIN REF_POTONGAN_BY_IPK ON COALESCE(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
+		                                            LEFT OUTER JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
+			                                            AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
+		                                            LEFT OUTER JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS 
+			                                            AND jenis ='Biaya Herregistrasi'
+		                                            LEFT OUTER JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            WHERE 
+			                                            (MHS_PENDAFTAR.KD_CALON = @kdCalon) 
+			                                            AND SKPU_detail.Jenis ='Biaya Herregistrasi' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is null
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+		                                            UNION
+		                                            SELECT DISTINCT 
+			                                            kd_calon,
+			                                            JNS_POTONGAN,
+			                                            JUMLAHPOTONGAN,
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            REF_POTONGAN 
+		                                            INNER JOIN MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+			                                            AND th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+		                                            WHERE 
+			                                            kd_calon = @kdcalon 
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is null 
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+	                                            END
+	                                            ELSE
+	                                            BEGIN
+		                                            INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, ID_TAGIHAN)
+		                                            --begin  ( potongan heregistrasi + Spp T pasca)
+		                                            SELECT 
+			                                            MHS_PENDAFTAR.KD_CALON,
+			                                            'SPP Tetap' JNS_POTONGAN, 
+			                                            COALESCE(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan, 
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            MHS_PENDAFTAR 
+		                                            INNER JOIN REF_POTONGAN_BY_IPK ON COALESCE(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni
+		                                            AND MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
+		                                            LEFT OUTER JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
+			                                            AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR
+		                                            LEFT OUTER JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
 
-                                        if not  exists (select id_jalur from MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                           and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                         where  MHS_PENDAFTAR.KD_CALON = @kdcalon)
-                                         begin
-                                        INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
-                                        SELECT MHS_PENDAFTAR.KD_CALON,'IPK' JNS_POTONGAN, coalesce(SPU,0)* potongan /100 potongan
-                                        FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni 
-                                        left outer JOIN SPU ON MHS_PENDAFTAR.KD_CALON = SPU.KD_CALON
-                                        WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) AND IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1
-                                        and  coalesce(SPU,0) >0 and id_jalur is null
-                                        union all
-                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                        SELECT MHS_PENDAFTAR.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
-                                        coalesce(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan
-                                        FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                        left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                        AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                        --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
-                                        left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                        AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                        --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                        WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='SPP Tetap' AND 
-                                        IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1  and id_jalur is null
-                                        union all
-                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                        SELECT MHS_PENDAFTAR.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
-                                        coalesce(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan
-                                        FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  
-                                        left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                        AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                         left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS and jenis ='Biaya Herregistrasi'
-                                        left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                        AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                        --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                        WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='Biaya Herregistrasi' AND 
-                                        IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1 and id_jalur is null
-                                        union 
-                                         SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
-                                         FROM REF_POTONGAN INNER JOIN
-                                         MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
-                                         and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-                                         where kd_calon = @kdcalon  and iscurrent = 1 and id_jalur is null 
- 
-                                         end
-                                         else
-                                         begin
-                                        INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL)
-                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                        SELECT MHS_PENDAFTAR.KD_CALON,'SPP Tetap' JNS_POTONGAN, 
-                                        coalesce(JUMLAH,0)* REF_POTONGAN_BY_IPK.SPP_TETAP /100 potongan
-                                        FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni     and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                        left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                        AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                        --left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS
-                                        left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                        AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK 
-                                        --AND RUMUS_ANGSURAN_detail.jenis = SKPU_detail.Jenis
-                                        WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='SPP Tetap' AND 
-                                        IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1  and id_jalur is not null
-                                        union all
-                                        --begin  ( potongan heregistrasi + Spp T pasca) rachel 31 Mei 2022
-                                        SELECT MHS_PENDAFTAR.KD_CALON,'Biaya Herregistrasi' JNS_POTONGAN, 
-                                        coalesce(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan
-                                        FROM MHS_PENDAFTAR INNER JOIN REF_POTONGAN_BY_IPK ON coalesce(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni  and MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
-                                        left outer JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
-                                        AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE  and MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
-                                         left outer JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS and jenis ='Biaya Herregistrasi'
-                                        left outer JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
-                                        AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK  
-                                        WHERE  (MHS_PENDAFTAR.KD_CALON = @kdCalon) and SKPU_detail.Jenis ='Biaya Herregistrasi' AND 
-                                        IPK BETWEEN BATAS_MIN AND BATAS_MAX   and iscurrent = 1 and id_jalur is not null 
-                                        union 
-                                         SELECT distinct kd_calon,JNS_POTONGAN ,JUMLAHPOTONGAN 
-                                         FROM REF_POTONGAN INNER JOIN
-                                         MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
-                                         and th_masuk between tahun_masuk_awal and tahun_masuk_akhir
-                                         where kd_calon = @kdcalon  and iscurrent = 1 and id_jalur is null 
-                                         end
-                                         end";
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+
+		                                            WHERE
+			                                            (MHS_PENDAFTAR.KD_CALON = @kdCalon) 
+			                                            AND SKPU_detail.Jenis ='SPP Tetap' 
+			                                            AND  IPK BETWEEN BATAS_MIN AND BATAS_MAX
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is not null
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+		                                            UNION ALL
+		                                            --begin  ( potongan heregistrasi + Spp T pasca)
+		                                            SELECT 
+			                                            MHS_PENDAFTAR.KD_CALON,
+			                                            'Biaya Herregistrasi' JNS_POTONGAN, 
+			                                            COALESCE(JUMLAH*pct/100,0)* REF_POTONGAN_BY_IPK.BIAYA_REGIS /100 potongan, 
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            MHS_PENDAFTAR 
+		                                            INNER JOIN REF_POTONGAN_BY_IPK ON COALESCE(MHS_PENDAFTAR.IS_ALUMNI,0) = REF_POTONGAN_BY_IPK.isAlumni
+			                                            AND MHS_PENDAFTAR.KD_JALUR = REF_POTONGAN_BY_IPK.id_jalur 
+		                                            LEFT OUTER JOIN MST_ANGSURAN ON MHS_PENDAFTAR.THNAKADEMIK = MST_ANGSURAN.THNAKADEMIK 
+			                                            AND MHS_PENDAFTAR.periode = MST_ANGSURAN.PERIODE 
+			                                            AND MHS_PENDAFTAR.KD_JALUR = MST_ANGSURAN.KD_JALUR  
+		                                            LEFT OUTER JOIN RUMUS_ANGSURAN_detail ON MST_ANGSURAN.ID_RUMUS = RUMUS_ANGSURAN_detail.ID_RUMUS 
+			                                            AND jenis ='Biaya Herregistrasi'
+		                                            LEFT OUTER JOIN SKPU_detail ON MHS_PENDAFTAR.MASUK = SKPU_detail.ID_PRODI 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = SKPU_detail.THNAKADEMIK  
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+		                                            WHERE 
+			                                            (MHS_PENDAFTAR.KD_CALON = @kdCalon) 
+			                                            AND SKPU_detail.Jenis ='Biaya Herregistrasi' 
+			                                            AND IPK BETWEEN BATAS_MIN AND BATAS_MAX 
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is not null 
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+		                                            UNION 
+		                                            SELECT distinct 
+			                                            kd_calon,
+			                                            JNS_POTONGAN,
+			                                            JUMLAHPOTONGAN, 
+			                                            e.nama_tagihan, 
+			                                            e.id_tagihan
+		                                            FROM 
+			                                            REF_POTONGAN 
+		                                            INNER JOIN MHS_PENDAFTAR ON REF_POTONGAN.id_prodi = MHS_PENDAFTAR.MASUK
+			                                            AND th_masuk between tahun_masuk_awal and tahun_masuk_akhir
+		                                            INNER JOIN MST_ANGSURAN c ON MHS_PENDAFTAR.KD_JALUR = c.KD_JALUR 
+			                                            AND MHS_PENDAFTAR.THNAKADEMIK = c.THNAKADEMIK 
+		                                            INNER JOIN detail_rumus_angsuran d ON c.ID_RUMUS = d.id_rumus 
+		                                            INNER JOIN REF_TAGIHAN e ON d.id_tagihan = e.id_tagihan
+
+		                                            WHERE 
+			                                            kd_calon = @kdcalon 
+			                                            AND iscurrent = 1 
+			                                            AND id_jalur is null 
+                                                        AND UPPER(e.nama_tagihan) LIKE '%SPP TETAP%' and UPPER(e.jenjang) LIKE '%S2%'
+	                                            END
+                                            END";
 
                     string procedureInsertRmsPtg = @"INSERT INTO potongan([KD_CALON],[JNS_POTONGAN],[JLH_TOTAL],[JENIS],[id_tagihan])
                                                     SELECT mhs.KD_CALON, ptg.keterangan, ptg.nominal, tgh.nama_tagihan, tgh.id_tagihan
@@ -394,7 +503,10 @@ namespace PMB.DAO
                                                         UPDATE [dbo].[spu]
                                                         SET
 		                                                    username = @username,
-                                                            spu = tr.biaya,
+                                                            spu =  CASE
+                                                                        WHEN (select jenjang from ref_jalur where kd_jalur = @kd_jalur) LIKE 'S1' THEN tr.biaya
+                                                                        ELSE 0
+                                                                    END,
                                                             tanggal = GETDATE(),
                                                             tgl_cetak = @tgl_cetak
                                                         FROM
@@ -416,7 +528,10 @@ namespace PMB.DAO
                                                         SELECT
                                                             mhs.kd_calon,
                                                             @username,
-                                                            tr.biaya,
+                                                             CASE
+                                                                WHEN (select jenjang from ref_jalur where kd_jalur = @kd_jalur) LIKE 'S1' THEN tr.biaya
+                                                                ELSE 0
+                                                            END,
                                                             GETDATE(),
                                                             @tgl_cetak
                                                         FROM
@@ -454,7 +569,7 @@ namespace PMB.DAO
                                                         '0'
 
                                                         FROM MHS_PENDAFTAR mhs 
-                                                        INNER JOIN MST_ANGSURAN ags ON mhs.KD_JALUR = ags.KD_JALUR AND mhs.THNAKADEMIK = ags.THNAKADEMIK 
+                                                        INNER JOIN MST_ANGSURAN ags ON mhs.KD_JALUR = ags.KD_JALUR AND mhs.THNAKADEMIK = ags.THNAKADEMIK AND mhs.periode = ags.periode
                                                         INNER JOIN detail_rumus_angsuran d_ags ON ags.ID_RUMUS = d_ags.id_rumus 
                                                         INNER JOIN ref_tagihan tgh ON d_ags.id_tagihan = tgh.id_tagihan 
                                                         INNER JOIN tr_tarif trf ON mhs.MASUK = trf.id_prodi AND mhs.TH_MASUK = trf.thmasuk AND tgh.id_tagihan = trf.id_tagihan
@@ -464,7 +579,7 @@ namespace PMB.DAO
                                                         AND mhs.KD_JALUR = @kd_jalur ";
 
                     string updateAgsBySPU = @"DELETE FROM angsuran_mhs
-                                            WHERE kd_calon = @kdCalon AND ket_angsuran LIKE '%SPU%';
+                                            WHERE kd_calon = @kdCalon AND ket_angsuran LIKE '%SPU%' and status = '0';
 
                                             INSERT INTO [dbo].[ANGSURAN_MHS] (
                                                 [KD_CALON], [ANGSURANKE], [TGL_BUKA], [BATAS_WAKTU],
@@ -519,7 +634,7 @@ namespace PMB.DAO
                                             FROM angsuran_mhs a 
                                             JOIN mhs_pendaftar b ON a.kd_calon = b.kd_calon
                                             WHERE a.kd_calon between @calon1 and @calon2
-                                            and b.kd_jalur = @kd_jalur ";
+                                            and b.kd_jalur = @kd_jalur and status = '0'";
 
                     if (simpan.kode_calon_akhir.Equals("ubah"))
                     {

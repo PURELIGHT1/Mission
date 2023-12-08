@@ -141,6 +141,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="tab9-tab" href="#tab9" aria-selected="false">Infomasi</a>
                             </li>  
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab11-tab" href="#tab11" aria-selected="false">Matrikulasi dan Alumni</a>
+                            </li>  
                         } @if(jenjang == "Sarjana")
                         {
                              <li class="nav-item">
@@ -956,9 +959,6 @@
                          <!-- Potongan -->
                         <div class="tab-pane fade" id="tab10" aria-labelledby="tab10-tab">
                             <!-- Konten Tab 1 -->
-                            <div class="text-right">
-                                <a href="UbahDataSMACalonMhs?Kd_Calon=@Model.Kd_Calon" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i> Edit Data Potongan</a>
-                            </div>
                             <div class="p-3 mb-3">
                                 <!-- title row -->
                                 <div class="row">
@@ -993,6 +993,45 @@
                                 <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
                             </div>
                         </div>
+
+                        <!--Matrikulasi dan Alumni-->
+                        <div class="tab-pane fade" id="tab11" aria-labelledby="tab11-tab">
+                            <!-- Konten Tab 1 -->
+                            <div class="p-3 mb-3">
+                                <!-- title row -->
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group">
+                                            <div class="icheck-success d-inline">
+                                                <input type="checkbox" id="matrikulasi_checkbox">
+                                                <label for="matrikulasi_checkbox">
+                                                    Matrikulasi
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="icheck-success d-inline">
+                                                <input type="checkbox" id="alumni_checkbox">
+                                                <label for="alumni_checkbox">
+                                                    Alumni
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @*<div class="form-group">
+                                            <label for="namaCalon">Nomor Pokok Mahasiswa</label>
+                                            <input type="text" class="form-control" id="npm_potongan" placeholder="Masukkan NPM Keluarga">
+                                        </div> *@
+                                    </div>
+                                    <div class="text-left">
+                                        <button type="submit" class="btn btn-sm btn-success" id="submitMatAl"><i class="bi bi-save"></i> Simpan</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -1056,6 +1095,9 @@
                     console.log(data);
                     if(data.is_konsesi === 'YA'){
                         $('#konsesi_checkbox').get(0).checked = true;
+                    }
+                    if (data.is_alumni === 'YA') {
+                        $('#alumni_checkbox').get(0).checked = true;
                     }
                     if(data.is_ptg_keluarga === 'YA'){
                         $('#ptg_checkbox').get(0).checked = true;
@@ -1672,7 +1714,7 @@
             });
             
             $('#submitPotongan').click(function () {
-                var content = $('#content').summernote('code');
+
                 var dataBerkasToSend = {
                     kd_calon: $('#kdCalon').val(),
                     konsesi: $('#konsesi_checkbox').get(0).checked,
@@ -1681,6 +1723,30 @@
                 }
                 $.ajax({
                     url: '@Url.Action("SaveKonsesiUbah", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataBerkasToSend),
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("DetailCalonMhs", "CalonMhs")?Kd_Calon=' + response.kd_calon;
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            });
+
+        $('#submitMatAl').click(function () {
+
+                var dataBerkasToSend = {
+                    kd_calon: $('#kdCalon').val(),
+                    is_alumni: $('#alumni_checkbox').get(0).checked,
+                    is_matrikulasi: $('#matrikulasi_checkbox').get(0).checked
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveMatAl", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
                     type: 'POST',
                     dataType: 'json',
                     contentType: 'application/json',

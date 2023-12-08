@@ -324,7 +324,7 @@ namespace PMB.DAO
                                                 tgl_buka, 
                                                 FORMAT(batas_waktu,'dd MMMM yyyy','id-id') batas_waktu
                                             from angsuran_mhs
-                                            where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null;";
+                                            where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null and status = '0'";
 
                             var data = conn.QueryFirstOrDefault<PembayaranSKPUK>(query, new { kd_calon = id });
 
@@ -335,6 +335,25 @@ namespace PMB.DAO
                             continue;
                         }
                     }
+                    string queryMat = @"select 
+                                        case 
+                                            when is_matrikulasi = '1' then '1'
+                                            else 0
+                                        end 
+                                        from spu where kd_calon = @kd_calon";
+
+                    var mat = conn.QueryFirstOrDefault<int>(queryMat, new { kd_calon = id });
+                    if(mat == 1)
+                    {
+                        for(int i = 0; i < dataSKPUK.Count(); i++)
+                        {
+                            if (dataSKPUK[i].ket_angsuran.Contains("Matrikulasi"))
+                            {
+                                dataSKPUK.RemoveAt(i);
+                            }
+                        }
+                    }
+
                     return dataSKPUK;
 
                 }

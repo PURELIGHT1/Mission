@@ -1,0 +1,406 @@
+﻿@{
+    ViewData["Title"] = "Pengelolaan Potongan Mahasiswa";
+}
+
+@section Styles{
+    <style>
+        #TabelPotongan thead th {
+            text-align: center;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #TabelPotongan thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelPotongan td {
+            white-space: nowrap;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <a href="#" class="btn btn-sm btn-success btntambah mb-2" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white;"></i> Tambah Potongan</a>
+        <div class="table-container">
+            <table id="TabelPotongan" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                <thead style="background-color: #284387; color: white;">
+                    <tr>
+                        <th style="width: 10px">No</th>
+                        <th>Kode Calon</th>
+                        <th>Tagihan Terpotong</th>
+                        <th>Total</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Potongan Mahasiswa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" value="@User.Identity.Name" id="username" />
+                    <label>Kode Calon</label>
+                    <input type="text" id="kd_calon" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_kd_calon"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="tagihan"> </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_tagihan"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Potongan</label>
+                    <input type="number" id="ptg" value="1000000" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_ptg"></span>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <input type="text" id="ket" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_ket"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpan">
+                    <span id="btnTextSimpan">Simpan</span>
+                    <span id="btnSpinnerSimpan" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-ubah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Potongan Mahasiswa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="id_potongan" />
+                    <label>Kode Calon</label>
+                    <input type="text" id="kd_calon_u" class="form-control" readonly>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_kd_calon_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Tagihan</label>
+                    <select class="form-select text-center" id="tagihan_u"> </select>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_tagihan_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Potongan</label>
+                    <input type="number" id="ptg_u" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_ptg_u"></span>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <input type="text" id="ket_u" class="form-control">
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_ket_u"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalUbah">
+                    <span id="btnTextSimpan">Simpan</span>
+                    <span id="btnSpinnerSimpan" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.5/jquery.inputmask.min.js"></script>
+
+}
+<script>
+    $(document).ready(function () {
+        function ValidateInput() {
+            var kd_calon = $("#kd_calon").val();
+            var error1 = $("#m_kd_calon");
+
+            var tagihan = $("#tagihan").val();
+            var error2 = $("#m_tagihan");
+
+            var ptg = $("#ptg").val();
+            var error3 = $("#m_ptg");
+
+            var isValid = true;
+
+            if (kd_calon === "") {
+                error1.text("Kode calon harus berisi!"); isValid = false;
+            }
+            else {
+                error1.text("");
+            }
+
+            if (tagihan === "") {
+                error2.text("Jenis tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (ptg < 1 || ptg === "") {
+                error3.text("Potongan tidak boleh 0 atau kosong!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+            return isValid;
+        }
+
+        function ValidateUbah() {
+            var kd_calon = $("#kd_calon_u").val();
+            var error1 = $("#m_kd_calon_u");
+
+            var tagihan = $("#tagihan_u").val();
+            var error2 = $("#m_tagihan_u");
+
+            var ptg = $("#ptg_u").val();
+            var error3 = $("#m_ptg_u");
+
+            var isValid = true;
+
+            if (kd_calon === "") {
+                error1.text("Kode calon harus berisi!"); isValid = false;
+            }
+            else {
+                error1.text("");
+            }
+
+            if (tagihan === "") {
+                error2.text("Jenis tagihan wajib dipilih!"); isValid = false;
+            } else {
+                error2.text("");
+            }
+
+            if (ptg < 1 || ptg === "") {
+                error3.text("Potongan tidak boleh 0 atau kosong!"); isValid = false;
+            } else {
+                error3.text("");
+            }
+            return isValid;
+        }
+
+        $("#kd_calon").on("input", ValidateInput);
+        $("#tagihan").on("input", ValidateInput);
+        $("#ptg").on("input", ValidateInput);
+
+        $("#kd_calon_u").on("input", ValidateUbah);
+        $("#tagihan_u").on("input", ValidateUbah);
+        $("#ptg_u").on("input", ValidateUbah);
+
+        var table = $('#TabelPotongan').DataTable({
+            "columns": [
+                { "data": "No" },
+                { "data": "kd_calon" },
+                { "data": "nama_tagihan" },
+                { "data": "jlh_total" },
+                { "data": "jns_potongan" },
+                {
+                    "data": null,
+                    "render": function (data, type, row) {
+                        if (type === 'display') {
+                            return '<div class="text-center">' +
+                                ' <a data-id="' + data.id_potongan + '" data-kd="' + data.kd_calon + '" data-nominal="' + data.jlh_total + '" data-ket="' + data.jns_potongan + '" data-tagihan="' + data.id_tagihan + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                '<a data-id="' + data.id_potongan + '" data-nama="' + data.kd_calon + '" class="btn btn-sm btn-danger hapus-button mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
+                                '</div>';
+                        }
+                        return data;
+
+                    }
+                },
+            ],
+            "lengthMenu": [20, 50, 100],
+            "searching": true
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetPotongan", "Potongan")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                for (var i = 0; i < data.length; i++) {
+                    data[i].No = i + 1;
+                }
+                table.rows.add(data).draw();
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $.ajax({
+            url: '@Url.Action("GetListTagihan", "Potongan")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                var select = $("#tagihan");
+                var select2 = $("#tagihan_u");
+
+                select.empty();
+                select2.empty();
+
+                var emptyOption = $('<option></option>');
+                emptyOption.val('');
+                emptyOption.text('-- Pilih Jenis Tagihan --');
+                select.append(emptyOption);
+
+                var emptyOption2 = $('<option></option>');
+                emptyOption2.val('');
+                emptyOption2.text('-- Pilih Jenis Tagihan --');
+                select2.append(emptyOption2);
+
+                data.forEach(item => {
+                    var option = $('<option></option>');
+                    option.val(item.id_tagihan);
+                    option.text(item.nama_tagihan);
+                    select.append(option);
+
+                    var option2 = $('<option></option>');
+                    option2.val(item.id_tagihan);
+                    option2.text(item.nama_tagihan);
+                    select2.append(option2);
+                });
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        $("#modalSimpan").on('click', function () {
+            if (ValidateInput()) {
+                var dataToSend = {
+                    id_potongan: 0,
+                    kd_calon: $('#kd_calon').val(),
+                    id_tagihan: $("#tagihan").val(),
+                    nominal: $("#ptg").val(),
+                    keterangan: $("#ket").val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("CekKodeCalon", "Potongan")?id=' + $('#kd_calon').val(),
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log(response);
+                        if (!response.success) {
+                            alert('Kode calon tidak ditemukan!');
+                        } else {
+                            $.ajax({
+                                url: '@Url.Action("SaveDataPotongan", "Potongan")',
+                                type: 'POST',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                data: JSON.stringify(dataToSend),
+                                success: function (response) {
+                                    console.log(response);
+                                    if (response.success) {
+                                        window.location.href = '@Url.Action("Potongan", "Potongan")';
+                                    }
+                                },
+                                error: function (error) {
+                                    console.error('Terjadi kesalahan:', error);
+                                }
+                            });
+                        }
+                    },
+                    error: function () {
+                        console.error('Gagal mengambil data.');
+                    }
+                });
+            }
+
+        });
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var dataToSend = {
+                    id_potongan: $('#id_potongan').val(),
+                    kd_calon: $('#kd_calon_u').val(),
+                    id_tagihan: $("#tagihan_u").val(),
+                    nominal: $("#ptg_u").val(),
+                    keterangan: $("#ket_u").val()
+                };
+                $.ajax({
+                    url: '@Url.Action("SaveDataPotongan", "Potongan")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Potongan", "Potongan")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+
+        });
+
+        $('#TabelPotongan').on('click', '.hapus-button', function () {
+            var id = $(this).data('id');
+            var nama = $(this).data('nama');
+
+            if (confirm('Anda yakin ingin menghapus potongan ini dari kode calon ' + nama + '?')) {
+                $.ajax({
+                    url: '@Url.Action("HapusPotongan", "Potongan")?id=' + id,
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: null,
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Potongan", "Potongan")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+        });
+
+        $('#TabelPotongan').on('click', '.edit-button', function () {
+            var id = $(this).data('id');
+            var kdCalon = $(this).data('kd');
+            var tagihan = $(this).data('tagihan');
+            var ket = $(this).data('ket');
+            var nominal = $(this).data('nominal');
+
+            $('#id_potongan').val(id);
+            $('#kd_calon_u').val(kdCalon);
+            $('#tagihan_u').val(tagihan);
+            $('#ptg_u').val(nominal);
+            $('#ket_u').val(ket);
+
+            ValidateUbah();
+        });
+    });
+</script>

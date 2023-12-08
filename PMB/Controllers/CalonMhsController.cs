@@ -333,6 +333,28 @@ namespace PMB.Controllers
         }
 
         [HttpPost]
+        public IActionResult SaveMatAl([FromBody] MatAlCalon data)
+        {
+            try
+            {
+                if (dao.UbahMatAlCalonMhs(data))
+                {
+                    TempData["success"] = "Berhasil mengubah Matrikulasi dan Alumni!";
+                }
+                else
+                {
+                    TempData["error"] = "Gagal mengubah Matrikulasi dan Alumni!";
+                }
+
+                return Json(new { success = true, kd_calon = data.kd_calon });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, TempData["error"] = ex.Message);
+            }
+        }
+
+        [HttpPost]
         public IActionResult SaveDataDiri([FromBody] DataDiri data)
         {
             try

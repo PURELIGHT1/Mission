@@ -13,4 +13,13 @@
         public string nama_jalur { get; set; }
         public string nm_prodi { get; set; }
     }
+
+    public class PotonganMhs
+    {
+        public int id_potongan { get; set; }
+        public string kd_calon { get; set; }
+        public int id_tagihan { get; set; }
+        public int nominal { get; set; }
+        public string keterangan { get; set; }
+    }
 }

@@ -432,6 +432,10 @@ namespace PMB.DAO
 		                                    else 'TIDAK'
 	                                    end as is_konsesi,
                                         case 
+		                                    when is_alumni = 1 Then 'YA'
+		                                    else 'TIDAK'
+	                                    end as is_alumni,
+                                        case 
                                             when (select count(*) from dt_potongan_keluarga where kd_calon = a.KD_CALON and status = '1') > 0 THEN 'YA'
 		                                    else 'TIDAK'
                                         end as is_ptg_keluarga,
@@ -1012,6 +1016,37 @@ namespace PMB.DAO
                 }
             }
         }
+
+        public bool UbahMatAlCalonMhs(MatAlCalon Mhs)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"UPDATE MHS_PENDAFTAR SET
+                                    is_alumni = @is_alumni 
+                                WHERE [KD_CALON] = @Kd_Calon;";
+
+                    var param = new
+                    {
+                        is_alumni = Mhs.is_alumni,
+                        Kd_Calon = Mhs.kd_calon
+                    };
+
+                    var data = conn.Execute(query, param);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public bool UbahCalonMhs(DataDiri ubah)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))

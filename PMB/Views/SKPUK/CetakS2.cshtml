@@ -145,7 +145,85 @@
 
 <body class="classbody">
     <div class="divbody">
-        
+        <h4 style="text-align: center;">
+            SURAT KETETAPAN PEMBAYARAN UANG KULIAH (SKPUK)
+            <br />
+            TAHUN AKADEMIK @Model.DataMhs.thnakademik
+            <br />
+            PMB PROGRAM @Model.DataMhs.nama_jalur
+            <hr style="width: 850px; height: 1px; background-color: black;" />
+        </h4>
+        <div style="float:right; font-size: 16px;">
+            <p>Kepada :</p>
+            <p>
+                Yth. Sdr. <strong>@Model.DataMhs.nm_calon/@Model.DataMhs.kd_calon</strong>
+                <br/>Calon Mahasiswa Magister
+               <br/>Universitas Atma Jaya Yogyakarta
+           </p>
+        </div><br />
+        <p class="floatLeftText" style="font-size: 18px;">
+            Dengan Hormat,
+            <br />
+            Berdasarkan hasil Tes Kemampuan Belajar dan Tes Wawancara Program Magister Universitas Atma Jaya Yogyakarta,
+            Saudara dinyatakan lulus dan <strong>@(Model.DataMhs.nm_prodi != null ? "DITERIMA" : "")</strong> sebagai calon mahasiswa pada :
+        </p>
+        <br />
+        <p style="text-align: center; float: left; width: 108%; font-weight:bold; font-size: 20px;">
+            Program Studi : @Model.DataMhs.nm_prodi
+        </p>
+        <br />
+        @{
+            string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
+            string jml_setelah_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+            string uang_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.uang_jaminan);
+            string tanggal_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.tanggal_jaminan);
+
+        }
+        <p class="floatLeftText" style="font-size: 18px;">
+            Total biaya yang harus dibayarkan pada semester 1 adalah Rp <strong>Rp. @jml_setelah_potongan</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>), dengan perincian sebagai berikut :
+        </p><br/><br/>
+        <table id="tblAngsuran" style="width: 100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th>Jenis Pembayaran</th>
+                    <th>Jumlah (Rp)</th>
+                    <th>Potongan</th>
+                    <th>Biaya (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ListAngsuranMhs != null)
+                {
+                   @*  foreach (var itemAngsuran in Model.ListAngsuranMhs)
+                    {
+                        string jml_uang = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", itemAngsuran.jmluang);
+
+                        <tr>
+                            <td style="text-align:center;" id="noAngsuran">@itemAngsuran.angsuranke</td>
+                            <td id="periodeAngsuran">@itemAngsuran.batas_bayar</td>
+                            <td id="ketAngsuran">@itemAngsuran.ket_angsuran</td>
+                            <td id="jmlAngsuran"><span style="float:left">Rp.</span> @jml_uang</td>
+                        </tr>
+                    } *@
+                }
+                @{
+                    string jml_angsuran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_angsuran);
+
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Total Biaya Semester 1 </td>
+                        <td id="jmlAngsuran"><span style="float:left">Rp.</span>@jml_angsuran</td>
+                    </tr>
+                }
+            </tbody>
+        </table> <br /><br />
+        @* <h4 style="text-align: center;">
+            SURAT KETETAPAN PEMBAYARAN UANG KULIAH (SKPUK)
+            <br />
+            TAHUN AKADEMIK @Model.DataMhs.thnakademik
+            <br />
+            PMB PROGRAM @Model.DataMhs.nama_jalur
+            <hr style="width: 850px; height: 1px; background-color: black;" />
+        </h4> *@
 
      </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
