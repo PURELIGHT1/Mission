@@ -8,7 +8,7 @@
 
 @section Styles{
     <style>
-        .btntambah{
+        .btntambah {
             margin-top: 10px;
             margin-bottom: 10px;
             margin-right: 10px;
@@ -86,7 +86,7 @@
         <div class="table-container">
             <table id="TabelSPU" class="table table-responsive-lg table-bordered table-striped display compact text-center">
                 <thead style="background-color: #284387; color: white;">
-                    <tr> 
+                    <tr>
                         <th>Kode Calon</th>
                         <th>Nama Calon</th>
                         <th>Prodi diterima</th>
@@ -113,7 +113,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <input type="hidden" value="@User.Identity.Name" id="username"/>
+                    <input type="hidden" value="@User.Identity.Name" id="username" />
                     <label>Tanggal Cetak</label>
                     <input type="text" id="tgl_cetak" class="form-control">
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_cetak"></span>
@@ -138,9 +138,9 @@
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
                 </div>
                 @* <div class="form-group">
-                    <label>Potongan Konsesi</label>
-                    <input type="number" class="form-control text-center" id="jlh_konsesi" value="10000000" />
-                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi"></span>
+                <label>Potongan Konsesi</label>
+                <input type="number" class="form-control text-center" id="jlh_konsesi" value="10000000" />
+                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi"></span>
                 </div> *@
             </div>
             <div class="modal-footer justify-content-between">
@@ -189,9 +189,9 @@
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_spu_u"></span>
                 </div>
                 @* <div class="form-group">
-                    <label>Potongan Konsesi</label>
-                    <input type="number" class="form-control text-center" id="jlh_konsesi_u" value="10000000" readonly />
-                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi_u"></span>
+                <label>Potongan Konsesi</label>
+                <input type="number" class="form-control text-center" id="jlh_konsesi_u" value="10000000" readonly />
+                <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jlh_konsesi_u"></span>
                 </div> *@
             </div>
             <div class="modal-footer justify-content-between">
@@ -299,6 +299,8 @@
                     "render": function (data, type, row) {
                         if (type === 'display') {
                             return '<div class="text-center">' +
+                                '<a href="/CalonMhs/DetailAngsuranCalonMhs?kd_calon=' + data.kd_calon + '" class="btn btn-sm btn-info text-white mr-2 mb-2" > <i class="bi bi-info-circle-fill" > </i> Detail SKPUK</a >' +
+
                                 '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-warning mb-2 mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
                                 // '<a data-id="' + data.id_dtl_potongan + '" data-jalur="' + data.nama_jalur + '" class="btn btn-sm btn-danger hapus-button mb-2 mr-2 ml-2"> <i class="bi bi-trash"></i> Hapus</a >' +
                                 '<a data-id="' + data.kd_calon + '" class="btn btn-sm btn-primary cetak-button mb-2 mr-2 ml-2"> <i class="bi bi-file-earmark-pdf-fill"></i> Cetak</a >' +

@@ -12,7 +12,7 @@ namespace PMB.Models
         [Required(ErrorMessage = "Tahun akademik wajib diisi!")]
         [RegularExpression(@"^([1-9]{1}[0-9]{3})+[-/.]+([1-9]{1}[0-9]{3})$", ErrorMessage = "Format tahun akademik wajib YYYY/YYYY!")]
         public string thnakademik { get; set; }
-        
+
         [Required(ErrorMessage = "Jenis tagihan wajib dipilih!")]
         public int id_tagihan { get; set; }
         public int? nominal { get; set; }
@@ -26,10 +26,15 @@ namespace PMB.Models
     public class PembayaranSKPUK
     {
         public bool is_jaminan { get; set; }
+        public string jenis { get; set; }
         public int jumlah { get; set; }
+        public int potongan { get; set; }
+        public int total { get; set; }
         public string ket_angsuran { get; set; }
         public string tgl_buka { get; set; }
         public string batas_waktu { get; set; }
+        public string batas_bayar { get; set; }
+
     }
 
     public class AngsuranSKPUK

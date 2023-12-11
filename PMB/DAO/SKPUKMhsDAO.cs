@@ -287,56 +287,26 @@ namespace PMB.DAO
                 }
             }
         }
-
         public List<PembayaranSKPUK> GetBayarSKPUK(string id)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
-                    List<PembayaranSKPUK> dataSKPUK = new List<PembayaranSKPUK>();
-                    string ambil = @"select top(1) thnakademik, kd_jalur 
-                                    from mhs_pendaftar 
-                                    where kd_calon = @kd_calon";
-                    MhsPendaftar2 data1 = conn.QueryFirstOrDefault<MhsPendaftar2>(ambil, new { kd_calon = id });
+                    string query = @"SELECT ANGSURAN_MHS.kd_calon, SUM(ANGSURAN_MHS.JMLUANG) AS jumlah,  SUM(ANGSURAN_MHS.JUMLAH) AS total, 
+ SUM(ANGSURAN_MHS.potongan) AS potongan, 
+ANGSURAN_MHS.ID_REF_TAGIHAN, ref_tagihan.nama_tagihan ket_angsuran, ref_tagihan.id_tagihan,
+FORMAT(MAX(batas_waktu),'dd MMMM yyyy','id-id') batas_waktu,
+CONCAT(FORMAT(MIN(tgl_buka),'dd MMMM yyyy','id-id'),' - ', FORMAT(MAX(batas_waktu),'dd MMMM yyyy','id-id')) as batas_bayar, max(cast(is_jaminan as int)) is_jaminan
+FROM ANGSURAN_MHS INNER JOIN
+ ref_tagihan ON ANGSURAN_MHS.ID_REF_TAGIHAN = ref_tagihan.id_tagihan
+GROUP BY ANGSURAN_MHS.kd_calon, ANGSURAN_MHS.ID_REF_TAGIHAN, ref_tagihan.nama_tagihan, ref_tagihan.id_tagihan 
+HAVING (ANGSURAN_MHS.kd_calon = @kd_calon)
+ORDER BY ref_tagihan.id_tagihan ";
 
-                    string ambilIdRumus = @"select top(1) id_rumus 
-                                            from mst_angsuran 
-                                            where thnakademik = @ta and kd_jalur = @jalur";
-                    var data2 = conn.QueryFirstOrDefault<int>(ambilIdRumus, new { ta = data1.thnakademik, jalur =  data1.kd_jalur });
+                    var data = conn.Query<PembayaranSKPUK>(query, new { kd_calon = id }).AsList();
 
-                    string queryTagihan = @"select distinct b.nama_tagihan 
-                                            from detail_rumus_angsuran a join ref_tagihan b ON a.id_tagihan = b.id_tagihan 
-                                            where id_rumus = @id_rumus";
-
-                    List<string> data3 = conn.Query<string>(queryTagihan, new { id_rumus = data2 }).AsList();
-                    if (data3.Count() > 0)
-                    {
-                        for(int i = 0; i < data3.Count(); i++)
-                        {
-                            string query = @"select top(1)
-                                                is_jaminan,
-                                                case 
-	                                                when ket_angsuran like '%SPU%' then (select sum(jumlah) from angsuran_mhs where kd_calon = @kd_calon and ket_angsuran like '%SPU%')
-	                                                else jumlah
-	                                            end as jumlah, 
-                                                ket_angsuran, 
-                                                tgl_buka, 
-                                                FORMAT(batas_waktu,'dd MMMM yyyy','id-id') batas_waktu
-                                            from angsuran_mhs
-                                            where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null;";
-
-                            var data = conn.QueryFirstOrDefault<PembayaranSKPUK>(query, new { kd_calon = id });
-
-                            if(data != null)
-                            {
-                                dataSKPUK.Add(data);
-                            }
-                            continue;
-                        }
-                    }
-                    return dataSKPUK;
-
+                    return data;
                 }
                 catch (Exception ex)
                 {
@@ -348,6 +318,66 @@ namespace PMB.DAO
                 }
             }
         }
+        //public List<PembayaranSKPUK> GetBayarSKPUK(string id)
+        //{
+        //    using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+        //    {
+        //        try
+        //        {
+        //            List<PembayaranSKPUK> dataSKPUK = new List<PembayaranSKPUK>();
+        //            string ambil = @"select top(1) thnakademik, kd_jalur 
+        //                            from mhs_pendaftar 
+        //                            where kd_calon = @kd_calon";
+        //            MhsPendaftar2 data1 = conn.QueryFirstOrDefault<MhsPendaftar2>(ambil, new { kd_calon = id });
+
+        //            string ambilIdRumus = @"select top(1) id_rumus 
+        //                                    from mst_angsuran 
+        //                                    where thnakademik = @ta and kd_jalur = @jalur";
+        //            var data2 = conn.QueryFirstOrDefault<int>(ambilIdRumus, new { ta = data1.thnakademik, jalur =  data1.kd_jalur });
+
+        //            string queryTagihan = @"select distinct b.nama_tagihan 
+        //                                    from detail_rumus_angsuran a join ref_tagihan b ON a.id_tagihan = b.id_tagihan 
+        //                                    where id_rumus = @id_rumus";
+
+        //            List<string> data3 = conn.Query<string>(queryTagihan, new { id_rumus = data2 }).AsList();
+        //            if (data3.Count() > 0)
+        //            {
+        //                for(int i = 0; i < data3.Count(); i++)
+        //                {
+        //                    string query = @"select top(1)
+        //                                        is_jaminan,
+        //                                        case 
+	       //                                         when ket_angsuran like '%SPU%' then (select sum(jumlah) from angsuran_mhs where kd_calon = @kd_calon and ket_angsuran like '%SPU%')
+	       //                                         else jumlah
+	       //                                     end as jumlah, 
+        //                                        ket_angsuran, 
+        //                                        tgl_buka, 
+        //                                        FORMAT(batas_waktu,'dd MMMM yyyy','id-id') batas_waktu
+        //                                    from angsuran_mhs
+        //                                    where ket_angsuran LIKE '%" + data3[i] + "%' and kd_calon = @kd_calon and sks is not null;";
+
+        //                    var data = conn.QueryFirstOrDefault<PembayaranSKPUK>(query, new { kd_calon = id });
+
+        //                    if(data != null)
+        //                    {
+        //                        dataSKPUK.Add(data);
+        //                    }
+        //                    continue;
+        //                }
+        //            }
+        //            return dataSKPUK;
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return null;
+        //        }
+        //        finally
+        //        {
+        //            conn.Dispose();
+        //        }
+        //    }
+        //}
 
         public List<AngsuranSKPUK> GetAngsuranSKPUK(string id)
         {

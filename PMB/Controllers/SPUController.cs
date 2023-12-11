@@ -12,8 +12,8 @@ namespace PMB.Controllers
     {
         private readonly ILogger<SPUController> _logger;
         SPUMhsDAO dao;
-        MstAngsuranDAO daoAngsuran;
         PendaftarDAO pendaftarDAO = new PendaftarDAO();
+        MstAngsuranDAO daoAngsuran;
 
         public SPUController(ILogger<SPUController> logger)
         {
@@ -35,6 +35,8 @@ namespace PMB.Controllers
             SPUMhsView objek = new SPUMhsView();
             objek.AllTahunAkademik = pendaftar.getAllTahunAkademik();
             objek.JalurList = pendaftarDAO.GetAllJalur();
+            //objek.SPUMhsList = dao.GetAllSPU();
+
             return View(objek);
         }
 
@@ -62,7 +64,6 @@ namespace PMB.Controllers
             data = dao.GetAllSPU(ta, jenjang, jalur);
             return Json(data);
         }
-
 
         public IActionResult GetDetailSPUMahasiswa(string kd_calon)
         {
@@ -92,7 +93,7 @@ namespace PMB.Controllers
             try
             {
                 List<string> ListProdi = dao.CekProdiTarifSPU(data);
-                if(ListProdi.Count() > 0)
+                if (ListProdi.Count() > 0)
                 {
                     return Json(new { success = true, message = ListProdi });
                 }
@@ -106,6 +107,7 @@ namespace PMB.Controllers
                 return StatusCode(500, TempData["error"] = ex.Message);
             }
         }
+
 
         [HttpPost]
         public IActionResult SaveDataSPU([FromBody] StoreSPUMhs data)
