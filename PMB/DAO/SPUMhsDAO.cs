@@ -10,13 +10,14 @@ namespace PMB.DAO
     public class SPUMhsDAO
     {
         //Tabel SPU
-        public List<SPUMhs2> GetAllSPU()
+
+        public List<SPUMhs2> GetAllSPU(string ta, string jenjang, string jalur)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
-                    string query = @"SELECT
+                    string query = @"SELECT row_number() over (order by b.kd_calon) no,
 		                                A.kd_calon,
 		                                B.nm_calon,
 		                                B.masuk,
@@ -32,10 +33,24 @@ namespace PMB.DAO
                                   JOIN mhs_pendaftar B ON A.kd_calon = B.kd_calon
                                   JOIN ref_prodi C ON B.masuk = C.id_prodi
                                   JOIN ref_jalur D ON B.kd_jalur = D.kd_jalur
-                                  WHERE b.masuk is not null and b.masuk not in ('', '00')
-                                  ORDER BY kd_calon DESC";
-                    
-                    var data = conn.Query<SPUMhs2>(query).AsList();
+                            WHERE b.thnakademik = @ta ";
+                    if (jalur != "All")
+                    {
+                        query = query + @"and b.kd_jalur = @jalur";
+                    }
+                    if (jenjang != "All")
+                    {
+                        query = query + @"and d.jenjang = @jenjang";
+                    }
+                    query = query + @" ORDER BY CONVERT(INT, b.[KD_CALON]) DESC;";
+                    var data = conn.Query<SPUMhs2>(query,
+                        new
+                        {
+                            ta = ta,
+                            jenjang = jenjang,
+                            jalur = jalur
+                        }
+                    ).AsList();
 
                     return data;
                 }
@@ -49,7 +64,6 @@ namespace PMB.DAO
                 }
             }
         }
-
         public dynamic GetDetailSPU(string id)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))

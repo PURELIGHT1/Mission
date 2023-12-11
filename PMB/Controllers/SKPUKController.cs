@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.Build.Framework;
+using Microsoft.AspNetCore.Razor.Language;
 using PMB.DAO;
 using PMB.Models;
 using Rotativa.AspNetCore;
 using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Drawing.Printing;
+using System.Dynamic;
 using System.IO;
 using System.IO.Compression;
 
@@ -51,8 +55,8 @@ namespace PMB.Controllers
                 if (dao.DetailSKPUK(dataSKPUK.SKPUK.id_skpu) != null)
                 {
                     string nama_prodi = dao.GetNamaProdi(dataSKPUK.SKPUK.id_prodi);
-                    TempData["error"] = $"Data SKPUK dengan prodi { nama_prodi } pada tahun akademik { dataSKPUK.SKPUK.thnakademik } sudah ada!";
-                    
+                    TempData["error"] = $"Data SKPUK dengan prodi {nama_prodi} pada tahun akademik {dataSKPUK.SKPUK.thnakademik} sudah ada!";
+
                     dataSKPUK.ProdiList = dao.GetProdi();
                     dataSKPUK.TagihanList = dao.GetTagihan();
                     return View(dataSKPUK);
@@ -75,7 +79,7 @@ namespace PMB.Controllers
             {
                 dataSKPUK.ProdiList = dao.GetProdi();
                 dataSKPUK.TagihanList = dao.GetTagihan();
-                
+
                 return View(dataSKPUK);
             }
         }
@@ -123,78 +127,82 @@ namespace PMB.Controllers
             return RedirectToAction("SKPUK");
         }
 
+
         public ViewAsPdf CetakSKPUK(string kd_calon, bool download = false)
         {
             string halamanS1 = "Cetak";
             string halamanS2 = "CetakS2";
 
+            string halaman = halamanS1;
             //List<AngsuranSKPUK> ListDataAngsuran = dao.GetAngsuranSKPUK(kd_calon);
             CetakSKPUKView data = new CetakSKPUKView();
 
-            data.JenisPembayaran = dao.GetBayarSKPUK(kd_calon);
             data.DataMhs = dao.GetMahasiswaCetakSKPUK(kd_calon);
-            data.Pejabat = dao.GetTTDRektor();
-            int total = 0;
-            int jml = 0;
-            int jmlPotongan = 0;
-            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
+            if (data.DataMhs != null)
             {
-                total = total + data.JenisPembayaran[i].jumlah;
-
-            }
-
-            int uang_angsuran1 = 0;
-            for (int i = 0; i < data.JenisPembayaran.Count(); i++)
-            {
-                if (data.JenisPembayaran[i].ket_angsuran.Contains("SPU"))
+                data.JenisPembayaran = dao.GetBayarSKPUK(kd_calon);
+                data.Pejabat = dao.GetTTDRektor();
+                int total = 0;
+                int jml = 0;
+                int jmlPotongan = 0;
+                for (int i = 0; i < data.JenisPembayaran.Count(); i++)
                 {
-                    data.DataMhs.jaminan = data.JenisPembayaran[i].is_jaminan;
-                    data.DataMhs.tanggal_jaminan = data.JenisPembayaran[i].batas_waktu;
-                    break;
-                }
-            }
+                    total = total + data.JenisPembayaran[i].jumlah;
 
-            data.DataMhs.jml_sebelum_potongan = total;
-
-            data.Potongan = dao.GetPotonganSKPUK(kd_calon);
-            for (int k = 0; k < data.Potongan.Count(); k++)
-            {
-                jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
-            }
-            data.DataMhs.jml_potongan = jmlPotongan;
-            data.DataMhs.jml_setelah_potongan = total - jmlPotongan;
-            data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
-            if (data.ListAngsuranMhs != null)
-            {
-                for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
-                {
-                    jml = jml + data.ListAngsuranMhs[j].jmluang;
                 }
 
+                int uang_angsuran1 = 0;
+                for (int i = 0; i < data.JenisPembayaran.Count(); i++)
+                {
+                    if (data.JenisPembayaran[i].ket_angsuran.Contains("SPU"))
+                    {
+                        data.DataMhs.jaminan = data.JenisPembayaran[i].is_jaminan;
+                        data.DataMhs.tanggal_jaminan = data.JenisPembayaran[i].batas_waktu;
+                        break;
+                    }
+                }
+
+                data.DataMhs.jml_sebelum_potongan = total;
+
+                data.Potongan = dao.GetPotonganSKPUK(kd_calon);
+                for (int k = 0; k < data.Potongan.Count(); k++)
+                {
+                    jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
+                }
+                data.DataMhs.jml_potongan = jmlPotongan;
+                data.DataMhs.jml_setelah_potongan = total - jmlPotongan;
+                data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
+                if (data.ListAngsuranMhs != null)
+                {
+                    for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
+                    {
+                        jml = jml + data.ListAngsuranMhs[j].jmluang;
+                    }
+
+                    if (data.DataMhs.jaminan)
+                    {
+
+                        uang_angsuran1 = uang_angsuran1 + data.ListAngsuranMhs[0].jmluang;
+                        foreach (var item in data.ListAngsuranMhs)
+                        {
+                            item.angsuranke = item.angsuranke - 1;
+                        }
+                        data.ListAngsuranMhs.RemoveAt(0);
+                    }
+                }
+
+                data.DataMhs.uang_jaminan = uang_angsuran1;
+                data.DataMhs.jml_angsuran = jml;
                 if (data.DataMhs.jaminan)
                 {
-
-                    uang_angsuran1 = uang_angsuran1 + data.ListAngsuranMhs[0].jmluang;
-                    foreach (var item in data.ListAngsuranMhs)
-                    {
-                        item.angsuranke = item.angsuranke - 1;
-                    }
-                    data.ListAngsuranMhs.RemoveAt(0);
+                    data.DataMhs.jml_angsuran = jml - uang_angsuran1;
                 }
+
+                string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_setelah_potongan);
+                data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
+
+                halaman = data.DataMhs.jenjang.Equals("S1") ? halamanS1 : halamanS2;
             }
-
-            data.DataMhs.uang_jaminan = uang_angsuran1;
-            data.DataMhs.jml_angsuran = jml;
-            if (data.DataMhs.jaminan)
-            {
-                data.DataMhs.jml_angsuran = jml - uang_angsuran1;
-            }
-
-            string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_setelah_potongan);
-            data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
-
-            string halaman = data.DataMhs.jenjang.Equals("S1") ? halamanS1 : halamanS2;
-
             if (download)
             {
                 return new ViewAsPdf(halaman, data)
@@ -225,7 +233,62 @@ namespace PMB.Controllers
                 };
             }
         }
+        //public IActionResult CetakSKPUK(string kd_calon)
+        //{
+        //    string halaman = "Cetak";
 
+        //    //List<AngsuranSKPUK> ListDataAngsuran = dao.GetAngsuranSKPUK(kd_calon);
+        //    CetakSKPUKView data = new CetakSKPUKView();
+
+        //    data.JenisPembayaran = dao.GetBayarSKPUK(kd_calon);
+        //    data.DataMhs = dao.GetMahasiswaCetakSKPUK(kd_calon);
+        //    data.Pejabat = dao.GetTTDRektor();
+
+        //    int total = 0;
+        //    int jml = 0;
+        //    int jmlPotongan = 0;
+        //    //for (int i = 0;  i < data.JenisPembayaran.Count(); i++)
+        //    //{
+        //    //    total = total + data.JenisPembayaran[i].jumlah;
+        //    //}
+        //    //data.DataMhs.jml_sebelum_potongan = total;
+
+        //    data.Potongan = dao.GetPotonganSKPUK(kd_calon);
+        //    for (int k = 0; k < data.Potongan.Count(); k++)
+        //    {
+        //        jmlPotongan = jmlPotongan + data.Potongan[k].jlh_total;
+        //    }
+        //    data.DataMhs.jml_potongan = jmlPotongan;
+
+        //    data.ListAngsuranMhs = dao.GetAngsuranSKPUK(kd_calon);
+
+        //    //if(data.ListAngsuranMhs != null)
+        //    //{
+        //    //    for (int j = 0; j < data.ListAngsuranMhs.Count(); j++)
+        //    //    {
+        //    //        jml = jml + data.ListAngsuranMhs[j].jmluang;
+        //    //    }
+        //    //}
+
+        //    //data.DataMhs.jml_angsuran = jml;
+
+        //    string terbilangJmlStlhPotongan = SKPUKMhsDAO.Terbilang(data.DataMhs.jml_angsuran);
+        //    data.DataMhs.terbilangJmlStlhPotongan = terbilangJmlStlhPotongan;
+
+        //    return new ViewAsPdf(halaman, data)
+        //    {
+        //        PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait,
+        //        PageSize = Rotativa.AspNetCore.Options.Size.A4,
+        //        PageMargins = {
+        //                 Left = 20,
+        //                 Right = 20,
+        //                 Top = 15,
+        //                 Bottom = 10
+        //         }
+        //        //,
+        //       // FileName = $"Surat Ketetapan Uang Kuliah {data.DataMhs.nm_calon}.pdf"
+        //    };
+        //}
         [HttpPost]
         public IActionResult CetakBatchSKPUK([FromBody] StoreSPUMhs data)
         {
@@ -254,7 +317,7 @@ namespace PMB.Controllers
                         var base64String = Convert.ToBase64String(zipMemoryStream.ToArray());
 
                         string jalur = daoAngsuran.GetNamaJalur(data.kd_jalur);
-                        return Json(new { success = true, fileContent = base64String, filename= $"SKPUK_{data.kode_calon_awal}-{data.kode_calon_akhir}_{jalur}.zip" });
+                        return Json(new { success = true, fileContent = base64String, filename = $"SKPUK_{data.kode_calon_awal}-{data.kode_calon_akhir}_{jalur}.zip" });
                     }
                 }
                 else
@@ -354,6 +417,7 @@ namespace PMB.Controllers
 
             return pdfBytes;
         }
+
 
         public IActionResult Privacy()
         {

@@ -12,6 +12,7 @@ namespace PMB.Controllers
     {
         private readonly ILogger<SPUController> _logger;
         SPUMhsDAO dao;
+        PendaftarDAO pendaftarDAO = new PendaftarDAO();
         MstAngsuranDAO daoAngsuran;
 
         public SPUController(ILogger<SPUController> logger)
@@ -30,16 +31,37 @@ namespace PMB.Controllers
         //SPU
         public IActionResult SPUMahasiswa()
         {
+            PendaftarView pendaftar = new PendaftarView();
             SPUMhsView objek = new SPUMhsView();
+            objek.AllTahunAkademik = pendaftar.getAllTahunAkademik();
+            objek.JalurList = pendaftarDAO.GetAllJalur();
             //objek.SPUMhsList = dao.GetAllSPU();
 
             return View(objek);
         }
 
-        public IActionResult GetSPUMahasiswa()
+        public IActionResult GetSPUMahasiswa(string ta, string jenjang, string jalur = null)
         {
             List<SPUMhs2> data = null;
-            data = dao.GetAllSPU();
+
+            if (String.IsNullOrEmpty(ta))
+            {
+                String tahun = DateTime.Now.Year + "/" + (DateTime.Now.Year + 1);
+                ta = tahun;
+                if (DateTime.Now.Month > 7)
+                {
+                    ta = DateTime.Now.Year + 1 + "/" + (DateTime.Now.Year + 2);
+                }
+            }
+            if (String.IsNullOrEmpty(jenjang))
+            {
+                jenjang = "s1";
+            }
+            if (String.IsNullOrEmpty(jalur))
+            {
+                jalur = "All";
+            }
+            data = dao.GetAllSPU(ta, jenjang, jalur);
             return Json(data);
         }
 
@@ -71,7 +93,7 @@ namespace PMB.Controllers
             try
             {
                 List<string> ListProdi = dao.CekProdiTarifSPU(data);
-                if(ListProdi.Count() > 0)
+                if (ListProdi.Count() > 0)
                 {
                     return Json(new { success = true, message = ListProdi });
                 }
@@ -85,6 +107,7 @@ namespace PMB.Controllers
                 return StatusCode(500, TempData["error"] = ex.Message);
             }
         }
+
 
         [HttpPost]
         public IActionResult SaveDataSPU([FromBody] StoreSPUMhs data)
