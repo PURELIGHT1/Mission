@@ -1555,15 +1555,25 @@ namespace PMB.DAO
             {
                 try
                 {
-
-                    string query = @"UPDATE tbl_nilai_utbk SET
-                                        nilai = @nilai
-                                     WHERE id_nilai_utbk = @id";
+                    string query = @"";
+                    if (ubah[0].id_nilai_utbk == 0)
+                    {
+                        query = @"INSERT INTO tbl_nilai_utbk([kd_calon], [id_ref_nilai_utbk], [nilai])
+								VALUES (@kd_calon, @id_ref_nilai_utbk, @nilai)";
+                    }
+                    else
+                    {
+                        query = @"UPDATE tbl_nilai_utbk SET
+                                    nilai = @nilai
+                                WHERE id_nilai_utbk = @id";
+                    }
 
                     for(int i=0; i < ubah.Count; i++)
                     {
                         var param = new
                         {
+                            kd_calon = ubah[i].Kd_calon,
+                            id_ref_nilai_utbk = ubah[i].id_ref_nilai_utbk,
                             nilai = ubah[i].nilai,
                             id = ubah[i].id_nilai_utbk
                         };
@@ -1590,13 +1600,27 @@ namespace PMB.DAO
             {
                 try
                 {
-
-                    string query = @"UPDATE dt_prestasi_pendidikan SET
-                                        matematika = @mm,
-                                        bhs_inggris = @bing,
-                                        bahasa = @bindo,
-                                        rangking = @rank
-                                     WHERE kd_calon = @kd_calon";
+                    string query = @"IF EXISTS (SELECT 1 FROM dt_prestasi_pendidikan WHERE kd_calon = @kd_calon)
+                                    BEGIN
+                                        UPDATE dt_prestasi_pendidikan
+                                        SET
+                                            matematika = @mm,
+                                            bhs_inggris = @bing,
+                                            bahasa = @bindo,
+                                            rangking = @rank
+                                        WHERE kd_calon = @kd_calon;
+                                    END
+                                    ELSE
+                                    BEGIN
+                                        INSERT INTO dt_prestasi_pendidikan (kd_calon, matematika, bhs_inggris, bahasa, rangking)
+                                        VALUES (@kd_calon, @mm, @bing, @bindo, @rank);
+                                    END";
+                    //string query = @"UPDATE dt_prestasi_pendidikan SET
+                    //                    matematika = @mm,
+                    //                    bhs_inggris = @bing,
+                    //                    bahasa = @bindo,
+                    //                    rangking = @rank
+                    //                 WHERE kd_calon = @kd_calon";
 
                     for (int i = 0; i < ubah.Count; i++)
                     {
@@ -1632,11 +1656,25 @@ namespace PMB.DAO
                 try
                 {
 
-                    string query = @"UPDATE dt_prestasi_pendidikan SET
-                                        matematika = @mm,
-                                        bhs_inggris = @bing,
-                                        bahasa = @bindo
-                                     WHERE kd_calon = @kd_calon";
+                    string query = @"IF EXISTS (SELECT 1 FROM dt_prestasi_pendidikan WHERE kd_calon = @kd_calon)
+                                    BEGIN
+                                        UPDATE dt_prestasi_pendidikan
+                                        SET
+                                            matematika = @mm,
+                                            bhs_inggris = @bing,
+                                            bahasa = @bindo
+                                        WHERE kd_calon = @kd_calon;
+                                    END
+                                    ELSE
+                                    BEGIN
+                                        INSERT INTO dt_prestasi_pendidikan (kd_calon, matematika, bhs_inggris, bahasa)
+                                        VALUES (@kd_calon, @mm, @bing, @bindo);
+                                    END";
+                    //string query = @"UPDATE dt_prestasi_pendidikan SET
+                    //                    matematika = @mm,
+                    //                    bhs_inggris = @bing,
+                    //                    bahasa = @bindo
+                    //                 WHERE kd_calon = @kd_calon";
 
                     for (int i = 0; i < ubah.Count; i++)
                     {
@@ -1670,20 +1708,39 @@ namespace PMB.DAO
             {
                 try
                 {
-
-                    string query = @"UPDATE dt_prestasi_pendidikan SET
-                                        matematika = @mm,
-                                        bhs_inggris = @bing,
-                                        bahasa = @bindo,
-                                        kkm_matematika = @kkm_mm,
-                                        kkm_inggris = @kkm_bing,
-                                        kkm_indonesia = @kkm_bindo
-                                     WHERE id_prestasi = @id";
+                    string query = @"IF EXISTS (SELECT 1 FROM dt_prestasi_pendidikan WHERE id_prestasi = @id)
+                                    BEGIN
+                                        -- Jika data dengan id_prestasi sudah ada, lakukan UPDATE
+                                        UPDATE dt_prestasi_pendidikan
+                                        SET
+                                            matematika = @mm,
+                                            bhs_inggris = @bing,
+                                            bahasa = @bindo,
+                                            kkm_matematika = @kkm_mm,
+                                            kkm_inggris = @kkm_bing,
+                                            kkm_indonesia = @kkm_bindo
+                                        WHERE id_prestasi = @id;
+                                    END
+                                    ELSE
+                                    BEGIN
+                                        -- Jika data dengan id_prestasi belum ada, lakukan INSERT
+                                        INSERT INTO dt_prestasi_pendidikan (kd_calon, matematika, bhs_inggris, bahasa, kkm_matematika, kkm_inggris, kkm_indonesia)
+                                        VALUES (@kd_calon, @mm, @bing, @bindo, @kkm_mm, @kkm_bing, @kkm_bindo);
+                                    END";
+                    //string query = @"UPDATE dt_prestasi_pendidikan SET
+                    //                    matematika = @mm,
+                    //                    bhs_inggris = @bing,
+                    //                    bahasa = @bindo,
+                    //                    kkm_matematika = @kkm_mm,
+                    //                    kkm_inggris = @kkm_bing,
+                    //                    kkm_indonesia = @kkm_bindo
+                    //                 WHERE id_prestasi = @id";
 
                     for (int i = 0; i < ubah.Count; i++)
                     {
                         var param = new
                         {
+                            kd_calon = ubah[i].Kd_calon,
                             mm = ubah[i].mm,
                             bing = ubah[i].bing,
                             bindo = ubah[i].bindo,
