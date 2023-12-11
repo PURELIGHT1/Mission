@@ -44,19 +44,19 @@
             margin-bottom: 10px;
         }
 
-        #tblJenisBayar thead, #tblTotalBayar thead, #tblAngsuran thead {
-            text-align: center;
-        }
+            #tblJenisBayar thead, #tblTotalBayar thead, #tblAngsuran thead {
+                text-align: center;
+            }
 
-        #tblJenisBayar td, #tblTotalBayar td, #tblAngsuran td {
-            padding: 5px;
-            border: 1px solid black;
-        }
+            #tblJenisBayar td, #tblTotalBayar td, #tblAngsuran td {
+                padding: 5px;
+                border: 1px solid black;
+            }
 
-        #tblJenisBayar tr, #tblTotalBayar tr, #tr td {
-            padding: 5px;
-            border: 1px solid black;
-        }
+            #tblJenisBayar tr, #tblTotalBayar tr, #tr td {
+                padding: 5px;
+                border: 1px solid black;
+            }
 
         #isiJenisBayar {
             border-bottom: hidden;
@@ -101,7 +101,7 @@
         }
 
         #tblAngsuran {
-            font-size:10px;
+            font-size: 10px;
         }
 
         #noAngsuran {
@@ -136,6 +136,11 @@
             width: 108%;
         }
 
+        /* .gambar-styled {
+                                    max-width: 1000px;
+                                    height: auto;
+                                } */
+
         .pdf-styled {
             width: 100%;
             height: 600px;
@@ -145,9 +150,117 @@
 
 <body class="classbody">
     <div class="divbody">
-        
+        <h4 style="text-align: center;">
+            SURAT KETETAPAN PEMBAYARAN UANG KULIAH (SKPUK)
+            <br />
+            TAHUN AKADEMIK @Model.DataMhs.thnakademik
+            <br />
+            PMB PROGRAM @Model.DataMhs.nama_jalur
+            <hr style="width: 850px; height: 1px; background-color: black;" />
+        </h4>
 
-     </div>
+        <table id="namaMhs" style="text-align: left; font-size: 16pt;">
+            <tr>
+                <th>Nama</th>
+                <td>
+                <th>: @Model.DataMhs.nm_calon</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Nomor Pendaftaran</th>
+                <td>
+                <th>: @Model.DataMhs.kd_calon</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Fakultas</th>
+                <td>
+                <th>: @Model.DataMhs.nm_fakultas</th>
+                </td>
+            </tr>
+            <tr>
+                <th>Program Studi</th>
+                <td>
+                <th>: @Model.DataMhs.nm_prodi</th>
+                </td>
+            </tr>
+        </table>
+        <br />
+
+        @{
+            string jml_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_potongan);
+            string jml_setelah_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
+            string uang_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.uang_jaminan);
+            string tanggal_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.tanggal_jaminan);
+            string batas_bayar = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.batas_bayar);
+
+        }
+
+        <p id="jmlBayar">Total biaya yang harus dibayarkan pada semester 1 adalah: <strong>Rp. @jml_setelah_potongan</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>):</p>
+        <br />
+
+        <table id="tblJenisBayar" width="80%" style="float: left;">
+            <thead>
+                <tr>
+                    <th>Jenis Pembayaran</th>
+                    <th>Jumlah (Rp)</th>
+                    <th>Potongan (Rp)</th>
+                    <th>Biaya (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.JenisPembayaran)
+                {
+                    string jenisPembayaran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.ket_angsuran);
+                    string jumlah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jumlah);
+                    string potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.potongan);
+                    string total = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.total);
+                    batas_bayar = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.batas_bayar);
+
+                    int indexPersen = jenisPembayaran.IndexOf('%');
+                    string jenis = jenisPembayaran.Substring(indexPersen + 1).Trim();
+
+                    <tr>
+                        <td id="isiJenisBayar" width="55%">@jenis</td>
+                        <td id="isiJmlJenisBayar" width="15%"><span style="float:left;"></span>@jumlah</td>
+                        <td id="isiJmlJenisBayar" width="15%"><span style="float:left;"></span>@potongan</td>
+                        <td id="isiJmlJenisBayar" width="15%"><span style="float:left;"></span>@total</td>
+                    </tr>
+                }
+                <tr></tr>
+
+                <tr>
+                    <td id="ketSebelum" colspan="3">Jumlah</td>
+                    <td id="jmlSetelah"><span style="float:left"></span>@jml_setelah_potongan</td>
+                </tr>
+
+            </tbody>
+        </table>
+
+        <br />
+
+        <br />
+        <p class="floatLeftText">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya tanggal  <strong> @batas_bayar  </strong></p>
+        <p class="floatLeftText">
+            Biaya studi yang dibayarkan pada semester berikutnya adalah SPP Tetap dan SPP Variabel berdasarkan
+            jumlah SKS yang akan ditempuh.
+            Atas perhatian Saudara kami ucapkan terima kasih.
+        </p>
+
+        <br />
+        <div style="float:right">
+            <p>Yogyakarta, @Model.DataMhs.tgl_cetak</p>
+            <p>@Model.Pejabat.jabatan</p>
+            <img src="data:image/jpeg;base64,@Model.Pejabat.foto" width="100%" height="100%" />
+            <p>@Model.Pejabat.nama</p>
+        </div>
+        <p class="floatLeftText">
+        </p>
+
+        <br />
+        <br />
+
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
             crossorigin="anonymous"></script>
