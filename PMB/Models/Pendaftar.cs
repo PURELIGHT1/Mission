@@ -212,6 +212,7 @@ namespace PMB.Models
         public string kd_calon { get; set; }
         public bool is_alumni { get; set; }
         public bool is_matrikulasi { get; set; }
+        public string username { get; set; }
     }
     
 }

@@ -9,6 +9,11 @@
         jenjang = "Pasca Sarjana";
     }
     ViewData["Title"] = "Detail Calon Mahasiswa " + jenjang;
+
+
+    var menu = User.Claims
+        .Where(c => c.Type == "menu")
+            .Select(c => c.Value).SingleOrDefault();
 }
 @model StorePendaftar2
 
@@ -1182,10 +1187,8 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        @*<div class="form-group">
-                                            <label for="namaCalon">Nomor Pokok Mahasiswa</label>
-                                            <input type="text" class="form-control" id="npm_potongan" placeholder="Masukkan NPM Keluarga">
-                                        </div> *@
+                                        
+                                        <input type="hidden" value="@User.Identity.Name" id="username" />
                                     </div>
                                     <div class="text-left">
                                         <button type="submit" class="btn btn-sm btn-success" id="submitMatAl"><i class="bi bi-save"></i> Simpan</button>
@@ -1260,6 +1263,9 @@
                     }
                     if (data.is_alumni === 'YA') {
                         $('#alumni_checkbox').get(0).checked = true;
+                    }
+                    if (data.is_matrikulasi === 'YA') {
+                        $('#matrikulasi_checkbox').get(0).checked = true;
                     }
                     if(data.is_ptg_keluarga === 'YA'){
                         $('#ptg_checkbox').get(0).checked = true;
@@ -1901,7 +1907,8 @@
                 var dataBerkasToSend = {
                     kd_calon: $('#kdCalon').val(),
                     is_alumni: $('#alumni_checkbox').get(0).checked,
-                    is_matrikulasi: $('#matrikulasi_checkbox').get(0).checked
+                    is_matrikulasi: $('#matrikulasi_checkbox').get(0).checked,
+                    username: $('#username').val()
                 }
                 $.ajax({
                     url: '@Url.Action("SaveMatAl", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda

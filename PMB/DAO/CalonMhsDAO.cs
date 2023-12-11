@@ -436,6 +436,10 @@ namespace PMB.DAO
 		                                    else 'TIDAK'
 	                                    end as is_alumni,
                                         case 
+		                                    when is_matrikulasi = 1 Then 'YA'
+		                                    else 'TIDAK'
+	                                    end as is_matrikulasi,
+                                        case 
                                             when (select count(*) from dt_potongan_keluarga where kd_calon = a.KD_CALON and status = '1') > 0 THEN 'YA'
 		                                    else 'TIDAK'
                                         end as is_ptg_keluarga,
@@ -480,6 +484,7 @@ namespace PMB.DAO
                                     LEFT OUTER JOIN DT_ALAMAT_ASAL b ON a.KD_CALON = b.kd_calon
                                     LEFT OUTER JOIN DT_ORTU c ON a.ID_ORTU = c.ID_ORTU
                                     LEFT OUTER JOIN ref_jalur d ON a.KD_JALUR = d.kd_jalur
+									LEFT OUTER JOIN spu e ON a.kd_calon = e.kd_calon
                                     WHERE a.KD_CALON = @Kd_Calon";
 
                     var param = new { Kd_Calon = id };
@@ -1025,10 +1030,26 @@ namespace PMB.DAO
                 {
                     string query = @"UPDATE MHS_PENDAFTAR SET
                                     is_alumni = @is_alumni 
-                                WHERE [KD_CALON] = @Kd_Calon;";
-
+                                WHERE [KD_CALON] = @Kd_Calon;
+                                
+                                IF EXISTS (SELECT 1 FROM spu WHERE kd_calon = @Kd_Calon)
+                                    BEGIN
+                                        UPDATE spu
+                                        SET
+                                            is_matrikulasi = @is_matrikulasi,
+			                                tanggal = GETDATE(),
+			                                username = @username
+                                        WHERE kd_calon = @Kd_Calon;
+                                    END
+                                    ELSE
+                                    BEGIN
+                                        INSERT INTO spu (kd_calon, username, tanggal, is_matrikulasi)
+                                        VALUES (@Kd_Calon, @username, GETDATE(), @is_matrikulasi);
+                                END";
                     var param = new
                     {
+                        username = Mhs.username,
+                        is_matrikulasi = Mhs.is_matrikulasi,
                         is_alumni = Mhs.is_alumni,
                         Kd_Calon = Mhs.kd_calon
                     };
