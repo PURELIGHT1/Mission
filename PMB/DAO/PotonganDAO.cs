@@ -162,26 +162,35 @@ namespace PMB.DAO
         }
 
         //potongan
-        public dynamic GetPotonganMandiri()
+        public List<dynamic> GetPotonganMandiri(string ta, string jalur)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
                     string query = @"SELECT
+                                        row_number() over (order by a.kd_calon) No,
 	                                    id_potongan, 
-	                                    kd_calon, 
+	                                    a.kd_calon, 
 	                                    jns_potongan, 
 	                                    jlh_total, 
 	                                    jenis, 
 	                                    a.id_tagihan, 
-	                                    nama_tagihan
+	                                    nama_tagihan,
+                                        c.kd_jalur,
+                                        d.nama_jalur,
+                                        c.thnakademik
                                     FROM Potongan a
-                                    JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
-                                    ORDER BY id_potongan, kd_calon DESC";
-
-                    var data = conn.Query<dynamic>(query);
-
+                                    INNER JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
+                                    INNER JOIN mhs_pendaftar c ON a.kd_calon = c.kd_calon
+                                    INNER JOIN ref_jalur d ON c.kd_jalur = d.kd_jalur
+                                    WHERE c.thnakademik = @ta";
+                    if (!jalur.Equals("All"))
+                    {
+                        query = query + @" AND c.kd_jalur = @jalur ";
+                    }
+                    query = query + @" ORDER BY a.kd_calon ASC";      
+                    var data = conn.Query<dynamic>(query, new { jalur = jalur, ta = ta }).AsList();
                     return data;
                 }
                 catch (Exception ex)
@@ -300,5 +309,27 @@ namespace PMB.DAO
             }
         }
         
+        //public List<dynamic> GetAllExcelPotonganCalon(string ta, string jalur)
+        //{
+        //    using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+        //    {
+        //        try
+        //        {
+        //            string query = @"DELETE FROM potongan WHERE id_potongan = @id";
+
+        //            var data = conn.Query<dynamic>(query, new { ta = ta, jalur = jalur }).AsList();
+
+        //            return false;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return null;
+        //        }
+        //        finally
+        //        {
+        //            conn.Dispose();
+        //        }
+        //    }
+        //}
     }
 }

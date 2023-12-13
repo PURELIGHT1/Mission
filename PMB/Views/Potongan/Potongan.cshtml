@@ -8,6 +8,13 @@
             text-align: center;
         }
 
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -23,7 +30,27 @@
         }
     </style>
 }
+<div class="customRow">
+    <div style="display: flex;">
+        <select id="tahunFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+            @foreach (var item in Model.AllTahunAkademik)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
 
+        <select id="jalurFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+            <option value="All" selected>Semua</option>
+            @foreach (var item in Model.JalurList)
+            {
+                <option value="@item.kd_jalur">@item.nama_jalur</option>
+            }
+        </select>
+    </div>
+    <div class="item-right">
+        <button class="btn btn-success" id="ExportExcelPotongan"><i class="bi bi-file-excel"></i> Export Calon Mahasiswa</button>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-12">
         <a href="#" class="btn btn-sm btn-success btntambah mb-2" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white;"></i> Tambah Potongan</a>
@@ -234,21 +261,45 @@
             "searching": true
         });
 
-        $.ajax({
-            url: '@Url.Action("GetPotongan", "Potongan")',
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                console.log(data);
-                for (var i = 0; i < data.length; i++) {
-                    data[i].No = i + 1;
-                }
-                table.rows.add(data).draw();
-            },
-            error: function () {
-                console.error('Gagal mengambil data.');
-            }
+        var ta = $("#tahunFilter").val();
+        var jalur = $("#jalurFilter").val();
+
+        function getDataAndInitializeTable() {
+            handleFilterChange();
+        }
+
+        getDataAndInitializeTable();
+
+        $('#tahunFilter').on('change', function () {
+            var filterValue = $(this).val();
+            ta = filterValue;
+            handleFilterChange();
         });
+
+        $('#jalurFilter').on('change', function () {
+            var filterValue = $(this).val();
+            jalur = filterValue;
+            handleFilterChange();
+        });
+
+        function SetTabelCalonMhs(result) {
+            table.clear();
+            table.rows.add(result).draw();
+        }
+
+        function handleFilterChange() {
+            $.ajax({
+                url: '@Url.Action("GetPotongan", "Potongan")?ta=' + ta + '&jalur='+jalur,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    SetTabelCalonMhs(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+        }
 
         $.ajax({
             url: '@Url.Action("GetListTagihan", "Potongan")',
@@ -401,6 +452,10 @@
             $('#ket_u').val(ket);
 
             ValidateUbah();
+        });
+
+        $('#ExportExcelPotongan').on('click', function () {
+            window.location.href = "@Url.Action("ExportExcelPotongan", "Potongan")?ta=" + ta + "&jalur="+jalur;
         });
     });
 </script>
