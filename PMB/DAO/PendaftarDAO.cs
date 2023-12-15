@@ -249,6 +249,30 @@ namespace PMB.DAO
             }
         }
 
+        public string GetNamaProdi(string id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT TOP(1)
+                                        NM_PRODI
+                                    FROM REF_PRODI WHERE ID_PRODI = @id";
+                    var data = conn.QueryFirstOrDefault<string>(query, new { id = id });
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<dynamic> GetAllJalur()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))

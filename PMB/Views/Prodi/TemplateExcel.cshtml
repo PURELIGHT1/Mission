@@ -1,0 +1,24 @@
+﻿@{
+    Layout = null;
+    Context.Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    // Context.Response.Headers.Add("content-disposition", "attachment;filename=template.xlsx");
+
+    using (var package = new OfficeOpenXml.ExcelPackage())
+    {
+        var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+        // Add header row
+        worksheet.Cells["A1"].Value = "Kode_calon";
+        worksheet.Cells["B1"].Value = "Prodi Diterima";
+
+        // Add data rows
+        worksheet.Cells["A2"].Value = "200710898";
+        worksheet.Cells["B2"].Value = "Informatika";
+
+        worksheet.Cells["A3"].Value = "200710905";
+        worksheet.Cells["B3"].Value = "Teknik Industri";
+
+        // Output the Excel package
+        Context.Response.Body.Write(package.GetAsByteArray());
+    }
+}

@@ -1,0 +1,371 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Pengelolaan Prodi Diterima"; 
+    var isExcel = ViewContext.HttpContext.Request.Query["excel"];
+
+}
+
+@model ProdiDiterimaView
+@section Styles{
+    <style>
+        #TabelProdiDT thead th {
+            text-align: center;
+        }
+
+        .customRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #TabelProdiDT thead {
+            background-color: #284387;
+            color: white;
+        }
+
+        #TabelProdiDT td {
+            white-space: nowrap;
+        }
+        
+    </style>
+}
+<div class="customRow">
+    <div style="display: flex;">
+        <select id="tahunFilter" class="form-select" style="width: 200px; margin-right: 10px;">
+            @foreach (var item in Model.AllTahunAkademik)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+
+        <select id="jalurFilter" class="form-select" style="width: 300px; margin-right: 10px;">
+            <option value="All" selected>Semua</option>
+            @foreach (var item in Model.JalurList)
+            {
+                <option value="@item.kd_jalur">@item.nama_jalur</option>
+            }
+        </select>
+        <select id="prodiFilter" class="form-select" style="width: 300px; margin-right: 10px;">
+            <option value="All" selected>Semua</option>
+            @foreach (var item in Model.ProdiList)
+            {
+                <option value="@item.ID_PRODI">@item.JENJANG -  @item.NM_PRODI</option>
+            }
+        </select>
+    </div>
+    <div class="item-right">
+        <button class="btn btn-success" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-file-excel"></i> Import Prodi Diterima</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="table-container">
+            <input type="hidden" id="BoolExcel" value="@isExcel" />
+            <table id="TabelProdiDT" class="table table-responsive-lg table-bordered table-striped display compact text-center">
+                <thead style="background-color: #284387; color: white;">
+                    <tr>
+                        <th><input type="checkbox" id="checkAll"></th>
+                        <th>Kode Calon</th>
+                        <th>Pilihan 1</th>
+                        <th>Pilihan 2</th>
+                        <th>Pilihan 3</th>
+                        <th>Masuk</th>
+                    </tr>
+                </thead>
+                <tbody class="table-light">
+                </tbody>
+            </table><br/>
+            <div class="text-left">
+                <button type="submit" class="btn btn-sm btn-success" id="SaveProdiDiterima"><i class="bi bi-save"></i> Save</button>
+                @if (isExcel == "true")
+                {
+                    <a href="@Url.Action("Diterima","Prodi")" class="btn btn-sm btn-danger"><i class="bi bi-save"></i> Kembali</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-tambah">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Tambah Potongan Mahasiswa</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+               <form asp-action="ImportExcelProdiDiterima" asp-controller="Prodi" enctype="multipart/form-data" method="POST">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="exampleInputFile">Excel Prodi</label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="excelFile" accept=".xls, .xlsx" required onchange="checkFileSizeExcel(this)">
+                                <label class="custom-file-label" for="inputFiles">Choose file</label>
+                            </div>
+                        </div>
+                        <a href="@Url.Action("TemplateExcel", "Prodi")">Template Excel</a>
+                        <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="fileSizeError"></span>
+                        <span class="badge bg-danger" style="font-size: 10pt; margin-top: 10px" id="typeSizeError"></span>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function checkFileSizeExcel(input) {
+        var maxSizeInBytes = 1024000;
+        var file = input.files[0];
+        var allowedTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+
+        if (file) {
+            if (!allowedTypes.includes(file.type)) {
+                document.getElementById("typeSizeError").innerText = "Tipe berkas tidak valid. Hanya berkas EXCEL yang diperbolehkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("typeSizeError").innerText = "";
+            }
+
+            if (file.size > maxSizeInBytes) {
+                document.getElementById("fileSizeError").innerText = "Ukuran berkas terlalu besar. Maksimum 1Mb diizinkan.";
+                input.value = "";
+                return false;
+            } else {
+                document.getElementById("fileSizeError").innerText = "";
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        bsCustomFileInput.init();
+
+        function disableFilters(disable) {
+            $("#tahunFilter").prop("disabled", disable);
+            $("#jalurFilter").prop("disabled", disable);
+            $("#prodiFilter").prop("disabled", disable);
+        }
+
+        var table = $('#TabelProdiDT').DataTable({
+            "columns": [
+                { 
+                    "data": null, 
+                    "orderable": false, 
+                    "searchable": false,
+                    "render": function (data, type, row, meta) {
+                        return '<input type="checkbox" class="row-checkbox" data-id="' + row.kd_calon + '">';
+                    }
+                },
+                { "data": "kd_calon" },
+                { "data": "pil_1" },
+                { "data": "pil_2" },
+                { "data": "pil_3" },
+                { "data": "masuk" },
+            ],
+            "lengthMenu": [20, 50, 100],
+            "searching": true
+        });
+
+        var ta = $("#tahunFilter").val();
+        var jalur = $("#jalurFilter").val();
+        var prodi = $("#prodiFilter").val();
+        var excel = $("#BoolExcel").val();
+
+        if (excel === null) {
+            excel === "false";
+        }
+
+        if (excel) {
+            disableFilters(true);
+        }
+
+        function getDataAndInitializeTable() {
+            handleFilterChange();
+        }
+
+        getDataAndInitializeTable();
+
+        $('#tahunFilter').on('change', function () {
+            var filterValue = $(this).val();
+            ta = filterValue;
+            handleFilterChange();
+        });
+
+        $('#jalurFilter').on('change', function () {
+            var filterValue = $(this).val();
+            jalur = filterValue;
+            handleFilterChange();
+        });
+
+        $('#prodiFilter').on('change', function () {
+            var filterValue = $(this).val();
+            prodi = filterValue;
+            handleFilterChange();
+        });
+        
+        function SetTabelCalonMhs(result) {
+            table.clear();
+            table.rows.add(result).draw();
+        }
+
+        function handleFilterChange() {
+            $.ajax({
+                url: '@Url.Action("GetPilProdiMhs", "Prodi")?ta=' + ta + '&jalur=' + jalur + '&prodi=' + prodi + '&excel='+ excel,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    SetTabelCalonMhs(data);
+                },
+                error: function () {
+                    console.error('Gagal mengambil data.');
+                }
+            });
+        }
+
+        $('#checkAll').on('change', function () {
+            var isChecked = $(this).prop('checked');
+            table.rows().every(function () {
+                var row = this.node();
+                $('input[type="checkbox"]', row).prop('checked', isChecked);
+                $(row).toggleClass('selected', isChecked);
+            });
+        });
+
+        $('#TabelProdiDT tbody').on('change', 'input[type="checkbox"]', function () {
+            var row = $(this).closest('tr');
+            row.toggleClass('selected', $(this).prop('checked'));
+        });
+
+        $('#SaveProdiDiterima').on('click', function () {
+            var selectedKdCalonArray = [];
+            var selectedExcelArray = [];
+
+            var nm_prodi = "";
+            table.rows('.selected').every(function () {
+                var rowData = this.data();
+                selectedKdCalonArray.push(rowData.kd_calon);
+                selectedExcelArray.push({
+                    kd_calon: rowData.kd_calon,
+                    pil_1: rowData.pil_1,
+                    pil_2: rowData.pil_2,
+                    pil_3: rowData.pil_3,
+                    masuk: rowData.masuk
+                });
+            });
+            var count = selectedKdCalonArray.length;
+            var countExcel = selectedExcelArray.length;
+            
+            if ((prodi === "All" || prodi === null) && !excel) {
+                alert("Harap pilih prodi yang akan di terima!");
+            } else {
+                if(excel){
+                    $.ajax({
+                        url: '@Url.Action("TambahProdiDiterima", "Prodi")',
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: JSON.stringify(selectedExcelArray),
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success) {
+                                window.location.href = '@Url.Action("Diterima", "Prodi")';
+                            }
+                        },
+                        error: function (error) {
+                            console.error('Terjadi kesalahan:', error);
+                        }
+                    });
+                }
+                else
+                {
+                    $.ajax({
+                        url: '@Url.Action("GetNamaProdi", "Prodi")?id_prodi=' + prodi,
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        data: null,
+                        success: function (response) {
+                            console.log(response);
+                            if (response.success) {
+                                if (confirm("Apakah yakin ingin memasukkan " + count + " calon ini menjadi prodi " + response.message)) {
+                                    var dataToSend = {
+                                        kode_calon: selectedKdCalonArray,
+                                        id_prodi: prodi,
+                                        nm_prodi: response.message
+                                    };
+
+                                    $.ajax({
+                                        url: '@Url.Action("UbahProdiDiterima", "Prodi")',
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify(dataToSend),
+                                        success: function (response) {
+                                            console.log(response);
+                                            if (response.success) {
+                                                window.location.href = '@Url.Action("Diterima", "Prodi")';
+                                            }
+                                        },
+                                        error: function (error) {
+                                            console.error('Terjadi kesalahan:', error);
+                                        }
+                                    });
+                                }
+                            }
+                        },
+                        error: function (error) {
+                            console.error('Terjadi kesalahan:', error);
+                        }
+                    });
+                }
+            }
+           
+        });
+
+
+        $("#modalUbah").on('click', function () {
+            if (ValidateUbah()) {
+                var dataToSend = {
+                    id_potongan: $('#id_potongan').val(),
+                    kd_calon: $('#kd_calon_u').val(),
+                    id_tagihan: $("#tagihan_u").val(),
+                    nominal: $("#ptg_u").val(),
+                    keterangan: $("#ket_u").val()
+                };
+                $.ajax({
+                    url: '@Url.Action("SaveDataPotongan", "Potongan")',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dataToSend),
+                    success: function (response) {
+                        console.log(response);
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Potongan", "Potongan")';
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Terjadi kesalahan:', error);
+                    }
+                });
+            }
+
+        });
+    });
+</script>
+@section Scripts{
+    <script src="/Assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+}
