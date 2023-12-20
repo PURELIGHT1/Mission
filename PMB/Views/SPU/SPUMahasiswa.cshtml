@@ -480,7 +480,8 @@
                 var dataCekToSend = {
                     kode_calon_awal: $("#kodeAwal").val(),
                     kode_calon_akhir: $("#kodeAkhir").val(),
-                    id_prodi: $("#prodi").val()
+                    id_prodi: $("#prodi").val(),
+                    kd_jalur: $("#jalur").val()
                 };
                 var cekProdi = $("#prodi").val();
 
@@ -496,8 +497,27 @@
                             var arrayProdi = response.message;
                             console.log(arrayProdi);
                             if (cekProdi === "All") {
-                                if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
+                                if (arrayProdi[0] != "Lengkap") {
+                                    if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
 
+                                        $.ajax({
+                                            url: '@Url.Action("SaveDataSPU", "SPU")',
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            contentType: 'application/json',
+                                            data: JSON.stringify(dataToSend),
+                                            success: function (response) {
+                                                console.log(response);
+                                                if (response.success) {
+                                                    window.location.href = '@Url.Action("SPUMahasiswa", "SPU")';
+                                                }
+                                            },
+                                            error: function (error) {
+                                                console.error('Terjadi kesalahan:', error);
+                                            }
+                                        });
+                                    }
+                                }else {
                                     $.ajax({
                                         url: '@Url.Action("SaveDataSPU", "SPU")',
                                         type: 'POST',

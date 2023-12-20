@@ -147,19 +147,20 @@ namespace PMB.DAO
                                             INNER JOIN tr_tarif c ON a.masuk = c.id_prodi
                                             AND a.th_masuk = c.thmasuk
                                             WHERE kd_calon BETWEEN @calon1 AND @calon2
-                                            AND b.id_prodi NOT IN ('', 00)";
+                                            AND b.id_prodi NOT IN ('', 00) 
+                                            AND a.kd_jalur = @jalur";
 
                     string queryProdiTidakAda = @"SELECT DISTINCT CONCAT(UPPER(b.jenjang),' - ' , b.nm_prodi) as prodi
                                                 FROM mhs_pendaftar a
                                                 INNER JOIN ref_prodi b ON a.masuk = b.id_prodi
                                                 LEFT OUTER JOIN tr_tarif c ON a.masuk = c.id_prodi AND a.th_masuk = c.thmasuk
-                                                WHERE kd_calon BETWEEN @calon1 AND @calon2 AND b.id_prodi NOT IN ('', 00)
+                                                WHERE kd_calon BETWEEN @calon1 AND @calon2 AND b.id_prodi NOT IN ('', 00) AND a.kd_jalur = @jalur
                                                 AND NOT EXISTS (
                                                     SELECT 1
                                                     FROM tr_tarif d
                                                     WHERE a.masuk = d.id_prodi AND a.th_masuk = d.thmasuk
                                                 )";
-                    var param = new { calon1 = cekProdiSPUMhs.kode_calon_awal, calon2 = cekProdiSPUMhs .kode_calon_akhir};
+                    var param = new { calon1 = cekProdiSPUMhs.kode_calon_awal, calon2 = cekProdiSPUMhs .kode_calon_akhir, jalur = cekProdiSPUMhs.kd_jalur };
 
                     var ListProdiTidakAda = conn.Query<string>(queryProdiTidakAda, param).AsList();
                     var ListProdiAda = conn.Query<string>(queryProdiAda, param).AsList();

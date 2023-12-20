@@ -34,6 +34,7 @@ namespace PMB.Models
         public string kode_calon_awal { get; set; }
         public string kode_calon_akhir { get; set; }
         public string id_prodi { get; set; }
+        public string kd_jalur { get; set; }
     }
 
     public class StoreSPUMhs
