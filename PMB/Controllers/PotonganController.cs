@@ -9,7 +9,6 @@ namespace PMB.Controllers
     {
         private readonly ILogger<PotonganController> _logger;
         PotonganDAO dao;
-        RumusAngsuranDAO rumusAngsuranDAO;
         PendaftarDAO pendaftarDAO;
 
         public PotonganController(ILogger<PotonganController> logger)
@@ -17,7 +16,6 @@ namespace PMB.Controllers
             _logger = logger;
             dao = new PotonganDAO();
             pendaftarDAO = new PendaftarDAO();
-            rumusAngsuranDAO = new RumusAngsuranDAO();
         }
 
         public IActionResult Potongan()
@@ -27,6 +25,8 @@ namespace PMB.Controllers
             data.JalurList = pendaftarDAO.GetAllJalur();
             return View(data);
         }
+
+        
 
         public IActionResult GetPotongan(string ta, string jalur)
         {
@@ -49,10 +49,17 @@ namespace PMB.Controllers
             return Json(data);
         }
 
-        public IActionResult GetListTagihan()
+        public IActionResult GetPotonganById(int id)
         {
-            List<Tagihan> data = null;
-            data = rumusAngsuranDAO.GetTagihan();
+            dynamic data = null;
+            data = dao.GetPotonganMandiriById(id);
+            return Json(data);
+        }
+
+        public IActionResult GetListTagihan(string id)
+        {
+            List<dynamic> data = null;
+            data = dao.GetTagihan(id);
             return Json(data);
         }
 

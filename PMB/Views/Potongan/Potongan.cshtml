@@ -62,6 +62,7 @@
                         <th>Kode Calon</th>
                         <th>Tagihan Terpotong</th>
                         <th>Total</th>
+                        <th>Tagihan</th>
                         <th>Keterangan</th>
                         <th>Aksi</th>
                     </tr>
@@ -172,6 +173,10 @@
             var ptg = $("#ptg").val();
             var error3 = $("#m_ptg");
 
+            var selectedInvoice = $("#tagihan option:selected");
+            var cost = selectedInvoice.data('biaya');
+
+            console.log(cost);
             var isValid = true;
 
             if (kd_calon === "") {
@@ -192,6 +197,16 @@
             } else {
                 error3.text("");
             }
+
+            if(cost > 0){
+                if (ptg > cost) {
+                    error3.text("Biaya tagihan terlalu tinggi!");
+                    isValid = false;
+                } else {
+                    error3.text("");
+                }
+            }
+            
             return isValid;
         }
 
@@ -205,6 +220,11 @@
             var ptg = $("#ptg_u").val();
             var error3 = $("#m_ptg_u");
 
+            var selectedInvoice = $("#tagihan_u option:selected");
+            var cost = selectedInvoice.data('biaya');
+
+            console.log(cost);
+
             var isValid = true;
 
             if (kd_calon === "") {
@@ -225,6 +245,17 @@
             } else {
                 error3.text("");
             }
+
+            
+            if(cost > 0){
+                if (ptg > cost) {
+                    error3.text("Biaya tagihan terlalu tinggi!");
+                    isValid = false;
+                } else {
+                    error3.text("");
+                }
+            }
+
             return isValid;
         }
 
@@ -236,12 +267,50 @@
         $("#tagihan_u").on("input", ValidateUbah);
         $("#ptg_u").on("input", ValidateUbah);
 
+        $("#kd_calon").on("change", function () {
+            var selectedKdCalon = $(this).val();
+            if (selectedKdCalon) {
+                $.ajax({
+                    url: '@Url.Action("GetListTagihan", "Potongan")?id=' + selectedKdCalon,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var select = $("#tagihan");
+                        select.empty();
+
+                        var emptyOption = $('<option></option>');
+                        emptyOption.val('');
+                        emptyOption.text('-- Pilih Jenis Tagihan --');
+                        select.append(emptyOption);
+
+                        data.forEach(item => {
+                            var option = $('<option></option>');
+                            option.val(item.id_tagihan);
+                            if(item.biaya === null){
+                                item.biaya = 0;
+                            }
+
+                            option.data('biaya', item.biaya);
+                            option.text(item.nama_tagihan + ' (Tagihan: ' + item.biaya + ')');
+                            select.append(option);
+                        });
+
+                        ValidateInput();
+                    },
+                    error: function () {
+                        console.error('Failed to fetch invoices.');
+                    }
+                });
+            }
+        });
+
         var table = $('#TabelPotongan').DataTable({
             "columns": [
                 { "data": "No" },
                 { "data": "kd_calon" },
                 { "data": "nama_tagihan" },
                 { "data": "jlh_total" },
+                { "data": "biaya" },
                 { "data": "jns_potongan" },
                 {
                     "data": null,
@@ -289,7 +358,7 @@
 
         function handleFilterChange() {
             $.ajax({
-                url: '@Url.Action("GetPotongan", "Potongan")?ta=' + ta + '&jalur='+jalur,
+                url: '@Url.Action("GetPotongan", "Potongan")?ta=' + ta + '&jalur=' + jalur,
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
@@ -301,44 +370,44 @@
             });
         }
 
-        $.ajax({
-            url: '@Url.Action("GetListTagihan", "Potongan")',
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                console.log(data);
-                var select = $("#tagihan");
-                var select2 = $("#tagihan_u");
+        // $.ajax({
+        //     url: '@Url.Action("GetListTagihan", "Potongan")',
+        //     method: 'GET',
+        //     dataType: 'json',
+        //     success: function (data) {
+        //         console.log(data);
+        //         var select = $("#tagihan");
+        //         var select2 = $("#tagihan_u");
 
-                select.empty();
-                select2.empty();
+        //         select.empty();
+        //         select2.empty();
 
-                var emptyOption = $('<option></option>');
-                emptyOption.val('');
-                emptyOption.text('-- Pilih Jenis Tagihan --');
-                select.append(emptyOption);
+        //         var emptyOption = $('<option></option>');
+        //         emptyOption.val('');
+        //         emptyOption.text('-- Pilih Jenis Tagihan --');
+        //         select.append(emptyOption);
 
-                var emptyOption2 = $('<option></option>');
-                emptyOption2.val('');
-                emptyOption2.text('-- Pilih Jenis Tagihan --');
-                select2.append(emptyOption2);
+        //         var emptyOption2 = $('<option></option>');
+        //         emptyOption2.val('');
+        //         emptyOption2.text('-- Pilih Jenis Tagihan --');
+        //         select2.append(emptyOption2);
 
-                data.forEach(item => {
-                    var option = $('<option></option>');
-                    option.val(item.id_tagihan);
-                    option.text(item.nama_tagihan);
-                    select.append(option);
+        //         data.forEach(item => {
+        //             var option = $('<option></option>');
+        //             option.val(item.id_tagihan);
+        //             option.text(item.nama_tagihan);
+        //             select.append(option);
 
-                    var option2 = $('<option></option>');
-                    option2.val(item.id_tagihan);
-                    option2.text(item.nama_tagihan);
-                    select2.append(option2);
-                });
-            },
-            error: function () {
-                console.error('Gagal mengambil data.');
-            }
-        });
+        //             var option2 = $('<option></option>');
+        //             option2.val(item.id_tagihan);
+        //             option2.text(item.nama_tagihan);
+        //             select2.append(option2);
+        //         });
+        //     },
+        //     error: function () {
+        //         console.error('Gagal mengambil data.');
+        //     }
+        // });
 
         $("#modalSimpan").on('click', function () {
             if (ValidateInput()) {
@@ -445,17 +514,54 @@
             var ket = $(this).data('ket');
             var nominal = $(this).data('nominal');
 
-            $('#id_potongan').val(id);
+            
             $('#kd_calon_u').val(kdCalon);
-            $('#tagihan_u').val(tagihan);
-            $('#ptg_u').val(nominal);
-            $('#ket_u').val(ket);
 
-            ValidateUbah();
+            $.ajax({
+                url: '@Url.Action("GetListTagihan", "Potongan")?id=' + kdCalon,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var select = $("#tagihan_u");
+                    select.empty();
+
+                    data.forEach(item => {
+                        var option = $('<option></option>');
+                        option.val(item.id_tagihan);
+                        option.data('biaya', item.biaya);
+                        option.text(item.nama_tagihan + ' (Tagihan: ' + item.biaya + ')');
+
+                        // Set the selected option based on the data
+                        if (item.id_tagihan === tagihan) {
+                            option.attr('selected', 'selected');
+                        }
+
+                        select.append(option);
+                    });
+
+                    // Set other values
+                    $('#ptg_u').val(nominal);
+                    $('#ket_u').val(ket);
+
+                    // Trigger validation
+                    ValidateUbah();
+                },
+                error: function () {
+                    console.error('Failed to fetch invoices.');
+                }
+            });
+
+            // $('#id_potongan').val(id);
+            // $('#kd_calon_u').val(kdCalon);
+            // $('#tagihan_u').val(tagihan);
+            // $('#ptg_u').val(nominal);
+            // $('#ket_u').val(ket);
+
+            // ValidateUbah();
         });
 
         $('#ExportExcelPotongan').on('click', function () {
-            window.location.href = "@Url.Action("ExportExcelPotongan", "Potongan")?ta=" + ta + "&jalur="+jalur;
+            window.location.href = "@Url.Action("ExportExcelPotongan", "Potongan")?ta=" + ta + "&jalur=" + jalur;
         });
     });
 </script>

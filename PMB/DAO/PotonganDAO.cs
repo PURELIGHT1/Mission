@@ -179,11 +179,13 @@ namespace PMB.DAO
 	                                    nama_tagihan,
                                         c.kd_jalur,
                                         d.nama_jalur,
-                                        c.thnakademik
+                                        c.thnakademik,
+                                        e.biaya
                                     FROM Potongan a
                                     INNER JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
                                     INNER JOIN mhs_pendaftar c ON a.kd_calon = c.kd_calon
                                     INNER JOIN ref_jalur d ON c.kd_jalur = d.kd_jalur
+                                    LEFT OUTER JOIN tr_tarif e ON c.masuk = e.id_prodi AND c.th_masuk = e.thmasuk AND b.id_tagihan = e.id_tagihan
                                     WHERE c.thnakademik = @ta";
                     if (!jalur.Equals("All"))
                     {
@@ -191,6 +193,72 @@ namespace PMB.DAO
                     }
                     query = query + @" ORDER BY a.kd_calon ASC";      
                     var data = conn.Query<dynamic>(query, new { jalur = jalur, ta = ta }).AsList();
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public dynamic GetPotonganMandiriById(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT TOP(1)
+	                                    id_potongan, 
+	                                    a.kd_calon, 
+	                                    jns_potongan, 
+	                                    jlh_total, 
+	                                    jenis, 
+	                                    a.id_tagihan, 
+	                                    nama_tagihan,
+                                        c.kd_jalur,
+                                        d.nama_jalur,
+                                        c.thnakademik
+                                    FROM Potongan a
+                                    INNER JOIN ref_tagihan b ON a.id_tagihan = b.id_tagihan
+                                    INNER JOIN mhs_pendaftar c ON a.kd_calon = c.kd_calon
+                                    INNER JOIN ref_jalur d ON c.kd_jalur = d.kd_jalur
+                                    WHERE a.id_potongan = @id";
+                    var data = conn.QueryFirstOrDefault<dynamic>(query, new { id = id });
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        
+        public List<dynamic> GetTagihan(string id)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT DISTINCT c.id_tagihan, d.nama_tagihan, e.biaya
+                                    FROM mhs_pendaftar a
+                                    LEFT OUTER JOIN mst_angsuran b ON a.kd_jalur = b.kd_jalur AND a.thnakademik = b.thnakademik
+                                    LEFT OUTER JOIN detail_rumus_angsuran c ON b.id_rumus = c.id_rumus
+                                    LEFT OUTER JOIN ref_tagihan d ON c.id_tagihan = d.id_tagihan
+                                    LEFT OUTER JOIN tr_tarif e ON a.masuk = e.id_prodi AND a.th_masuk = e.thmasuk AND d.id_tagihan = e.id_tagihan
+                                    WHERE a.kd_calon = @kd_calon";
+
+                    var data = conn.Query<dynamic>(query, new { kd_calon = id }).AsList();
+
                     return data;
                 }
                 catch (Exception ex)
