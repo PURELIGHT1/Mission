@@ -184,7 +184,8 @@ namespace PMB.DAO
                                           ,[KET_ANGSURAN]
                                           ,[JUMLAH]
                                           ,[POTONGAN]
-                                          ,[SKS],
+                                          ,[SKS]
+                                          ,id_detail AS Id_detail_ags,
 										  CASE
                                             WHEN [IS_JAMINAN] = 1 THEN 'Ya'
                                             WHEN [IS_JAMINAN] = 0 THEN 'Tidak'

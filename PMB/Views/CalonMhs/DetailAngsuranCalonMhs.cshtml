@@ -39,6 +39,59 @@
         .btndel{
             float: right;
         }
+
+         .table-container {
+            width: 100%;
+            overflow-x: auto;
+        } 
+
+        .freeze-column {
+            width: fit-content; /* Adjust to fit your needs */
+            max-width: 100%;
+            overflow-x: auto;
+            border: 1px solid #777777;
+        }
+
+        .freeze-column table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            width: 100%; /* Optional: To remove spacing between cells */
+        }
+
+        .freeze-column th,
+        .freeze-column td {
+            border-right: 1px solid #bbbbbb;
+            border-bottom: 1px solid #bbbbbb;
+            padding: inherit;
+            word-wrap: break-word;
+            text-align: center;
+        }
+
+        .freeze-column th:nth-child(1),
+        .freeze-column td:nth-child(1),
+        .freeze-column th:nth-child(2),
+        .freeze-column td:nth-child(2) {
+            position: sticky;
+            font-weight: normal;
+            z-index: 2;
+        }
+
+        .freeze-column td:nth-child(1) {
+            left: 0; /* Width of the first column */
+            width: 50px;
+            min-width: 75px;
+        }
+
+        .freeze-column td:nth-child(2) {
+            left: 100px;
+            width: 100px;
+            min-width: 100px;
+        }
+
+        .freeze-column td:nth-child(1),
+        .freeze-column td:nth-child(2) {
+            background: #f5ac1d;
+        }
     </style>
 }
 
@@ -60,7 +113,8 @@
                             <button class="btn btn-sm btn-danger btndel" onclick="return confirm('Apakah yakin ingin menghapus data angsuran mahasiswa @Model.Pendaftar.Kd_Calon?');"><i class="bi bi-trash"></i> Hapus Semua Angsuran</button>
                         </form>
                         <br /><br />
-                        <table id="TabelAngsuranMhs" class="table table-bordered table-striped display text-center" style="width: 100%;">
+                    <div class="table-container">
+                        <table id="TabelAngsuranMhs" class="freeze-column" style="width: 100%;">
                             <thead style="background-color: #284387; color: white;">
                                 <tr>
                                     <th>Angsuran Ke</th>
@@ -72,6 +126,7 @@
                                     <th>Harus Dibayarkan</th>
                                     <th>Status</th>
                                     <th>Jaminan</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="table-light">
@@ -130,20 +185,217 @@
                                         {
                                             <td><span class="badge bg-success">@item.Is_Jaminan</span></td>
                                         }
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-warning edit-split" hidden="@(item.Status == "Lunas")" data-toggle="modal" data-target="#modal-split" data-id="@item.Id_detail_ags" data-jlh="@item.Jumlah"><i class="bi bi-hammer"></i> Split Angsuran</a>
+                                            <a href="#" class="btn btn-sm btn-danger ml-2 edit-jadwal" hidden="@(item.Status == "Lunas")" data-toggle="modal" data-target="#modal-jadwal" data-id="@item.Id_detail_ags" data-awal="@item.Tgl_Buka" data-akhir="@item.Batas_Waktu"><i class="bi bi-calendar2-check-fill"></i> Ubah Jadwal Bayar</a>
+                                        </td>
                                     </tr>
                                 }
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <a href="/CalonMhs/CalonMhs" class="btn btn-sm btn-back">Kembali</a>
+                    <a href="/SPU/SPUMahasiswa" class="btn btn-sm btn-back">Kembali</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
+<div class="modal fade" id="modal-split">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Split Angsuran</h4>
+                <input type="hidden" value="@Model.Pendaftar.Kd_Calon" id="calon_split" />
+                <input type="hidden" id="id_ags_split" />
+                <input type="hidden" id="jlh_ags" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Banyak angsuran yang displit</label>
+                    <input type="number" class="form-control" id="split_ags" value="2" required/>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_data"></span>
+                    <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_ganjil"></span>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpanSplit">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-jadwal">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ubah Jadwal Pembayaran Angsuran</h4>
+                <input type="hidden" value="@Model.Pendaftar.Kd_Calon" id="calon_jadwal"/>
+                <input type="hidden" id="id_ags_jadwal" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tanggal Angsuran Sebelumnya</label>
+                    <span class="badge bg-success" style="margin-top: 5px" id="batasJadwal"></span>
+                </div>
+                <hr /><br />
+                <div class="form-group">
+                    <label>Tanggal yang angsuran yang diubah</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control float-right" id="tgl_ubahJadwal" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="modalSimpanJadwal">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
+    function ubahFormatTanggal(tanggal) {
+        let tanggalArray = tanggal.split(' ');
+
+        const bulanIndonesiaToNumerik = {
+            'januari': '01',
+            'februari': '02',
+            'maret': '03',
+            'april': '04',
+            'mei': '05',
+            'juni': '06',
+            'juli': '07',
+            'agustus': '08',
+            'september': '09',
+            'oktober': '10',
+            'november': '11',
+            'desember': '12'
+        };
+
+        let bulanNumerik = bulanIndonesiaToNumerik[tanggalArray[1].toLowerCase()];
+
+        let hari = tanggalArray[0].length === 1 ? '0' + tanggalArray[0] : tanggalArray[0];
+
+        let tanggalUbah = `${bulanNumerik}/${hari}/${tanggalArray[2]}`;
+
+        return tanggalUbah;
+    }
+
+    function bagiJumlah(total, jumlahBagian) {
+      const setiapBagian = Math.floor(total / jumlahBagian);
+      const sisa = total % jumlahBagian;
+
+      const hasilPembagian = Array.from({ length: jumlahBagian }, (_, index) => {
+        return setiapBagian + (index < sisa ? 1 : 0);
+      });
+
+      return hasilPembagian;
+    }
+
     $(document).ready(function () {
+        $('#TabelAngsuranMhs').on('click', '.edit-split', function () {
+            var id_ags = $(this).data('id');
+            var jlh_ags = $(this).data('jlh');
+            
+            $("#jlh_ags").val(jlh_ags);
+            $("#id_ags_split").val(id_ags);
+
+        });
+
+        $('#TabelAngsuranMhs').on('click', '.edit-jadwal', function () {
+            var id_ags = $(this).data('id');
+            var awal = $(this).data('awal');
+            var akhir = $(this).data('akhir');
+
+            var tgl = awal + ' - ' + akhir;
+            var tglAwal = ubahFormatTanggal(awal);
+            var tglAkhir = ubahFormatTanggal(akhir);
+            console.log(tglAwal); console.log(tglAkhir);
+            $('#tgl_ubahJadwal').daterangepicker({ startDate: tglAwal, endDate: tglAkhir });
+            $("#id_ags_jadwal").val(id_ags);
+            $("#batasJadwal").text(tgl);
+        });
+
+        $("#modalSimpanJadwal").on('click', function () {
+
+            var jadwal = $('#tgl_ubahJadwal').val();
+            var tgl = jadwal.split(" - ");
+
+            var dataToSend = {
+                kd_calon: $('#calon_jadwal').val(),
+                id_ags: parseInt($('#id_ags_jadwal').val()),
+                tgl_buka: tgl[0],
+                tgl_tutup: tgl[1],
+            }
+            console.log(dataToSend);
+            $.ajax({
+                url: '@Url.Action("SimpanUbahJadwalAgs", "SPU")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    window.location.href = '@Url.Action("DetailAngsuranCalonMhs", "CalonMhs")?kd_calon=' + $('#calon_jadwal').val();
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+        });
+
+        $("#modalSimpanSplit").on('click', function () {
+
+            var totalJumlah = parseInt($("#jlh_ags").val());
+            var jumlahBagian = parseInt($("#split_ags").val());
+
+            const hasilPembagian = bagiJumlah(totalJumlah, jumlahBagian);
+
+             var dataToSend = {
+                kd_calon: $('#calon_jadwal').val(),
+                id_ags: parseInt($('#id_ags_split').val()),
+                banyak: parseInt($("#split_ags").val()),
+                split_uang: hasilPembagian
+            }
+
+            console.log(hasilPembagian);
+            console.log(dataToSend);
+            // console.log(jlhUang % dataToSend.banyak);
+            // if (jlhUang % dataToSend.banyak !== 0) {
+            //     $('#m_ganjil').text("gak bisa di bagi bos!");
+            // }
+            // else 
+            // {
+            $.ajax({
+                url: '@Url.Action("SimpanSplitAgs", "SPU")',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    window.location.href = '@Url.Action("DetailAngsuranCalonMhs", "CalonMhs")?kd_calon=' + $('#calon_jadwal').val();
+                },
+                error: function (error) {
+                    console.error('Terjadi kesalahan:', error);
+                }
+            });
+            // }
+        });
+
         $('#TabelAngsuranMhs').DataTable({
             //fixedHeader: {
             //    header: true,

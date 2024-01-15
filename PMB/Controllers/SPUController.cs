@@ -220,6 +220,37 @@ namespace PMB.Controllers
             return RedirectToAction("SPUMahasiswa");
         }
 
+        [HttpPost]
+        public IActionResult SimpanSplitAgs([FromBody] JadwalAngsuran jadwal)
+        {
+            if (dao.UbahJadwalSplitAgs(jadwal))
+            {
+
+                TempData["success"] = "Berhasil split angsuran sebanyak " + jadwal.banyak + " data!";
+                return Json(new { success = true, kd_calon = jadwal.kd_calon });
+            }
+            else
+            {
+                TempData["error"] = "Gagal split angsuran sebanyak " + jadwal.banyak + " data!";
+                return Json(new { success = false });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult SimpanUbahJadwalAgs([FromBody] JadwalAngsuran jadwal)
+        {
+            if (dao.UbahJadwalSplitAgs(jadwal))
+            {
+                TempData["success"] = "Berhasil mengubah jadwal bayar angsuran!";
+                return Json(new { success = true, kd_calon = jadwal.kd_calon });
+            }
+            else
+            {
+                TempData["error"] = "Gagal mengubah jadwal bayar angsuran!";
+                return Json(new { success = false });
+            }
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

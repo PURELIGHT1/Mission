@@ -569,29 +569,67 @@ namespace PMB.DAO
                                                             mhs.kd_calon;
                                                     END";
 
-                    string procedureInsertAngsuran = @"insert into [dbo].[ANGSURAN_MHS]([KD_CALON],[ANGSURANKE],[TGL_BUKA],[BATAS_WAKTU],
-                                                        [IS_JAMINAN],[ID_REF_TAGIHAN],[SKS],[JUMLAH],[JMLUANG],[POTONGAN],[KET_ANGSURAN], [status])
-                                                        SELECT mhs.KD_CALON , d_ags.angsuran_ke, d_ags.tgl_buka, d_ags.tgl_tutup, 
-                                                        d_ags.is_jaminan, tgh.id_tagihan, trf.jumlah_pengali AS sks, 
-                                                        d_ags.prosentase * trf.jumlah_pengali * trf.biaya/100 jmlh,
-                                                        case when coalesce(JLH_Potongan,0)= 0 then
-                                                        d_ags.prosentase * trf.jumlah_pengali * trf.biaya/100
-                                                        else
-                                                        d_ags.prosentase * ((trf.jumlah_pengali * trf.biaya) - coalesce(JLH_Potongan,0)) /100
-                                                        end AS jumlah_uang, 
-                                                        d_ags.prosentase *   coalesce(JLH_Potongan,0) /100 potongan,
-                                                        cast(prosentase as varchar(5))+'% '+nama_tagihan keterangan,
+                    string procedureInsertAngsuran = @"INSERT INTO [dbo].[ANGSURAN_MHS] (
+                                                        [KD_CALON],
+                                                        [ANGSURANKE],
+                                                        [TGL_BUKA],
+                                                        [BATAS_WAKTU],
+                                                        [IS_JAMINAN],
+                                                        [ID_REF_TAGIHAN],
+                                                        [SKS],
+                                                        [JUMLAH],
+                                                        [JMLUANG],
+                                                        [POTONGAN],
+                                                        [KET_ANGSURAN],
+                                                        [status]
+                                                    )
+                                                    SELECT 
+                                                        mhs.KD_CALON,
+                                                        d_ags.angsuran_ke,
+                                                        d_ags.tgl_buka,
+                                                        d_ags.tgl_tutup,
+                                                        d_ags.is_jaminan,
+                                                        tgh.id_tagihan,
+                                                        trf.jumlah_pengali AS sks,
+                                                        d_ags.prosentase * trf.jumlah_pengali * trf.biaya / 100 AS jmlh,
+                                                        CASE 
+                                                            WHEN COALESCE(JLH_Potongan, 0) = 0 THEN
+                                                                d_ags.prosentase * trf.jumlah_pengali * trf.biaya / 100
+                                                            ELSE
+                                                                d_ags.prosentase * ((trf.jumlah_pengali * trf.biaya) - COALESCE(JLH_Potongan, 0)) / 100
+                                                        END AS jumlah_uang,
+                                                        d_ags.prosentase * COALESCE(JLH_Potongan, 0) / 100 AS potongan,
+                                                        CAST(prosentase AS VARCHAR(5)) + '%' + nama_tagihan AS keterangan,
                                                         '0'
-
-                                                        FROM MHS_PENDAFTAR mhs 
-                                                        INNER JOIN MST_ANGSURAN ags ON mhs.KD_JALUR = ags.KD_JALUR AND mhs.THNAKADEMIK = ags.THNAKADEMIK AND mhs.periode = ags.periode
-                                                        INNER JOIN detail_rumus_angsuran d_ags ON ags.ID_RUMUS = d_ags.id_rumus 
-                                                        INNER JOIN ref_tagihan tgh ON d_ags.id_tagihan = tgh.id_tagihan 
-                                                        INNER JOIN tr_tarif trf ON mhs.MASUK = trf.id_prodi AND mhs.TH_MASUK = trf.thmasuk AND tgh.id_tagihan = trf.id_tagihan
-                                                        LEFT OUTER JOIN (select KD_CALON, id_tagihan, sum(JLH_TOTAL) JLH_Potongan from dbo.POTONGAN group by KD_CALON,id_tagihan) POTONGAN   
-                                                        ON POTONGAN.KD_CALON = mhs.KD_CALON AND tgh.id_tagihan = POTONGAN.id_tagihan
-                                                        WHERE mhs.KD_CALON between @calon1 and @calon2
-                                                        AND mhs.KD_JALUR = @kd_jalur ";
+                                                    FROM 
+                                                        MHS_PENDAFTAR mhs
+                                                    INNER JOIN 
+                                                        MST_ANGSURAN ags ON mhs.KD_JALUR = ags.KD_JALUR 
+                                                                            AND mhs.THNAKADEMIK = ags.THNAKADEMIK 
+                                                                            AND mhs.periode = ags.periode
+                                                    INNER JOIN 
+                                                        detail_rumus_angsuran d_ags ON ags.ID_RUMUS = d_ags.id_rumus
+                                                    INNER JOIN 
+                                                        ref_tagihan tgh ON d_ags.id_tagihan = tgh.id_tagihan
+                                                    INNER JOIN 
+                                                        tr_tarif trf ON mhs.MASUK = trf.id_prodi 
+                                                                        AND mhs.TH_MASUK = trf.thmasuk 
+                                                                        AND tgh.id_tagihan = trf.id_tagihan
+                                                    LEFT OUTER JOIN (
+                                                        SELECT 
+                                                            KD_CALON, 
+                                                            id_tagihan, 
+                                                            SUM(JLH_TOTAL) AS JLH_Potongan 
+                                                        FROM 
+                                                            dbo.POTONGAN 
+                                                        GROUP BY 
+                                                            KD_CALON, 
+                                                            id_tagihan
+                                                    ) POTONGAN ON POTONGAN.KD_CALON = mhs.KD_CALON 
+                                                                AND tgh.id_tagihan = POTONGAN.id_tagihan
+                                                    WHERE 
+                                                        mhs.KD_CALON BETWEEN @calon1 AND @calon2
+                                                        AND mhs.KD_JALUR = @kd_jalur;";
 
                     string updateAgsBySPU = @"DELETE FROM angsuran_mhs
                                             WHERE kd_calon = @kdCalon AND ket_angsuran LIKE '%SPU%' and status = '0';
@@ -948,6 +986,117 @@ namespace PMB.DAO
                     var data = conn.Execute(query, new { kd_calon = kd_calon });
 
                     return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public bool UbahJadwalSplitAgs(JadwalAngsuran jadwal)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"";
+                    if(jadwal.banyak > 0)
+                    {
+                        query = @"SELECT TOP(1) potongan FROM angsuran_mhs 
+                                WHERE id_detail = @id_ags AND kd_calon = @kd_calon";
+
+                        var potongan = conn.QueryFirstOrDefault<int>(query, jadwal);
+
+                        int setiapBagian = potongan / jadwal.banyak;
+                        int sisa = potongan % jadwal.banyak;
+                        int[] hasilPembagian = new int[jadwal.banyak];
+
+                        for (int i = 0; i < jadwal.banyak; i++)
+                        {
+                            hasilPembagian[i] = setiapBagian + (i < sisa ? 1 : 0);
+                        }
+
+                        int lengthSukses = 0;
+                        for (int j = 0; j < jadwal.split_uang.Count(); j++)
+                        {
+                            query = @"IF EXISTS (
+                                        SELECT 1 FROM angsuran_mhs 
+                                        WHERE id_detail = @id_ags AND kd_calon = @kd_calon
+                                    )
+                                    BEGIN  
+                                        -- Masukkan angsuran terbagi
+                                        INSERT INTO angsuran_mhs (
+                                            kd_calon, 
+                                            angsuranke, 
+                                            jmluang, 
+                                            tgl_buka, 
+                                            batas_waktu, 
+                                            ket_angsuran, 
+                                            status, 
+                                            is_jaminan, 
+                                            jumlah, 
+                                            potongan, 
+                                            sks, 
+                                            ID_REF_TAGIHAN
+                                        )
+                                        SELECT 
+                                            kd_calon, 
+                                            angsuranke, 
+                                            @jlhAkhir, 
+                                            tgl_buka, 
+                                            batas_waktu, 
+                                            'Manual',
+                                            '0', 
+                                            is_jaminan, 
+                                            @jlh, 
+                                            @potongan, 
+                                            sks, 
+                                            ID_REF_TAGIHAN
+                                        FROM angsuran_mhs
+                                        WHERE id_detail = @id_ags AND kd_calon = @kd_calon;
+                                    END;";
+                            var data = conn.Execute(query, new
+                            {
+                                id_ags = jadwal.id_ags,
+                                kd_calon = jadwal.kd_calon,
+                                jlh = jadwal.split_uang[j],
+                                potongan = hasilPembagian[j],
+                                jlhAkhir = jadwal.split_uang[j] - hasilPembagian[j]
+                            });
+                            lengthSukses += data;
+                        }
+
+                        if(lengthSukses == jadwal.split_uang.Count())
+                        {
+                            query = @"DELETE FROM angsuran_mhs where id_detail = @id_ags";
+                            var data = conn.Execute(query, jadwal);
+                            if(data == 1)
+                            {
+                                return true;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        query = query + @"UPDATE angsuran_mhs SET 
+                                            tgl_buka = @tgl_buka,
+                                            batas_waktu = @tgl_tutup
+                                        WHERE id_detail = @id_ags and kd_calon = @kd_calon";
+
+                        var data = conn.Execute(query, jadwal);
+                        if (data == 1)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
                 }
                 catch (Exception ex)
                 {
