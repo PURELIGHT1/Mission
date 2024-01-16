@@ -1007,7 +1007,7 @@ namespace PMB.DAO
                     string query = @"";
                     if(jadwal.banyak > 0)
                     {
-                        query = @"SELECT TOP(1) potongan FROM angsuran_mhs 
+                        query = @"SELECT TOP(1) coalesce(potongan,0) FROM angsuran_mhs 
                                 WHERE id_detail = @id_ags AND kd_calon = @kd_calon";
 
                         var potongan = conn.QueryFirstOrDefault<int>(query, jadwal);
