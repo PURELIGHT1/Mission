@@ -182,7 +182,7 @@
                 </div>
                 <div class="form-group">
                     <label>SPU</label>
-                    <input type="number" id="spu_u" class="form-control">
+                    <input type="text" oninput="FormatAngka(this)" id="spu_u" class="form-control">
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_spu_u"></span>
                 </div>
                 @* <div class="form-group">
@@ -202,6 +202,42 @@
     </div>
 </div>
 <script>
+    function formatCurrency(number) {
+        // Format angka menjadi mata uang Rupiah
+        var formatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        });
+
+        // Dapatkan hasil format sebagai string
+        var result = formatter.format(number);
+
+        // Ganti simbol mata uang yang digunakan (misalnya "Rp.") menjadi "RP."
+        result = result.replace("Rp", "RP.");
+        return result;
+    }
+    function FormatAngka(input) {
+        // Hapus karakter selain angka
+        let numericValue = input.value.replace(/[^0-9]/g, '');
+
+        // Jika nilai kosong, set nilai input menjadi kosong
+        if (numericValue === '') {
+            input.value = '';
+            return;
+        }
+
+        // Format angka ke dalam format mata uang
+        let formattedValue = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(parseInt(numericValue));
+
+        formattedValue = formattedValue.replace("Rp", "RP.");
+        // Set nilai input dengan format mata uang
+        input.value = formattedValue;
+    }
     $(document).ready(function () {
         function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
             const byteCharacters = atob(b64Data);
@@ -262,18 +298,18 @@
 
 
         function ValidateUbah() {
-            var spu = $("#spu_u").val();
+            let spu = $("#spu_u").val().replace(/[^0-9,]/g, '');
             var error1 = $("#m_spu_u");
 
             var isValid = true;
 
-            if (spu < 0) {
+            if (parseInt(spu) < 0) {
                 error1.text("SPU harus lebih dari atau sama dengan 0!"); isValid = false;
             }
             else {
                 error1.text("");
             }
-
+                        
             return isValid;
         }
 
@@ -594,7 +630,7 @@
                     $('#jalur_u').val(data.nama_jalur);
                     $('#prodi_u').val(data.prodi_diterima);
 
-                    $('#spu_u').val(data.spu);
+                    $('#spu_u').val(formatCurrency(data.spu));
                     var formattedDatetime = moment(data.tgl_cetak, 'YYYY-MM-DD HH:mm').format('YYYY-MM-DD HH:mm');
                     $('#tgl_cetak_u').val(formattedDatetime);
 
@@ -622,6 +658,8 @@
 
         $("#modalUbah").on('click', function () {
             if (ValidateUbah()) {
+
+                let spu = $("#spu_u").val().replace(/[^0-9,]/g, '');
                 var dataToSend = {
                     tgl_cetak: $('#tgl_cetak_u').val(),
                     kode_calon_awal: $("#kode_u").val(),
@@ -629,7 +667,7 @@
                     kd_jalur: "",
                     id_prodi: "",
                     username: $("#username").val(),
-                    spu: $("#spu_u").val(),
+                    spu: parseInt(spu),
                     ptg_konsesi: 0
                 };
 

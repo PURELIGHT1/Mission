@@ -279,6 +279,42 @@
     
 }
 <script>
+    function formatCurrency(number) {
+        // Format angka menjadi mata uang Rupiah
+        var formatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+        });
+
+        // Dapatkan hasil format sebagai string
+        var result = formatter.format(number);
+
+        // Ganti simbol mata uang yang digunakan (misalnya "Rp.") menjadi "RP."
+        result = result.replace("Rp", "RP.");
+        return result;
+    }
+    function FormatAngka(input) {
+        // Hapus karakter selain angka
+        let numericValue = input.value.replace(/[^0-9]/g, '');
+
+        // Jika nilai kosong, set nilai input menjadi kosong
+        if (numericValue === '') {
+            input.value = '';
+            return;
+        }
+
+        // Format angka ke dalam format mata uang
+        let formattedValue = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(parseInt(numericValue));
+
+        formattedValue = formattedValue.replace("Rp", "RP.");
+        // Set nilai input dengan format mata uang
+        input.value = formattedValue;
+    }
     function formatRupiah(value) {
         return 'Rp. ' + value.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
     }
@@ -312,14 +348,15 @@
             dataTampil.attr("class", "tarif-tagihan");
             dataTampil.text(item.nama_tagihan);
             var dataInput = $('<input type="text">');
-            dataInput.attr("class", "form-control masked-money text-center");
+            dataInput.attr("class", "form-control text-center");
+            dataInput.attr("oninput", "FormatAngka(this)");
 
             idTagihan.push(item.id_tagihan);
             if (id_tarif === "tarifTagihanUbah"){
                 dataInput.attr('id', 'dataU_' + item.id_tagihan);
             } else {
                 dataInput.attr('id', 'data_' + item.id_tagihan);
-                dataInput.val(biaya);
+                dataInput.val(formatCurrency(biaya));
             }
 
             row.append(dataTampil);
@@ -361,61 +398,7 @@
 
             $("#dataSKS_U").val(tarif["SKS"]);
 
-            // if (item.nama_tagihan === "SPP Tetap") {
-                $('#dataU_' + item.id_tagihan).val(tarif[item.nama_tagihan]);
-            // }
-
-            // if (item.nama_tagihan === "SPP Variabel") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel"]);
-            // }
-
-            // if (item.nama_tagihan === "Jaket") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif.Jaket);
-            // }
-
-            // if (item.nama_tagihan === "Buku") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif.Buku);
-            // }
-
-            // if (item.nama_tagihan === "Courseware") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif.Courseware);
-            // }
-
-            // if (item.nama_tagihan === "Matrikulasi") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif.Matrikulasi);
-            // }
-
-            // if (item.nama_tagihan === "Biaya Herregistrasi") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["Biaya Herregistrasi"]);
-            // }
-
-            // if (item.nama_tagihan === "SPP Variabel Inter") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPP Variabel Inter"]);
-            // }
-
-            // if (item.nama_tagihan === "Kemahasiswaan") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif.Kemahasiswaan);
-            // }
-
-            // if (item.nama_tagihan === "Uang Kuliah Tetap") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["Uang Kuliah Tetap"]);
-            // }
-
-            // if (item.nama_tagihan === "SPU Bersubsidi") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Bersubsidi"]);
-            // }
-
-            // if (item.nama_tagihan === "SPU Normal") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Normal"]);
-            // }
-
-            // if (item.nama_tagihan === "SPU Registrasi 3") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 3"]);
-            // }
-
-            // if (item.nama_tagihan === "SPU Registrasi 4") {
-            //     $('#dataU_' + item.id_tagihan).val(tarif["SPU Registrasi 4"]);
-            // }
+            $('#dataU_' + item.id_tagihan).val(formatCurrency(tarif[item.nama_tagihan]));
         });
     }
 
@@ -582,7 +565,7 @@
             var tagihan = [];
 
             for (var i = 0; i < idTagihan.length; i++) {
-                var value = parseInt($('#data_' + idTagihan[i]).val());
+                var value = parseInt($('#data_' + idTagihan[i]).val().replace(/[^0-9,]/g, ''));
 
                 if (!isNaN(value)) {
                     biayaTagihan.push(value);
@@ -701,7 +684,7 @@
             var tagihan = [];
 
             for (var i = 0; i < idTagihan.length; i++) {
-                var value = parseInt($('#dataU_' + idTagihan[i]).val());
+                var value = parseInt($('#dataU_' + idTagihan[i]).val().replace(/[^0-9,]/g, ''));
 
                 if (!isNaN(value)) {
                     biayaTagihan.push(value);
