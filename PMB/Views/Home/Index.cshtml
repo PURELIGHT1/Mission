@@ -1,9 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 
-    var username = User.Claims
-                    .Where(c => c.Type == "username")
+    var nama = User.Claims
+                    .Where(c => c.Type == "nama")
                         .Select(c => c.Value).SingleOrDefault();
+    
 }
 
 @section Styles{
@@ -18,7 +19,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <h3 style="text-align:center; margin-bottom: 20px">Selamat datang, @User.Identity.Name!</h3><br />
+        <h3 style="text-align:center; margin-bottom: 20px">Selamat datang, @nama</h3><br />
             <div id="carouselExampleControls" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-inner rounded-5 shadow-4-strong">
                     <div class="carousel-item active">

@@ -46,10 +46,11 @@ namespace PMB.Controllers
                     isAuthenticated = true;
                     identity = new ClaimsIdentity(new[] {
                                     new Claim(ClaimTypes.Name, data.nama),
-                                    //new Claim(ClaimTypes.Role, data.deskripsi),
+                                    new Claim(ClaimTypes.Role, data.deskripsi),
                                     new Claim("username", data.npp),
-                                    //new Claim("role", data.deskripsi),
-                                    //new Claim("menu", GenerateMenu(username))
+                                    new Claim("nama", data.nama),
+                                    new Claim("role", data.deskripsi),
+                                    new Claim("menu", GenerateMenu(username))
                                 }, CookieAuthenticationDefaults.AuthenticationScheme);
                 }
                 else
@@ -96,12 +97,40 @@ namespace PMB.Controllers
             {
                 foreach (var row in menus)
                 {
-                    menu += $"<li class='nav-item'><a href = '#' class='nav-link'><i class='nav-icon fas fa-circle'></i><p>{row.DESKRIPSI}<i class='fas fa-angle-left right'></i></p></a><ul class='nav nav-treeview'>";
+                    string deskripsiMenu = "";
+                    string iconMenu = "";
+
+                    if (row.DESKRIPSI != null && row.DESKRIPSI.Contains(','))
+                    {
+                        deskripsiMenu = row.DESKRIPSI?.Split(',')[0];
+                        iconMenu = row.DESKRIPSI?.Split(',')[1];
+                    }
+                    else
+                    {
+                        deskripsiMenu = row.DESKRIPSI;
+                        iconMenu = "far fa-circle";
+                    }
+
+                    menu += $"<li class='nav-item'><a href = '#' class='nav-link'><i class='nav-icon {iconMenu}'></i><p>{deskripsiMenu}<i class='fas fa-angle-left right'></i></p></a><ul class='nav nav-treeview'>";
                     var filtersub = submenus.Where(x => x.ID_SI_MENU == row.ID_SI_MENU).ToList();
 
                     foreach (var submenu in filtersub)
                     {
-                        menu += $"<li class='nav-item'><a href='{submenu.LINK}' class='nav-link'><i class='far fa-circle nav-icon'></i><p>{submenu.DESKRIPSI}</p></a></li>";
+
+                        string deskripsiSubMenu = "";
+                        string iconSubMenu = "";
+                        if (submenu.DESKRIPSI != null && submenu.DESKRIPSI.Contains(','))
+                        {
+                            deskripsiSubMenu = submenu.DESKRIPSI?.Split(',')[0];
+                            iconSubMenu = submenu.DESKRIPSI?.Split(',')[1];
+                        }
+                        else
+                        {
+                            deskripsiSubMenu = submenu.DESKRIPSI;
+                            iconSubMenu = "far fa-circle";
+                        }
+
+                        menu += $"<li class='nav-item'><a href='{submenu.LINK}' class='nav-link'><i class='nav-icon {iconSubMenu}'></i><p>{deskripsiSubMenu}</p></a></li>";
                     }
 
                     menu += "</ul></li> ";

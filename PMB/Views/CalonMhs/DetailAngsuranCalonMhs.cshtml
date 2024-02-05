@@ -106,7 +106,7 @@
                 <div class="card-body">
                     <div class="col-md-12">
                         <a href="/CalonMhs/GenerateAngsuran?Kd_Calon=@Model.Pendaftar.Kd_Calon&&Nm_Calon=@Model.Pendaftar.Nm_Calon&&Masuk=@Model.Pendaftar.Masuk&&Periode=@Model.Pendaftar.Periode&&Kd_Jalur=@Model.Pendaftar.Kd_Jalur&&Thnakademik=@Model.Pendaftar.Thnakademik"
-                            class="btn btn-sm btn-success btntambah" id="btn-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Generate Angsuran @Model.Pendaftar.Nm_Calon </a>
+                            @* class="btn btn-sm btn-success btntambah" id="btn-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Generate Angsuran @Model.Pendaftar.Nm_Calon </a> *@
                         <form style="display:inline" asp-action="DeleteAngsuran" asp-controller="CalonMhs" method="post">
                             <input type="hidden" name="Kd_Calon" value="@Model.Pendaftar.Kd_Calon" />
                             <input type="hidden" name="Nm_Calon" value="@Model.Pendaftar.Nm_Calon" />

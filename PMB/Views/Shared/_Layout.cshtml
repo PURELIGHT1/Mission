@@ -2,6 +2,7 @@
     var menu = User.Claims
         .Where(c => c.Type == "menu")
             .Select(c => c.Value).SingleOrDefault();
+
 }
 
 <!DOCTYPE html>
@@ -119,98 +120,9 @@
                         data-widget="treeview"
                         role="menu"
                         data-accordion="false">
-                        @*@Html.Raw(menu)*@
-                        <li class="nav-item">
-                            <a href="/CalonMhs/CalonMhs" class="nav-link">
-                                <i class="bi bi-file-earmark-person-fill"></i>
-                                <p>
-                                    Data Calon Mahasiswa
-                                    @*<i class="fas fa-angle-left right"></i>*@
-                                </p>
-                            </a>
-                            @*<ul class="nav nav-treeview">
-                            <li class="nav-item">
-                            <a href="/CalonMhs/CalonMhs" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Data Calon Mahasiswa</p>
-                            </a>
-                            </li>
-                            </ul>*@
-                        <li class="nav-item">
-                            <a href="/Tarif/Tarif" class="nav-link">
-                                <i class="bi bi-cash-coin"></i>
-                                <p>Pengelolaan Tarif Tagihan</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="/MstAngsuran/MstAngsuran" class="nav-link">
-                                <i class="bi bi-credit-card-fill"></i>
-                                <p>
-                                    Pengelolaan Rumus Angsuran
-                                </p>
-                            </a>
-                                @*<ul class="nav nav-treeview">
-                            <li class="nav-item">
-                            <a href="/MstAngsuran/MstAngsuran" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Data Master Angsuran</p>
-                            </a>
-                            </li>
-                            </ul>*@
-                                @*<ul class="nav nav-treeview">
-                            <li class="nav-item">
-                            <a href="#" class="nav-link">
-                            <i class="bi bi-plus-slash-minus"></i>
-                            <p>
-                            Pengelolaan Rumus Angsuran
-                            <i class="fas fa-angle-left right"></i>
-                            </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                            <a href="/RumusAngsuran/RumusAngsuran" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Data Rumus Angsuran Calon Mahasiswa</p>
-                            </a>
-                            </li>
-                            </ul>
-                            </li>
-                            </ul>
-                            </li>*@
-
-                        <li class="nav-item">
-                            <a href="/SPU/SPUMahasiswa" class="nav-link">
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <p>
-                                    Pengelolaan SPU
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Wilayah/Provinsi" class="nav-link">
-                                <i class="bi bi-flag-fill"></i>
-                                <p>Pengelolaan Data Wilayah</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/MstReferensi/MstReferensi" class="nav-link">
-                                <i class="bi bi-building"></i>
-                                <p>Pengelolaan Referensi SMA</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Potongan/Potongan" class="nav-link">
-                                <i class="bi bi-scissors"></i>
-                                <p>Pengelolaan Potongan Mahasiswa</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Prodi/Diterima" class="nav-link">
-                                <i class="bi bi-person-fill"></i>
-                                <p>Pengelolaan Prodi Diterima</p>
-                            </a>
-                        </li>
+                       
+                        @Html.Raw(menu)
+                        <br/>
                         <hr style="color:white" />
                         <li class="nav-item">
                             <a href="/Account/LogOut" class="nav-link">
@@ -218,6 +130,7 @@
                                 <p>Logout</p>
                             </a>
                         </li>
+                       
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->

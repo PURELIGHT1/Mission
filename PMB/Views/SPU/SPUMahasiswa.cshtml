@@ -1,8 +1,9 @@
 ﻿@{
     ViewData["Title"] = "SPU Mahasiswa";
-    var menu = User.Claims
-        .Where(c => c.Type == "menu")
+    var role = User.Claims
+        .Where(c => c.Type == "role")
             .Select(c => c.Value).SingleOrDefault();
+
 }
 @model SPUMhsView
 
@@ -79,7 +80,10 @@
 </div>
 <div class="row">
     <div class="col-md-12">
-        <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah SPU</a>
+        @if (role == "Admin")
+        {
+            <a href="#" class="btn btn-sm btn-success btntambah" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-plus-circle-fill" style="color:white"></i> Tambah SPU</a>     
+        }
         <div class="table-container">
             <table id="TabelSPU" class="table table-responsive-lg table-bordered table-striped display compact text-center">
                 <thead style="background-color: #284387; color: white;">

@@ -32,6 +32,16 @@
         #TabelProdiDT td {
             white-space: nowrap;
         }
+
+        .hyperlink{
+            text-decoration: none;
+            color: black;
+            font-style: italic;
+        }
+
+        .hyperlink:hover{
+            color: blue;
+        }
         
     </style>
 }
@@ -95,7 +105,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Tambah Potongan Mahasiswa</h4>
+                <h4 class="modal-title">Tambah Excel Mahasiswa</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -110,7 +120,8 @@
                                 <label class="custom-file-label" for="inputFiles">Choose file</label>
                             </div>
                         </div>
-                        <a href="@Url.Action("TemplateExcel", "Prodi")">Template Excel</a>
+                        <span style="color: red; font-size: 10px; font-style: italic;">Harap melihat template excel nya </span><br/>
+                        <a href="@Url.Action("TemplateExcel", "Prodi")" class="hyperlink">Template Excel</a>
                         <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="fileSizeError"></span>
                         <span class="badge bg-danger" style="font-size: 10pt; margin-top: 10px" id="typeSizeError"></span>
                     </div>
