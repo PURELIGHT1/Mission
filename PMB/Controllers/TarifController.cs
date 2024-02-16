@@ -55,6 +55,13 @@ namespace PMB.Controllers
             return Json(data);
         }
 
+        public IActionResult GetListTagihan()
+        {
+            List<dynamic> data = null;
+            data = dao.GetListTagihan();
+            return Json(data);
+        }
+
         public IActionResult GetDetailRefTagihan(string id_prodi, int tahun)
         {
             List<string> dataString = new List<string>();

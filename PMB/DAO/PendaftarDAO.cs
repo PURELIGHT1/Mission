@@ -256,7 +256,9 @@ namespace PMB.DAO
                 try
                 {
                     string query = @"SELECT TOP(1)
-                                        NM_PRODI
+                                        CASE WHEN NM_PRODI = '' THEN 'Tolak Mahasiswa'
+	                                    ELSE 'menjadi prodi ' + UPPER(jenjang)+ ' - ' + NM_PRODI
+	                                    END AS NM_PRODI
                                     FROM REF_PRODI WHERE ID_PRODI = @id";
                     var data = conn.QueryFirstOrDefault<string>(query, new { id = id });
 
@@ -286,6 +288,31 @@ namespace PMB.DAO
                                     WHERE kd_jalur != 0
                                     ORDER BY nama_jalur ASC;";
                     var data = conn.Query<dynamic>(query).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public string GetJalurById(string jalur)
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT TOP(1)
+                                        nama_jalur
+                                    FROM ref_jalur 
+                                    WHERE kd_jalur != 0 and kd_jalur = @jalur;";
+                    var data = conn.QueryFirstOrDefault<string>(query, new { jalur = jalur });
 
                     return data;
                 }

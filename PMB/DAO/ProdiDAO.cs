@@ -16,35 +16,29 @@ namespace PMB.DAO
                     string query = @"SELECT 
                                         row_number() over (order by a.kd_calon) No,
 	                                    kd_calon, 
-	                                    pilihan_1
 	                                    pilihan_1, 
 	                                    pilihan_2, 
 	                                    pilihan_3, 
-	                                    c.nm_prodi as pil_1, 
-	                                    d.nm_prodi as pil_2, 
-	                                    e.nm_prodi as pil_3, 
-	                                    pilihan_2, 
-	                                    pilihan_3, 
-                                        CASE 
-		                                    WHEN masuk in(00) THEN ''
-                                            WHEN masuk is null THEN ''
-		                                    ELSE masuk
-	                                    END masuk,
+	                                    (UPPER(c.jenjang) + ' - ' + c.nm_prodi) as pil_1, 
+	                                    (UPPER(d.jenjang) + ' - ' + d.nm_prodi) as pil_2, 
+	                                    (UPPER(e.jenjang) + ' - ' + e.nm_prodi) as pil_3, 
+                                        masuk,
 	                                    b.nama_jalur
                                     FROM mhs_pendaftar a
                                     INNER JOIN ref_jalur b ON a.kd_jalur = b.kd_jalur
                                     LEFT OUTER JOIN ref_prodi c ON a.pilihan_1 = c.id_prodi
                                     LEFT OUTER JOIN ref_prodi d ON a.pilihan_2 = d.id_prodi
                                     LEFT OUTER JOIN ref_prodi e ON a.pilihan_3 = e.id_prodi
-                                    WHERE a.thnakademik = @ta AND (masuk is null OR masuk in (00, ''))";
+                                    WHERE a.thnakademik = @ta AND (masuk is null OR masuk in ('')) ";
                     if (!jalur.Equals("All"))
                     {
                         query = query + @" AND a.kd_jalur = @jalur ";
                     }
-                    if (!prodi.Equals("All"))
+                    if (!prodi.Equals("All") && !prodi.Equals("00"))
                     {
                         query = query + @" AND (pilihan_1 LIKE @prodi OR pilihan_2 LIKE @prodi OR pilihan_3 LIKE @prodi) ";
                     }
+
                     var data = conn.Query<dynamic>(query, new { jalur = jalur, ta = ta, prodi = prodi }).AsList();
                     return data;
                 }
@@ -92,12 +86,11 @@ namespace PMB.DAO
             {
                 try
                 {
-                    string query = @"UPDATE mhs_pendaftar
-                                    SET masuk = (SELECT TOP 1 id_prodi FROM ref_prodi WHERE UPPER(nm_prodi) LIKE '%' + UPPER(@id_prodi) + '%')
-                                    WHERE kd_calon = @kd_calon";
                     int countEksekusi = 0;
                     foreach(ProdiDiterimaExcel item in excel)
                     {
+                        string query = @"UPDATE mhs_pendaftar SET masuk = @id_prodi WHERE kd_calon = @kd_calon";
+
                         var data = conn.Execute(query, new { id_prodi = item.masuk, kd_calon = item.kd_calon });
                         countEksekusi += data;
                     }
@@ -130,22 +123,34 @@ namespace PMB.DAO
                                         c.nm_prodi as pil_1, 
                                         d.nm_prodi as pil_2, 
                                         e.nm_prodi as pil_3,
-                                        (
-                                            SELECT TOP 1 nm_prodi 
-                                            FROM ref_prodi 
-                                            WHERE UPPER(nm_prodi) LIKE '%' + UPPER(@prodi) + '%'
-                                        ) AS masuk
+                                        a.pilihan_1, 
+                                        a.pilihan_2,
+                                        a.pilihan_3,
+                                       CASE 
+		                                    WHEN @prodi = '00' THEN '00'
+		                                    ELSE
+			                                    (SELECT TOP 1 UPPER(jenjang) + ' - ' + nm_prodi
+				                                    FROM ref_prodi 
+				                                    WHERE id_prodi = @prodi)
+	                                    END AS masuk,
+	                                    CASE 
+		                                    WHEN @prodi = '00' THEN '00'
+		                                    ELSE
+			                                    (SELECT TOP 1 id_prodi
+				                                    FROM ref_prodi 
+				                                    WHERE id_prodi = @prodi)
+	                                    END AS id_masuk
 
                                     FROM mhs_pendaftar a
                                     LEFT OUTER JOIN ref_prodi c ON a.pilihan_1 = c.id_prodi
                                     LEFT OUTER JOIN ref_prodi d ON a.pilihan_2 = d.id_prodi
                                     LEFT OUTER JOIN ref_prodi e ON a.pilihan_3 = e.id_prodi
                                     WHERE a.kd_calon = @kd_calon AND 
-                                    (
-                                        UPPER(c.nm_prodi) LIKE '%' + UPPER(@prodi) + '%' OR 
-                                        UPPER(d.nm_prodi) LIKE '%' + UPPER(@prodi) + '%' OR 
-                                        UPPER(e.nm_prodi) LIKE '%' + UPPER(@prodi) + '%'
-                                    ) AND (masuk is null OR masuk in (00, ''))";
+                                   (
+                                        a.pilihan_1 = @prodi OR 
+                                        a.pilihan_2 = @prodi OR 
+                                        a.pilihan_3 = @prodi
+                                   ) AND (masuk is null OR masuk in (''))";
 
                     var data = conn.QueryFirstOrDefault<ProdiDiterimaExcel>(query, new { kd_calon = kd_calon, prodi = prodi });
                     

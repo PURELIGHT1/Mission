@@ -130,7 +130,7 @@ namespace PMB.Controllers
                             iconSubMenu = "far fa-circle";
                         }
 
-                        menu += $"<li class='nav-item'><a href='{submenu.LINK}' class='nav-link'><i class='nav-icon {iconSubMenu}'></i><p>{deskripsiSubMenu}</p></a></li>";
+                        menu += $"<li class='nav-item'><a href='{submenu.LINK}' class='nav-link'><i class='nav-icon {iconSubMenu}' style='color: #f3ad1b;'></i><p>{deskripsiSubMenu}</p></a></li>";
                     }
 
                     menu += "</ul></li> ";

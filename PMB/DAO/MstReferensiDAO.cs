@@ -173,7 +173,6 @@ namespace PMB.DAO
                 try
                 {
                     string query = @"UPDATE REF_SMA SET
-                                        [NAMA_SMA] = @nama,
                                         [ALAMAT] = @alamat,
                                         [ID_KABUPATEN] = @kota,
                                         [ID_KECAMATAN] = @kec,

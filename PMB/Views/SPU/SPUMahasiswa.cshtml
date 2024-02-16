@@ -130,12 +130,12 @@
                 </div>
                 <div class="form-group">
                     <label>Jalur</label>
-                    <select class="form-select text-center" id="jalur"></select>
+                    <select class="form-select" id="jalur"></select>
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_jalur"></span>
                 </div>
                 <div class="form-group">
                     <label>Prodi</label>
-                    <select class="form-select text-center" id="prodi"></select>
+                    <select class="form-select" id="prodi"></select>
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_prodi"></span>
                 </div>
                 @* <div class="form-group">
@@ -205,6 +205,7 @@
         </div>
     </div>
 </div>
+
 <script>
     function formatCurrency(number) {
         // Format angka menjadi mata uang Rupiah
@@ -501,7 +502,9 @@
         $("#modalSimpan").on('click', function () {
             if (ValidateInput()) {
 
-                $(".loading-spinner-container").show();
+                // $(".loading-spinner-container").show();
+                $("#btnTextUbah").hide();
+                $("#btnSpinnerUbah").show();
 
                 var dataToSend = {
                     tgl_cetak: $('#tgl_cetak').val(),
@@ -530,11 +533,11 @@
                     data: JSON.stringify(dataCekToSend),
                     success: function (response) {
                         console.log(response);
-                        if (response.success) {
+                        // if (response.success) {
                             var arrayProdi = response.message;
                             console.log(arrayProdi);
                             if (cekProdi === "All") {
-                                if (arrayProdi[0] != "Lengkap") {
+                                if (arrayProdi[0] != "Prodi Lengkap") {
                                     if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa?\nTarif yang tidak lengkap prodi nya:\n' + arrayProdi.join(', '))) {
 
                                         $.ajax({
@@ -551,6 +554,10 @@
                                             },
                                             error: function (error) {
                                                 console.error('Terjadi kesalahan:', error);
+                                            },
+                                            complete: function () {
+                                                $("#btnTextUbah").show();
+                                                $("#btnSpinnerUbah").hide();
                                             }
                                         });
                                     }
@@ -569,11 +576,15 @@
                                         },
                                         error: function (error) {
                                             console.error('Terjadi kesalahan:', error);
+                                        },
+                                        complete: function () {
+                                            $("#btnTextUbah").show();
+                                            $("#btnSpinnerUbah").hide();
                                         }
                                     });
                                 }
                             } else {
-                                if (arrayProdi[0] != "Lengkap") {
+                                if (arrayProdi[0] != "Prodi Lengkap") {
                                     if (confirm('Anda yakin ingin melanjutkan tambah spu mahasiswa? ' + arrayProdi.join(', '))) {
                                         $.ajax({
                                             url: '@Url.Action("SaveDataSPU", "SPU")',
@@ -589,6 +600,10 @@
                                             },
                                             error: function (error) {
                                                 console.error('Terjadi kesalahan:', error);
+                                            },
+                                            complete: function () {
+                                                $("#btnTextUbah").show();
+                                                $("#btnSpinnerUbah").hide();
                                             }
                                         });
                                     }
@@ -607,14 +622,22 @@
                                         },
                                         error: function (error) {
                                             console.error('Terjadi kesalahan:', error);
+                                        },
+                                        complete: function () {
+                                            $("#btnTextUbah").show();
+                                            $("#btnSpinnerUbah").hide();
                                         }
                                     });
                                 }
                             }
-                        }
+                        // }
                     },
                     error: function (error) {
                         console.error('Terjadi kesalahan:', error);
+                    },
+                    complete: function () {
+                        $("#btnTextUbah").show();
+                        $("#btnSpinnerUbah").hide();
                     }
                 });
             }

@@ -194,7 +194,8 @@ namespace PMB.Controllers
                     }
                     else
                     {
-                        return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Data Potongan Mahasiswa Baru TA - " + ta + " & Jalur "+jalur+".xlsx");
+                        string nm_jalur = pendaftarDAO.GetJalurById(jalur);
+                        return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Data Potongan Mahasiswa Baru TA - " + ta + " & Jalur " + nm_jalur + ".xlsx");
                     }
                 }
             }

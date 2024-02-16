@@ -109,7 +109,7 @@ namespace PMB.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult UbahMstReferensi(MstReferensiView referensiView)
         {
-            referensiView.MstReferensi.NAMA_SMA.ToUpper();
+            //referensiView.MstReferensi.NAMA_SMA.ToUpper();
             referensiView.MstReferensi.ALAMAT.ToUpper();
             if (dao.UbahReferensi(referensiView))
             {

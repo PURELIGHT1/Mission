@@ -92,14 +92,17 @@ namespace PMB.Controllers
         {
             try
             {
-                List<string> ListProdi = dao.CekProdiTarifSPU(data);
+                List<string> ListProdi = null;
+                ListProdi = dao.CekProdiTarifSPU(data);
                 if (ListProdi.Count() > 0)
                 {
                     return Json(new { success = true, message = ListProdi });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Prodi Lengkap" });
+                    string lengkap = "Prodi Lengkap";
+                    ListProdi.Add(lengkap);
+                    return Json(new { success = false, message = ListProdi });
                 }
             }
             catch (Exception ex)

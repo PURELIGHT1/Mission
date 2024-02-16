@@ -4,6 +4,7 @@ using OfficeOpenXml;
 using PMB.DAO;
 using PMB.Models;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PMB.Controllers
 {
@@ -57,6 +58,7 @@ namespace PMB.Controllers
                 prodi = "All";
             }
 
+
             if(excel == true)
             {
                 List<ProdiDiterimaExcel> data = new List<ProdiDiterimaExcel> ();
@@ -74,6 +76,57 @@ namespace PMB.Controllers
                 return Json(data);
             }
         }
+
+        public IActionResult GetExcelProdiDiterima(string ta, string jalur, string prodi)
+        {
+            List<dynamic> data = dao.GetPilProdiMhs(ta, jalur, prodi);
+            try
+            {
+                using (var package = new ExcelPackage())
+                {
+                    // Tambahkan lembar Excel
+                    var worksheet = package.Workbook.Worksheets.Add("Data");
+
+                    // Tambahkan header
+                    worksheet.Cells["A1"].Value = "KD Calon";
+                    worksheet.Cells["B1"].Value = "Pilihan 1";
+                    worksheet.Cells["C1"].Value = "Pilihan 2";
+                    worksheet.Cells["D1"].Value = "Pilihan 3";
+                    worksheet.Cells["E1"].Value = "Masuk";
+
+                    // Isi data
+                    var row = 2;
+                    foreach (var item in data)
+                    {
+                        worksheet.Cells[string.Format("A{0}", row)].Value = item.kd_calon;
+                        worksheet.Cells[string.Format("B{0}", row)].Value = item.pilihan_1;
+                        worksheet.Cells[string.Format("C{0}", row)].Value = item.pilihan_2;
+                        worksheet.Cells[string.Format("D{0}", row)].Value = item.pilihan_1;
+                        worksheet.Cells[string.Format("E{0}", row)].Value = item.masuk;
+                        row++;
+                    }
+
+                    // Konversi ke byte array
+                    var excelBytes = package.GetAsByteArray();
+
+                    if (jalur.Equals("All"))
+                    {
+                        return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Data Excel Prodi Diterima Calon Mahasiswa Baru TA - " + ta + ".xlsx");
+                    }
+                    else
+                    {
+                        string nm_jalur = pendaftarDAO.GetJalurById(jalur);
+                        return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Data Excel Prodi Diterima Calon Mahasiswa Baru TA - " + ta + " & Jalur " + nm_jalur + ".xlsx");
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Terjadi kesalahan saat menghasilkan file Excel: " + ex.Message);
+            }
+        }
+
 
         [HttpPost]
         public IActionResult GetNamaProdi(string id_prodi)
@@ -103,11 +156,25 @@ namespace PMB.Controllers
             {
                 if (dao.UbahProdiDiterima(data))
                 {
-                    TempData["success"] = "Berhasil menerima calon menjadi prodi "+data.nm_prodi+"!";
+                    if(data.id_prodi == "00")
+                    {
+                        TempData["success"] = "Berhasil menolak calon!";
+                    }
+                    else
+                    {
+                        TempData["success"] = "Berhasil menerima calon menjadi prodi " + data.nm_prodi + "!";
+                    }
                 }
                 else
                 {
-                    TempData["error"] = "Gagal menerima calon menjadi prodi " + data.nm_prodi + "!";
+                    if (data.id_prodi == "00")
+                    {
+                        TempData["error"] = "Gagal menolak calon!";
+                    }
+                    else
+                    {
+                        TempData["error"] = "Gagal menerima calon menjadi prodi " + data.nm_prodi + "!";
+                    }
                 }
 
                 return Json(new { success = true });
@@ -163,10 +230,13 @@ namespace PMB.Controllers
                             for (int row = 2; row <= rowCount; row++)
                             {
                                 string kd_calon = worksheet.Cells[row, 1].Value?.ToString();
-                                string masuk = worksheet.Cells[row, 2].Value?.ToString();
+                                string masuk = worksheet.Cells[row, 5].Value?.ToString();
 
                                 ProdiDiterimaExcel DataExcel = dao.CekDataExcelDatabase(kd_calon, masuk);
-                                data.ListDataProdiExcel.Add(DataExcel);
+                                if(DataExcel != null)
+                                {
+                                    data.ListDataProdiExcel.Add(DataExcel);
+                                }
                             } 
 
                         }

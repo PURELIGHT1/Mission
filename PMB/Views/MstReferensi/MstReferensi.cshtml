@@ -224,6 +224,14 @@
                         var kecamatanSelect = document.getElementById("kecamatan");
                         kecamatanSelect.innerHTML = "";
                         kecamatanSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        console.log(data);
+                        if(data.length === 0){
+                            var option = document.createElement("option");
+                            option.value = 0;
+                            option.text = "Luar Negeri";
+                            kecamatanSelect.appendChild(option);
+
+                        }
                         data.forEach(item => {
                             var option = document.createElement("option");
                             option.value = item.id_kecamatan;
@@ -247,16 +255,16 @@
                 console.log(propinsi);
                 // Lakukan validasi di sini, misalnya, apakah inputData kosong
                 if (propinsi.trim() === '') {
-                    $('#propinsi_message').text('Propinsi tidak boleh kosong.');
+                    $('#propinsi_message').Text('Propinsi tidak boleh kosong.');
                     return;
                 }
                 if (propinsi > 99 && propinsi < 135) {
                     if (kota.trim() === '') {
-                        $('#kota_message').text('Kota tidak boleh kosong.');
+                        $('#kota_message').Text('Kota tidak boleh kosong.');
                         return;
                     }
                     if (kecamatan.trim() === '') {
-                        $('#kecamatan_message').text('Kecamatan tidak boleh kosong.');
+                        $('#kecamatan_message').Text('Kecamatan tidak boleh kosong.');
                         return;
                     }
                 }

@@ -15,9 +15,35 @@ namespace PMB.DAO
                 {
                     string query = @"SELECT [nama_tagihan]
                                     FROM [Mission].[dbo].[ref_tagihan]
-                                    WHERE is_aktif = '1'";
+                                    WHERE is_aktif = '1'
+                                    ORDER BY nama_tagihan ASC";
 
                     var data = conn.Query<string>(query).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
+        public List<dynamic> GetListTagihan()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT id_tagihan, nama_tagihan, singkatan
+                                    FROM [Mission].[dbo].[ref_tagihan]
+                                    WHERE is_aktif = '1'";
+
+                    var data = conn.Query<dynamic>(query).AsList();
 
                     return data;
                 }

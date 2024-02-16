@@ -158,7 +158,7 @@
         // console.log(id); console.log(id_ortu);
         var kecId = 0;
         var kabId = 0;
-        GetPropJas();
+        GetPropJas('0');
         var text = "";
 
         $.ajax({
@@ -205,8 +205,10 @@
 
                 if (data.kd_prop_asal !== null || data.kd_prop_asal !== "") {
                     text = data.kd_prop_asal;
+                    GetPropJas(data.kd_prop_asal);
                 }
-                $('#data2_6').val(text);
+                console.log(text);
+                // $('#data2_6').val(text);
 
                 if (data.kota_asal !== null) {
                     kabId = data.kota_asal;
@@ -296,6 +298,7 @@
             } else {
                 $("#m_data_1").text("");
             }
+            console.log(dataToSend);
 
             $.ajax({
                 url: '@Url.Action("SaveDataDiri", "CalonMhs")', // Ganti dengan URL sesuai dengan controller dan action Anda
@@ -318,7 +321,7 @@
         ValidateInput();
     });
 
-    function GetPropJas() {
+    function GetPropJas(prop) {
         $.ajax({
             url: '@Url.Action("GetProvinsiList", "CalonMhs")',// Ganti dengan URL controller Anda
             method: 'GET',
@@ -326,7 +329,16 @@
             success: function (data) {
                 var select = $('#data2_6');
                 data.forEach(item => {
-                    var option = $('<option>').val(item.kD_PROP).text(item.namA_PROP);
+                    // var option = $('<option>').val(item.kD_PROP).text(item.namA_PROP);
+                    // select.append(option);
+                    var option = $('<option></option>');
+                    option.val(item.kD_PROP);
+                    option.text(item.namA_PROP);
+
+                    // Menentukan opsi yang sudah terpilih (selected)
+                    if (item.kD_PROP === prop) {
+                        option.attr('selected', 'selected');
+                    }
                     select.append(option);
                 });
             },

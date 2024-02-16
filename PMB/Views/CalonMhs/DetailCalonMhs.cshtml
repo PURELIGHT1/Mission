@@ -36,6 +36,7 @@
             display: none;
         }
 
+
         /* Mengatur lebar maksimum untuk tabel */
         .dataTables_wrapper .dataTables_scroll {
             max-width: 100%;
@@ -682,7 +683,7 @@
                                 {
                                     <div class="error-page">
                                         <div class="error-content">
-                                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Halaman nilai tidak tidak memiliki Template</h3>
+                                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Tidak ada data nilai</h3>
                                         </div>
                                     </div>
                                 }
@@ -701,23 +702,25 @@
                             </div>
                             <div class="p-3 mb-3">
                                 <!-- title row -->
-                                <table id="TabelPrestasi" class="table table-responsive-lg table-bordered table-striped display compact tabel-custom">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 40px">Hapus</th>
-                                            <th>Kategori</th>
-                                            <th>Nama Kegiatan</th>
-                                            <th style="width: 40px">Tingkat</th>
-                                            <th>Prestasi</th>
-                                            <th style="width: 40px">Tahun</th>
-                                            <th>Keterangan</th>
-                                            <th style="width: 50px">Kelompok</th>
-                                            <th style="width: 40px">Ubah</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
+                               <div class="table-container">
+                                    <table id="TabelPrestasi" class="table table-responsive-lg table-bordered table-striped display compact tabel-custom">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px">Hapus</th>
+                                                <th>Kategori</th>
+                                                <th>Nama Kegiatan</th>
+                                                <th style="width: 40px">Tingkat</th>
+                                                <th>Prestasi</th>
+                                                <th style="width: 40px">Tahun</th>
+                                                <th>Keterangan</th>
+                                                <th style="width: 50px">Kelompok</th>
+                                                <th style="width: 40px">Ubah</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div class="text-left">
                                 <a asp-controller="CalonMhs" asp-action="CalonMhs" class="btn btn-sm btn-danger"><i class="bi bi-arrow-left"></i> Kembali</a>
@@ -1451,6 +1454,7 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function (data) {
+                    console.log(data);
                     if (data.NAMA_SMA === null) {
                         data.NAMA_SMA = text;
                     }

@@ -63,6 +63,7 @@
         </select>
         <select id="prodiFilter" class="form-select" style="width: 300px; margin-right: 10px;">
             <option value="All" selected>Semua</option>
+            <option value="00">Tidak Diterima</option>
             @foreach (var item in Model.ProdiList)
             {
                 <option value="@item.ID_PRODI">@item.JENJANG -  @item.NM_PRODI</option>
@@ -70,7 +71,7 @@
         </select>
     </div>
     <div class="item-right">
-        <button class="btn btn-success" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-file-excel"></i> Import Prodi Diterima</button>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#modal-tambah"><i class="bi bi-upload"></i> Import Excel Prodi Diterima</button>
     </div>
 </div>
 <div class="row">
@@ -92,7 +93,7 @@
                 </tbody>
             </table><br/>
             <div class="text-left">
-                <button type="submit" class="btn btn-sm btn-success" id="SaveProdiDiterima"><i class="bi bi-save"></i> Save</button>
+                <button type="submit" class="btn btn-sm btn-success" id="SaveProdiDiterima"><i class="bi bi-check-all"></i> Terima</button>
                 @if (isExcel == "true")
                 {
                     <a href="@Url.Action("Diterima","Prodi")" class="btn btn-sm btn-danger"><i class="bi bi-save"></i> Kembali</a>
@@ -120,8 +121,8 @@
                                 <label class="custom-file-label" for="inputFiles">Choose file</label>
                             </div>
                         </div>
-                        <span style="color: red; font-size: 10px; font-style: italic;">Harap melihat template excel nya </span><br/>
-                        <a href="@Url.Action("TemplateExcel", "Prodi")" class="hyperlink">Template Excel</a>
+                        <span style="color: green; font-size: 10px; font-style: italic;">Download Excel Mahasiswa </span><br/>
+                        <a class="hyperlink" id="downloadExcel">Excel</a>
                         <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="fileSizeError"></span>
                         <span class="badge bg-danger" style="font-size: 10pt; margin-top: 10px" id="typeSizeError"></span>
                     </div>
@@ -180,10 +181,44 @@
                     }
                 },
                 { "data": "kd_calon" },
-                { "data": "pil_1" },
-                { "data": "pil_2" },
-                { "data": "pil_3" },
-                { "data": "masuk" },
+                { 
+                    "data": "pilihan_1",
+                    "render": function (data, type, row, meta) {
+                        return row.pil_1;
+                    }
+                },
+                { 
+                    "data": "pilihan_2",
+                    "render": function (data, type, row, meta) {
+                        return row.pil_2;
+                    }
+                },
+                { 
+                    "data": "pilihan_3",
+                    "render": function (data, type, row, meta) {
+                        return row.pil_3;
+                    }
+                },
+                { 
+                    "data": "masuk",
+                    "render": function (data, type, row, meta) {
+                        if (type === 'display') {
+                            var text = row.masuk;
+                            if (text == "00") {
+                                return '<td><span class="badge bg-danger"> Tidak Diterima </span></td >';
+                            }
+                            else if(text != null) {
+                                return '<td><span class="badge bg-success">' + text + '</span></td >';
+                            }
+                            else{
+                                return text;
+                            }
+                        }
+                        else {
+                            return data;
+                        }
+                    }
+                },
             ],
             "lengthMenu": [20, 50, 100],
             "searching": true
@@ -193,6 +228,12 @@
         var jalur = $("#jalurFilter").val();
         var prodi = $("#prodiFilter").val();
         var excel = $("#BoolExcel").val();
+        console.log(ta); console.log(jalur); console.log(prodi);
+
+        $('#downloadExcel').on('click', function () {
+            window.location.href = "@Url.Action("GetExcelProdiDiterima", "Prodi")?ta=" + ta + "&jalur=" + jalur + "&prodi=" + prodi;
+            $('#modal-tambah').modal('hide');
+        });
 
         if (excel === null) {
             excel === "false";
@@ -232,6 +273,7 @@
         }
 
         function handleFilterChange() {
+
             $.ajax({
                 url: '@Url.Action("GetPilProdiMhs", "Prodi")?ta=' + ta + '&jalur=' + jalur + '&prodi=' + prodi + '&excel='+ excel,
                 method: 'GET',
@@ -270,18 +312,19 @@
                 selectedKdCalonArray.push(rowData.kd_calon);
                 selectedExcelArray.push({
                     kd_calon: rowData.kd_calon,
-                    pil_1: rowData.pil_1,
-                    pil_2: rowData.pil_2,
-                    pil_3: rowData.pil_3,
-                    masuk: rowData.masuk
+                    pil_1: rowData.pilihan_1,
+                    pil_2: rowData.pilihan_2,
+                    pil_3: rowData.pilihan_3,
+                    masuk: rowData.id_masuk
                 });
             });
             var count = selectedKdCalonArray.length;
             var countExcel = selectedExcelArray.length;
             
             if ((prodi === "All" || prodi === null) && !excel) {
-                alert("Harap pilih prodi yang akan di terima!");
+                alert("Harap pilih prodi yang akan diterima!");
             } else {
+                console.log(selectedExcelArray);
                 if(excel){
                     $.ajax({
                         url: '@Url.Action("TambahProdiDiterima", "Prodi")',
@@ -290,7 +333,6 @@
                         contentType: 'application/json',
                         data: JSON.stringify(selectedExcelArray),
                         success: function (response) {
-                            console.log(response);
                             if (response.success) {
                                 window.location.href = '@Url.Action("Diterima", "Prodi")';
                             }
@@ -309,9 +351,15 @@
                         contentType: 'application/json',
                         data: null,
                         success: function (response) {
-                            console.log(response);
                             if (response.success) {
-                                if (confirm("Apakah yakin ingin memasukkan " + count + " calon ini menjadi prodi " + response.message)) {
+                                var text = "Apakah yakin ingin memasukkan ";
+                                var messageText = "";
+                                if (response.message === "Tolak Mahasiswa") {
+                                    text = "Apakah yakin ingin menolak ";
+                                }else {
+                                    messageText = response.message;
+                                }
+                                if (confirm(text + count + ' calon ini ' + messageText+"?")) {
                                     var dataToSend = {
                                         kode_calon: selectedKdCalonArray,
                                         id_prodi: prodi,
@@ -325,7 +373,6 @@
                                         contentType: 'application/json',
                                         data: JSON.stringify(dataToSend),
                                         success: function (response) {
-                                            console.log(response);
                                             if (response.success) {
                                                 window.location.href = '@Url.Action("Diterima", "Prodi")';
                                             }
@@ -363,7 +410,6 @@
                     contentType: 'application/json',
                     data: JSON.stringify(dataToSend),
                     success: function (response) {
-                        console.log(response);
                         if (response.success) {
                             window.location.href = '@Url.Action("Potongan", "Potongan")';
                         }

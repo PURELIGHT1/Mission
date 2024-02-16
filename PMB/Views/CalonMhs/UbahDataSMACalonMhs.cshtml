@@ -63,8 +63,6 @@
         var kabId = 0;
         var smaId = 0;
 
-        GetProp();
-
         $.ajax({
             url: '@Url.Action("GetDataSMA", "CalonMhs")?Kd_Calon=' + kdCalon,// Ganti dengan URL controller Anda
             method: 'GET',
@@ -74,8 +72,8 @@
 
                 if (data.KD_PROP !== null || data.KD_PROP !== "") {
                     text = data.KD_PROP;
+                    GetProp(data.KD_PROP);
                 }
-                $('#data_1').val(text);
 
                 if (data.ID_KABUPATEN !== null) {
                     kabId = data.ID_KABUPATEN;
@@ -111,17 +109,28 @@
         });
     });
 
-    function GetProp() {
+    function GetProp(id) {
+        console.log(id);
         $.ajax({
             url: '@Url.Action("GetProvinsiList", "CalonMhs")',// Ganti dengan URL controller Anda
             method: 'GET',
             dataType: 'json',
             success: function (data) {
                 var select = $('#data_1');
+                console.log(data);
                 data.forEach(item => {
-                    var option = $('<option>').val(item.kD_PROP).text(item.namA_PROP);
+                    var option = $('<option></option>');
+                    option.val(item.kD_PROP);
+                    option.text(item.namA_PROP);
+
+                    // Menentukan opsi yang sudah terpilih (selected)
+                    if (item.kD_PROP === id) {
+                        option.attr('selected', 'selected');
+                    }
                     select.append(option);
                 });
+                console.log('berashasil');
+                $('#data_1').val(id);
             },
             error: function () {
                 console.error('Gagal mengambil data.');
@@ -168,7 +177,6 @@
             method: 'GET',
             dataType: 'json',
             success: function (data) {
-                console.log(data);
                 var select = $('#data_3');
                 select.empty();
 

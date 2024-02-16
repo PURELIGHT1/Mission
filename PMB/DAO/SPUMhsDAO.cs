@@ -185,7 +185,7 @@ namespace PMB.DAO
                             {
                                 List<string> data = new List<string>
                                 {
-                                    "Lengkap"
+                                    "Prodi Lengkap"
                                 };
                                 return data;
                             }
@@ -599,7 +599,7 @@ namespace PMB.DAO
                                                                 d_ags.prosentase * ((trf.jumlah_pengali * trf.biaya) - COALESCE(JLH_Potongan, 0)) / 100
                                                         END AS jumlah_uang,
                                                         d_ags.prosentase * COALESCE(JLH_Potongan, 0) / 100 AS potongan,
-                                                        CAST(prosentase AS VARCHAR(5)) + '%' + nama_tagihan AS keterangan,
+                                                        CAST(prosentase AS VARCHAR(5)) + '% ' + nama_tagihan AS keterangan,
                                                         '0'
                                                     FROM 
                                                         MHS_PENDAFTAR mhs
@@ -629,7 +629,7 @@ namespace PMB.DAO
                                                                 AND tgh.id_tagihan = POTONGAN.id_tagihan
                                                     WHERE 
                                                         mhs.KD_CALON BETWEEN @calon1 AND @calon2
-                                                        AND mhs.KD_JALUR = @kd_jalur;";
+                                                        AND mhs.KD_JALUR = @kd_jalur ";
 
                     string updateAgsBySPU = @"DELETE FROM angsuran_mhs
                                             WHERE kd_calon = @kdCalon AND ket_angsuran LIKE '%SPU%' and status = '0';

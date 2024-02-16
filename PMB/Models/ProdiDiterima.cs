@@ -13,6 +13,10 @@
         public string pil_1 { get; set; }
         public string pil_2 { get; set; }
         public string pil_3 { get; set; }
+        public string pilihan_1 { get; set; }
+        public string pilihan_2 { get; set; }
+        public string pilihan_3 { get; set; }
         public string masuk { get; set; }
+        public string id_masuk { get; set; }
     }
 }

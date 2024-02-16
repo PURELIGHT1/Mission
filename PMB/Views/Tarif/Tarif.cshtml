@@ -180,9 +180,9 @@
                         <th>SPU N</th>
                         <th>SPU R 3</th>
                         <th>SPU R 4</th>
-                        @* <th>SPP T S2</th>
-                        <th>SPP V S2</th> *@
-                        <th>Aksi</th>
+                        <th>SPP T S2</th>
+                        <th>SPP V S2</th>
+                        @* <th>Aksi</th> *@
                     </tr>
                 </thead>
                 <tbody class="table-light">
@@ -403,8 +403,6 @@
     }
 
     $(document).ready(function () {
-
-
         $('#data_5').on('input', function () {
             var removeChar = this.value.replace(/[^0-9\.]/g, '');
             var removeDot = removeChar.replace(/\./g, '');
@@ -466,6 +464,73 @@
             }
         });
 
+        var columns = [];
+        columns.splice(2, 0,
+            { 
+                "data": "No",
+                "render": function (data, type, row) {
+                    return data;
+                }
+            },
+            {
+                "data": "nm_prodi",
+                "render": function (data, type, row) {
+                    return row.jenjang + ' - ' + row.nm_prodi;
+                }
+            },
+            { 
+                "data": "thmasuk",
+                "render": function (data, type, row) {
+                    return data;
+                }
+            },
+        );
+
+        $.ajax({
+            url: '@Url.Action("GetListTagihan", "Tarif")',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                data.forEach(function (item, index) {
+                    console.log(item.nama_tagihan);
+                    columns.splice(index + 3, 0, {
+                        "data": item.nama_tagihan,
+                        "render": function (data, type, row) {
+                            return data;
+                        }
+                    });
+                });
+
+                columns.splice(data.length + 4, 0,
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            if (type === 'display') {
+                                if (row.iscurrent) {
+                                    return '<div class="text-center">' +
+                                        ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                        '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '" data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
+                                        '</div>';
+                                } else {
+                                    return '<div class="text-center">' +
+                                        ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                                        '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '"data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
+                                        '</div>';
+                                }
+                            }
+                            return data;
+
+                        }
+                    },
+                );
+            },
+            error: function () {
+                console.error('Gagal mengambil data.');
+            }
+        });
+
+        console.log(columns);
         var table = $('#TabelTarif').DataTable({
             "columns": [
                 { "data": "No" },
@@ -475,6 +540,7 @@
                         return row.jenjang + ' - ' + row.nm_prodi;
                     }
                 },
+
                 { "data": "thmasuk" },
                 { "data": "SPP Tetap" },
                 { "data": "SPP Variabel" },
@@ -552,6 +618,7 @@
                 for (var i = 0; i < data.length; i++) {
                     data[i].No = i + 1;
                 }
+                console.log(data);
                 table.rows.add(data).draw();
             },
             error: function () {
