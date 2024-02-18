@@ -389,24 +389,24 @@
         });
 
         columns.push({
-            "data": null,
+            "data": "no",
             "render": function (data, type, row) {
-                if (type === 'display') {
-                    if (row.iscurrent) {
-                        return '<div class="text-center">' +
+                if (row.iscurrent) {
+
+                    return '<div class="text-center">' +
                             ' <a data-id="' + row.id_prodi + '" data-prodi="' + row.nm_prodi + '" data-tahun="' + row.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
                             '<a data-id="' + row.id_prodi + '" data-tahun="' + row.thmasuk + '" data-prodi="' + row.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
                             '</div>';
-                    } else {
-                        return '<div class="text-center">' +
+                }else{
+
+                    return '<div class="text-center">' +
                             ' <a data-id="' + row.id_prodi + '" data-prodi="' + row.nm_prodi + '" data-tahun="' + row.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
                             '<a data-id="' + row.id_prodi + '" data-tahun="' + row.thmasuk + '"data-prodi="' + row.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
                             '</div>';
-                    }
                 }
-            }
-        });
 
+            }
+        })
         return columns;
     }
 
