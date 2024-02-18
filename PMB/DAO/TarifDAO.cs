@@ -7,13 +7,42 @@ namespace PMB.DAO
 {
     public class TarifDAO
     {
+        public List<ListTagihan> GetAlListTagihan()
+        {
+            using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
+            {
+                try
+                {
+                    string query = @"SELECT 
+                                        ROW_NUMBER() OVER (ORDER BY nama_tagihan) + 2 AS id_tagihan,
+                                        [nama_tagihan]
+                                    FROM [Mission].[dbo].[ref_tagihan]
+                                    WHERE is_aktif = '1'
+                                    ORDER BY nama_tagihan ASC";
+
+                    var data = conn.Query<ListTagihan>(query).AsList();
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+                finally
+                {
+                    conn.Dispose();
+                }
+            }
+        }
+
         public List<string> GetAllTagihan()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
-                    string query = @"SELECT [nama_tagihan]
+                    string query = @"SELECT 
+                                        [nama_tagihan]
                                     FROM [Mission].[dbo].[ref_tagihan]
                                     WHERE is_aktif = '1'
                                     ORDER BY nama_tagihan ASC";
@@ -32,16 +61,16 @@ namespace PMB.DAO
                 }
             }
         }
-
         public List<dynamic> GetListTagihan()
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
                 try
                 {
-                    string query = @"SELECT id_tagihan, nama_tagihan, singkatan
+                    string query = @"SELECT ROW_NUMBER() OVER (ORDER BY nama_tagihan) + 2 AS no, id_tagihan, nama_tagihan, singkatan
                                     FROM [Mission].[dbo].[ref_tagihan]
-                                    WHERE is_aktif = '1'";
+                                    WHERE is_aktif = '1'
+                                    ORDER BY nama_tagihan ASC";
 
                     var data = conn.Query<dynamic>(query).AsList();
 
@@ -65,7 +94,9 @@ namespace PMB.DAO
                 try
                 {
                     string listTagihan = "";
-                    string query = @"select * from (
+                    string query = @"select * ,
+                                        ROW_NUMBER() OVER (ORDER BY thmasuk, id_prodi) AS no
+                                    from (
 	                                    SELECT 
 		                                    a.id_prodi, 
 		                                    b.nm_prodi,

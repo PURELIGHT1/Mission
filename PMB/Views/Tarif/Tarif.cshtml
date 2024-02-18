@@ -135,55 +135,19 @@
         <div class="col-md-12">
             <div class="form-group">
                 <label>Pilih kolom yang ingin ditampilkan:</label>
-                <select id="columnSelect" class="select2 freeze-column" multiple="multiple" data-placeholder="Kolom Akan Terlihat saat dipilih" style="width: 100%;">
+                <select id="columnSelect" class="select2" multiple="multiple" data-placeholder="Kolom Akan Terlihat saat dipilih" style="width: 100%;">
 
                     <option value="all">ALL</option>
                     @foreach (var item in Model.ListTagihan)
                     {
-                        <option value="@item">@item</option>
+                        <option value="@item.id_tagihan">@item.nama_tagihan</option>
                     }
-                    @* <option value="3">SPP Tetap</option>
-                    <option value="4">SPP Variabel</option>
-                    <option value="5">Jaket</option>
-                    <option value="6">Buku</option>
-                    <option value="7">Courseware</option>
-                    <option value="8">Matrikulasi</option>
-                    <option value="9">Biaya Herregistrasi</option>
-                    <option value="10">SPP Variabel Inter</option>
-                    <option value="11">Kemahasiswaan</option>
-                    <option value="12">Uang Kuliah Tetap</option>
-                    <option value="13">SPU Bersubsidi</option>
-                    <option value="14">SPU Normal</option>
-                    <option value="15">SPU Registrasi 3</option>
-                    <option value="16">SPU Registrasi 4</option> *@
                 </select>
             </div>
         </div>
         <div class="table-container">
             <table id="TabelTarif" class="freeze-column">
                 <thead>
-                    <tr>
-                        <th style="width: 10px">No</th>
-                        <th>Prodi</th>
-                        <th>Tahun Masuk</th>
-                        <th>SPP T</th>
-                        <th>SPP V</th>
-                        <th>Jaket</th>
-                        <th>Buku</th>
-                        <th>Courseware</th>
-                        <th>Matrikulasi</th>
-                        <th>Herregistrasi</th>
-                        <th>SPP V Inter</th>
-                        <th>Kemahasiswaan</th>
-                        <th>Uang KT</th>
-                        <th>SPU Subsidi</th>
-                        <th>SPU N</th>
-                        <th>SPU R 3</th>
-                        <th>SPU R 4</th>
-                        <th>SPP T S2</th>
-                        <th>SPP V S2</th>
-                        @* <th>Aksi</th> *@
-                    </tr>
                 </thead>
                 <tbody class="table-light">
                 </tbody>
@@ -252,12 +216,7 @@
                 </div>
                 <div class="form-group">
                     <label>Tahun Masuk</label>
-                    <select id="thnUbah" class="form-select" disabled>
-                        @foreach (var item in Model.ListTahun)
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    </select>
+                    <input type="text" class="form-control" id="thnUbah" disabled />
                     <span class="badge bg-danger" style="font-size: 10pt; margin-top: 5px" id="m_thn"></span>
                 </div>
                 <div class="form-group">
@@ -402,7 +361,58 @@
         });
     }
 
+    function createColumns(data) {
+        var columns = [];
+        columns.push({
+            "data": "no"
+        });
+
+        // Kolom untuk nama prodi dengan penggabungan jenjang
+        columns.push({
+            "data": "nm_prodi",
+            "render": function (data, type, row) {
+                return row.jenjang + ' - ' + row.nm_prodi;
+            }
+        });
+
+        // Kolom untuk tahun masuk
+        columns.push({
+            "data": "thmasuk"
+        });
+        // Kolom untuk aksi
+
+        data.forEach(item => {
+            console.log(item);
+            columns.push({
+                "data": item
+            });
+        });
+
+        columns.push({
+            "data": null,
+            "render": function (data, type, row) {
+                if (type === 'display') {
+                    if (row.iscurrent) {
+                        return '<div class="text-center">' +
+                            ' <a data-id="' + row.id_prodi + '" data-prodi="' + row.nm_prodi + '" data-tahun="' + row.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                            '<a data-id="' + row.id_prodi + '" data-tahun="' + row.thmasuk + '" data-prodi="' + row.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
+                            '</div>';
+                    } else {
+                        return '<div class="text-center">' +
+                            ' <a data-id="' + row.id_prodi + '" data-prodi="' + row.nm_prodi + '" data-tahun="' + row.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
+                            '<a data-id="' + row.id_prodi + '" data-tahun="' + row.thmasuk + '"data-prodi="' + row.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
+                            '</div>';
+                    }
+                }
+            }
+        });
+
+        return columns;
+    }
+
     $(document).ready(function () {
+        var coulmns;
+        var rowTable = [];
         $('#data_5').on('input', function () {
             var removeChar = this.value.replace(/[^0-9\.]/g, '');
             var removeDot = removeChar.replace(/\./g, '');
@@ -463,168 +473,104 @@
                 console.error('Gagal mengambil data.');
             }
         });
-
-        var columns = [];
-        columns.splice(2, 0,
-            { 
-                "data": "No",
-                "render": function (data, type, row) {
-                    return data;
-                }
-            },
-            {
-                "data": "nm_prodi",
-                "render": function (data, type, row) {
-                    return row.jenjang + ' - ' + row.nm_prodi;
-                }
-            },
-            { 
-                "data": "thmasuk",
-                "render": function (data, type, row) {
-                    return data;
-                }
-            },
-        );
-
+       
         $.ajax({
             url: '@Url.Action("GetListTagihan", "Tarif")',
             method: 'GET',
             dataType: 'json',
             success: function (data) {
+                var dataHeader = [];
+                var indexTabel = [];
                 console.log(data);
-                data.forEach(function (item, index) {
-                    console.log(item.nama_tagihan);
-                    columns.splice(index + 3, 0, {
-                        "data": item.nama_tagihan,
-                        "render": function (data, type, row) {
-                            return data;
-                        }
-                    });
-                });
+                for (var i = 0; i < data.length; i++) {
+                    dataHeader.push(data[i].singkatan);
+                    rowTable.push(data[i].nama_tagihan);
+                    indexTabel.push(data[i].no);
+                }
 
-                columns.splice(data.length + 4, 0,
-                    {
-                        "data": null,
+
+                var headerRow = $('<tr>');
+                headerRow.append('<th style="width: 10px">No</th>');
+                headerRow.append('<th>Prodi</th>');
+                headerRow.append('<th>Tahun Masuk</th>');
+
+                // Menambahkan header dinamis berdasarkan data yang diperoleh dari Ajax
+                for (var i = 0; i < dataHeader.length; i++) {
+                    headerRow.append('<th>' + dataHeader[i] + '</th>');
+                }
+
+                headerRow.append('<th>Aksi</th>');
+
+                // Periksa apakah thead sudah ada sebelum menambahkan yang baru
+                var existingThead = $('#TabelTarif thead');
+                if (existingThead.length > 0) {
+                    existingThead.empty(); // Kosongkan thead yang sudah ada
+                    existingThead.append(headerRow); // Tambahkan baris header yang baru
+                } else {
+                    // Tambahkan thead baru dengan baris header
+                    $('#TabelTarif thead').append(headerRow);
+                }
+
+                var table = $('#TabelTarif').DataTable({
+                    "columns": createColumns(rowTable),
+                    "lengthMenu": [20, 50, 100],
+                    "searching": true,
+                    "columnDefs": [{
+                        "targets": indexTabel,
                         "render": function (data, type, row) {
                             if (type === 'display') {
-                                if (row.iscurrent) {
-                                    return '<div class="text-center">' +
-                                        ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
-                                        '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '" data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
-                                        '</div>';
+                                if (data == null) {
+                                    return '0';
                                 } else {
-                                    return '<div class="text-center">' +
-                                        ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
-                                        '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '"data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
-                                        '</div>';
+                                    return formatRupiah(data);
                                 }
                             }
                             return data;
-
                         }
                     },
-                );
+                    {
+                        "targets": indexTabel,
+                        "visible": false
+                    }
+                    ],
+                    "lengthMenu": [20, 50, 100],
+                    "searching": true
+                });
+
+                // Lakukan permintaan AJAX lain untuk mendapatkan data
+                $.ajax({
+                    url: '@Url.Action("GetAllTarifTagihan", "Tarif")',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                           data[i].no = i + 1;
+                        }
+                        console.log(data);
+                        table.rows.add(data).draw();
+                    },
+                    error: function () {
+                        console.error('Gagal mengambil data');
+                    }
+                });
+
+                $('#columnSelect').on('change', function () {
+                    var selectedColumns = $(this).val();
+                    console.log(selectedColumns);
+                    table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]).visible(false);
+                    if (selectedColumns && selectedColumns.indexOf("all") !== -1) {
+                        table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]).visible(true);
+                    } else {
+                        table.columns(selectedColumns).visible(true);
+                    }
+                });
             },
             error: function () {
                 console.error('Gagal mengambil data.');
             }
         });
 
-        console.log(columns);
-        var table = $('#TabelTarif').DataTable({
-            "columns": [
-                { "data": "No" },
-                { 
-                    "data": "nm_prodi",
-                    "render": function(data, type, row) {
-                        return row.jenjang + ' - ' + row.nm_prodi;
-                    }
-                },
-
-                { "data": "thmasuk" },
-                { "data": "SPP Tetap" },
-                { "data": "SPP Variabel" },
-                { "data": "Jaket" },
-                { "data": "Buku" },
-                { "data": "Courseware" },
-                { "data": "Matrikulasi" },
-                { "data": "Biaya Herregistrasi" },
-                { "data": "SPP Variabel Inter" },
-                { "data": "Kemahasiswaan" },
-                { "data": "Uang Kuliah Tetap" },
-                { "data": "SPU Bersubsidi" },
-                { "data": "SPU Normal" },
-                { "data": "SPU Registrasi 3" },
-                { "data": "SPU Registrasi 4" },
-                // { "data": "SPP Tetap S2" },
-                // { "data": "SPP Variabel S2" },
-                {
-                    "data": null,
-                    "render": function (data, type, row) {
-                        if (type === 'display') {
-                            if (row.iscurrent) {
-                                return '<div class="text-center">' +
-                                    ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
-                                    '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '" data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-success nonaktif-button mr-2 ml-2"> <i class="bi bi-check2-circle"></i> Aktif</a >' +
-                                    '</div>';
-                            } else {
-                                return '<div class="text-center">' +
-                                    ' <a data-id="' + data.id_prodi + '" data-prodi="' + data.nm_prodi + '" data-tahun="' + data.thmasuk + '" class="btn btn-sm btn-warning mr-2 ml-2 edit-button" data-toggle="modal" data-target="#modal-ubah"><i class="bi bi-pencil-fill"></i> Ubah</a>' +
-                                    '<a data-id="' + data.id_prodi + '" data-tahun="' + data.thmasuk + '"data-prodi="' + data.nm_prodi + '" class="btn btn-sm btn-danger aktif-button mr-2 ml-2"> <i class="bi bi-slash-circle"></i> Tidak Aktif</a >' +
-                                    '</div>';
-                            }
-                        }
-                        return data;
-                       
-                    }
-                },
-            ],
-            "columnDefs": [{
-                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-                "render": function (data, type, row) {
-                    if (type === 'display') {
-                        if (data == null) {
-                            return '0';
-                        } else {
-                            return formatRupiah(data);
-                        }
-                    }
-                    return data;
-                }
-            },
-            {
-                "targets": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-                "visible": false
-            }],
-            "lengthMenu": [20, 50, 100],
-            "searching": true
-        });
-
-        $('#columnSelect').on('change', function () {
-            var selectedColumns = $(this).val();
-            table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).visible(false);
-            if (selectedColumns && selectedColumns.indexOf("all") !== -1) {
-                table.columns([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).visible(true);
-            }else{
-                table.columns(selectedColumns).visible(true);
-            }
-        });
-
-        $.ajax({
-            url: '@Url.Action("GetAllTarifTagihan", "Tarif")',
-            method: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    data[i].No = i + 1;
-                }
-                console.log(data);
-                table.rows.add(data).draw();
-            },
-            error: function () {
-                console.error('Gagal mengambil data');
-            }
-        });
+        
 
 
         $("#modalSimpan").on('click', function () {

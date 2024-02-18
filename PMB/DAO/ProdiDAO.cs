@@ -7,7 +7,7 @@ namespace PMB.DAO
 {
     public class ProdiDAO
     {
-        public List<dynamic> GetPilProdiMhs(string ta, string jalur, string prodi)
+        public List<dynamic> GetPilProdiMhs(string ta, string jalur, string prodi, bool masuk = false)
         {
             using (SqlConnection conn = new SqlConnection(DBConnection.koneksi))
             {
@@ -29,7 +29,7 @@ namespace PMB.DAO
                                     LEFT OUTER JOIN ref_prodi c ON a.pilihan_1 = c.id_prodi
                                     LEFT OUTER JOIN ref_prodi d ON a.pilihan_2 = d.id_prodi
                                     LEFT OUTER JOIN ref_prodi e ON a.pilihan_3 = e.id_prodi
-                                    WHERE a.thnakademik = @ta AND (masuk is null OR masuk in ('')) ";
+                                    WHERE a.thnakademik = @ta AND (masuk is null OR masuk in (''))";
                     if (!jalur.Equals("All"))
                     {
                         query = query + @" AND a.kd_jalur = @jalur ";
