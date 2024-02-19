@@ -518,22 +518,10 @@ namespace PMB.DAO
                                                         UPDATE [dbo].[spu]
                                                         SET
 		                                                    username = @username,
-                                                            spu =  CASE
-                                                                        WHEN (select jenjang from ref_jalur where kd_jalur = @kd_jalur) LIKE 'S1' THEN tr.biaya
-                                                                        ELSE 0
-                                                                    END,
+                                                            spu =  @spu,
                                                             tanggal = GETDATE(),
                                                             tgl_cetak = @tgl_cetak
-                                                        FROM
-                                                            mhs_pendaftar mhs
-                                                            INNER JOIN tr_tarif tr ON mhs.masuk = tr.id_prodi AND mhs.th_masuk = tr.thmasuk 
-                                                            INNER JOIN ref_tagihan tgh ON tr.id_tagihan = tgh.id_tagihan 
-                                                            INNER JOIN mst_angsuran ags ON mhs.kd_jalur = ags.kd_jalur AND mhs.thnakademik = ags.thnakademik 
-                                                            INNER JOIN detail_rumus_angsuran d_ags ON tgh.id_tagihan = d_ags.id_tagihan AND ags.id_rumus = d_ags.id_rumus
-                                                        WHERE
-                                                            mhs.KD_JALUR = @kd_jalur AND
-                                                            tgh.nama_tagihan LIKE '%spu%' AND
-                                                            mhs.kd_calon = @kdCalon;
+                                                        WHERE kd_calon = @kdCalon;
                                                     END
                                                 ELSE
                                                     BEGIN
@@ -733,7 +721,8 @@ namespace PMB.DAO
                             kdCalon = simpan.kode_calon_awal,
                             username = simpan.username,
                             tgl_cetak = simpan.tgl_cetak,
-                            kd_jalur = simpan.kd_jalur
+                            kd_jalur = simpan.kd_jalur,
+                            spu = simpan.spu
                         });
                         return true;
                     }
@@ -811,7 +800,8 @@ namespace PMB.DAO
                                     kdCalon = items.kd_calon,
                                     username = simpan.username,
                                     tgl_cetak = simpan.tgl_cetak,
-                                    kd_jalur = simpan.kd_jalur
+                                    kd_jalur = simpan.kd_jalur,
+                                    spu = simpan.spu
                                 });
                             }
                             return true;
@@ -890,7 +880,8 @@ namespace PMB.DAO
                                     kdCalon = items.kd_calon,
                                     username = simpan.username,
                                     tgl_cetak = simpan.tgl_cetak,
-                                    kd_jalur = simpan.kd_jalur
+                                    kd_jalur = simpan.kd_jalur,
+                                    spu = simpan.spu,
                                 });
                             }
 

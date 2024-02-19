@@ -192,7 +192,7 @@
             string jml_setelah_potongan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.jml_setelah_potongan);
             string uang_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.uang_jaminan);
             string tanggal_jaminan = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.tanggal_jaminan);
-
+            string batas_bayar = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", Model.DataMhs.batas_bayar);
         }
 
         <p id="jmlBayar">Total biaya yang harus dibayarkan: <strong>Rp. @jml_setelah_potongan</strong> (<strong>@Model.DataMhs.terbilangJmlStlhPotongan</strong>), dengan perincian sebagai berikut:</p>
@@ -210,6 +210,7 @@
                 {
                     string jenisPembayaran = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.ket_angsuran);
                     string jumlah = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.jumlah);
+                    batas_bayar = String.Format(System.Globalization.CultureInfo.CreateSpecificCulture("id-id"), "{0:N0}", item.batas_bayar);
 
                     int indexPersen = jenisPembayaran.IndexOf('%');
                     string jenis = jenisPembayaran.Substring(indexPersen + 1).Trim();
@@ -266,7 +267,7 @@
             <br />
 
             <br />
-            <p class="floatLeftText">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya tanggal</p>
+            <p class="floatLeftText">Uang kuliah tersebut dibayar sekaligus selambat-lambatnya tanggal <strong> @batas_bayar  </strong</p>
             <p class="floatLeftText">
                 Mohon perhatian, membayar biaya kuliah belum berarti Saudara sudah tercatat sebagai
                 mahasiswa baru, selanjutnya Saudara <strong>

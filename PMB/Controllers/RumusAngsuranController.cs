@@ -84,7 +84,7 @@ namespace PMB.Controllers
 
                 dataTagihan = dao.CekNamaTagihan(data.id_tagihan);
 
-                if (total > 101)
+                if (total >= 101)
                 {
 
                     if (data.id_detail < 1)
