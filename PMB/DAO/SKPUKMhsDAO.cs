@@ -399,38 +399,112 @@ ORDER BY ref_tagihan.id_tagihan ";
                             string ket_angsuran = "";
                             string query2 = @"select sum(jmluang) as total from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
 
-                            var total = conn.QueryFirstOrDefault<int>(query2, new { kd_calon = id, angsuranke = angsuranKe[i] });
-                            dataAngsuran.jmluang = total;
+                            string query2_potongan = @"select sum(potongan) as total from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
 
-                            string query3 = @"select ket_angsuran from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
+                            var total = conn.QueryFirstOrDefault<int>(query2, new { kd_calon = id, angsuranke = angsuranKe[i] });
+
+                            var total_potongan = conn.QueryFirstOrDefault<int>(query2_potongan, new { kd_calon = id, angsuranke = angsuranKe[i] });
+                            if(total_potongan > 0)
+                            {
+
+                                dataAngsuran.jmluang = total - total_potongan;
+                            }
+                            else
+                            {
+                                dataAngsuran.jmluang = total;
+                            }
+
+                            string query3 = @"select distinct ket_angsuran from angsuran_mhs where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
 
                             var dataKetAngsuran = conn.Query<string>(query3, new { kd_calon = id, angsuranke = angsuranKe[i] }).AsList();
 
                             for(int j = 0; j < dataKetAngsuran.Count(); j++)
                             {
-                                if(ket_angsuran == "")
+                                
+                                if(!ket_angsuran.Contains(dataKetAngsuran[j]))
                                 {
-                                    ket_angsuran = dataKetAngsuran[j];
-                                }
-                                else
-                                {
-                                    ket_angsuran = ket_angsuran + " + " + dataKetAngsuran[j];
+                                    if (ket_angsuran == "")
+                                    {
+                                        ket_angsuran = dataKetAngsuran[j];
+                                    }
+                                    else
+                                    {
+                                        ket_angsuran = ket_angsuran + " + " + dataKetAngsuran[j];
+                                    }
                                 }
                                 continue;
                             }
                             dataAngsuran.ket_angsuran = ket_angsuran;
+                            ket_angsuran = "";
 
-                            string query4 = @"select top(1) 
-                                                CONCAT(FORMAT(tgl_buka,'dd MMMM yyyy','id-id'),' - ',FORMAT(batas_waktu,'dd MMMM yyyy','id-id')) as batas_bayar
-                                            from angsuran_mhs 
-                                            where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null";
-                            var batas_bayar = conn.QueryFirstOrDefault<string>(query4, new { kd_calon = id, angsuranke = angsuranKe[i] });
-
-                            dataAngsuran.batas_bayar = batas_bayar;
-
-                            if(dataAngsuran != null)
+                            for (int j = 0; j < dataKetAngsuran.Count(); j++)
                             {
-                                data.Add(dataAngsuran);
+
+                                if (ket_angsuran.Contains(dataKetAngsuran[j]))
+                                {
+                                    ket_angsuran = ket_angsuran + ", sama";
+                                }
+                                else
+                                {
+                                    if (ket_angsuran == "")
+                                    {
+                                        ket_angsuran = dataKetAngsuran[j];
+                                    }
+                                    else
+                                    {
+                                        ket_angsuran = ket_angsuran + " + " + dataKetAngsuran[j];
+                                    }
+                                }
+                                continue;
+                            }
+
+                            if (ket_angsuran.Contains("sama"))
+                            {
+                                string query4 = @"select 
+                                                    angsuranke, 
+                                                    ket_angsuran, 
+                                                    jmluang, 
+                                                    potongan, 
+                                                    CONCAT(FORMAT(tgl_buka,'dd MMMM yyyy','id-id'),' - ',FORMAT(batas_waktu,'dd MMMM yyyy','id-id')) as batas_bayar 
+                                                from angsuran_mhs 
+                                                where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null and ket_angsuran = @ket";
+
+                                var keterangan = ket_angsuran.Substring(0, ket_angsuran.IndexOf(", sama"));
+
+                                dynamic dataBaru = conn.Query<dynamic>(query4, new { kd_calon = id, angsuranke = angsuranKe[i], ket = keterangan }).AsList();
+
+                                foreach (var ags in dataBaru){
+                                    AngsuranSKPUK dataAngsuranNew = new AngsuranSKPUK();
+                                    dataAngsuranNew.angsuranke = Convert.ToInt32(ags.angsuranke);
+                                    dataAngsuranNew.batas_bayar = ags.batas_bayar;
+                                    dataAngsuranNew.ket_angsuran = ags.ket_angsuran;
+                                    dataAngsuranNew.jmluang = Convert.ToInt32(ags.jmluang) - Convert.ToInt32(ags.potongan);
+                                    data.Add(dataAngsuranNew);
+                                }
+                            }
+                            else
+                            {
+                                string query4 = @"select top(1) 
+                                               FORMAT(tgl_buka,'dd MMMM yyyy','id-id')
+                                            from angsuran_mhs 
+                                            where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null
+                                            order by id_detail asc";
+
+                                string query5 = @"select top(1) 
+                                                FORMAT(batas_waktu,'dd MMMM yyyy','id-id')
+                                            from angsuran_mhs 
+                                            where kd_calon = @kd_calon and angsuranke = @angsuranke and sks is not null
+                                            order by id_detail desc";
+                                var tgl_buka = conn.QueryFirstOrDefault<string>(query4, new { kd_calon = id, angsuranke = angsuranKe[i] });
+                                var batas_waktu = conn.QueryFirstOrDefault<string>(query5, new { kd_calon = id, angsuranke = angsuranKe[i] });
+
+                                var batas_bayar = tgl_buka + " - " + batas_waktu;
+                                dataAngsuran.batas_bayar = batas_bayar;
+
+                                if (dataAngsuran != null)
+                                {
+                                    data.Add(dataAngsuran);
+                                }
                             }
                         }
                     }

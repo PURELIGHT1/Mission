@@ -226,7 +226,7 @@ namespace PMB.DAO
 		                                        and UPPER(e.nama_tagihan) LIKE '%SPU%'
 		                                        and iscurrent = 1 and JNS_POTONGAN not in ('PI','PN','PL')
 
-		                                        PRINT 'potongan prestasi'
+		                                    PRINT 'potongan prestasi'
 	                                        IF exists (SELECT KD_CALON FROM DT_PRESTASI where DT_PRESTASI.KD_CALON = @kdCalon and 
 	                                        DT_PRESTASI.TINGKAT = 'Internasional')
 		                                        INSERT INTO POTONGAN (KD_CALON,JNS_POTONGAN,JLH_TOTAL, jenis, ID_TAGIHAN)
@@ -1041,7 +1041,7 @@ namespace PMB.DAO
                                             @jlhAkhir, 
                                             tgl_buka, 
                                             batas_waktu, 
-                                            'Manual',
+                                            (select ket_angsuran from angsuran_mhs where kd_calon = @kd_calon and id_detail = @id_ags),
                                             '0', 
                                             is_jaminan, 
                                             @jlh, 
